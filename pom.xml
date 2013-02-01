@@ -4,7 +4,7 @@
   <groupId>jparsec</groupId>
   <artifactId>jparsec</artifactId>
   <packaging>jar</packaging>
-  <version>2.1-mx</version>
+  <version>3.0-SNAPSHOT</version>
 
   <dependencies>
     <dependency>
@@ -33,6 +33,20 @@
   <build>
     <sourceDirectory>src</sourceDirectory>
     <testSourceDirectory>test/src</testSourceDirectory>
+
+    <plugins>
+      <plugin>
+        <artifactId>maven-source-plugin</artifactId>
+        <executions>
+          <!-- always deploy sources on Nexus -->
+          <execution>
+            <goals>
+              <goal>jar</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
   </build>
   
 </project>
