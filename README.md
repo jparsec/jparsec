@@ -22,3 +22,6 @@ Jparsec is an implementation of [Haskell Parsec](http://www.haskell.org/haskellw
 * Rich set of pre-defined reusable combinator functions,
 * Declarative API that resembles BNF.
 
+## Documentation
+
+Look at the [wiki](wiki/Home) for documentation on implementing parsers with jparsec.
