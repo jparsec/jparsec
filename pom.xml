@@ -31,9 +31,6 @@
   
   
   <build>
-    <sourceDirectory>src</sourceDirectory>
-    <testSourceDirectory>test/src</testSourceDirectory>
-
     <plugins>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
