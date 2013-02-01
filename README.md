@@ -24,4 +24,4 @@ Jparsec is an implementation of [Haskell Parsec](http://www.haskell.org/haskellw
 
 ## Documentation
 
-Look at the [wiki](wiki/Home) for documentation on implementing parsers with jparsec.
+Look at the [wiki](https://github.com/abailly/jparsec/wiki) for documentation on implementing parsers with jparsec.
