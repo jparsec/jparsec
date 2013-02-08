@@ -3,6 +3,8 @@ jparsec
 
 > This is code repository for jParsec 3.0 development branch. For current version see [Codehaus](http://jparsec.codehaus.org/) site
 
+[![Build Status](https://travis-ci.org/abailly/jparsec.png)](https://travis-ci.org/abailly/jparsec)
+
 ## What is jparsec?
 
 Jparsec is a recursive-descent parser combinator framework written for Java. It constructs parsers in native Java language only.
