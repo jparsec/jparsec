@@ -475,6 +475,15 @@ public abstract class Parser<T> {
     return new ReturnSourceParser(this);
   }
 
+
+  /**
+   * A {@link Parser} that, when run successfully, annotates the result with the source of the parse and its location,
+   * provided the result is an instance of {@link Locatable}.
+   */
+  public final Parser<T> locate() {
+    return new LocatableParser(this);
+  }
+
   /**
    * A {@link Parser} that takes as input the {@link Token} collection returned by {@code lexer}, and runs {@code
    * this} to parse the tokens.
