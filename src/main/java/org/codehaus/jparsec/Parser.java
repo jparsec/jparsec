@@ -481,9 +481,17 @@ public abstract class Parser<T> {
    * provided the result is an instance of {@link Locatable}.
    */
   public final Parser<T> locate() {
-    return new LocatableParser(this);
+    return new LocatableParser<T>(this);
   }
 
+  /**
+   * A {@link Parser} that, when run successfully, calls a handler with the source and location of the parse.
+   */
+  public final <U> Parser<T> locate(LocatableHandler<U> handler) {
+    return new LocatableParser2<T, U>(this, handler);
+  }
+
+  
   /**
    * A {@link Parser} that takes as input the {@link Token} collection returned by {@code lexer}, and runs {@code
    * this} to parse the tokens.
