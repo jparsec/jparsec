@@ -8,11 +8,13 @@ import org.junit.Test;
 public class LocatableParserTest2 {
 
 	public static class SourceInfo {
+		private String module;
 		private int start;
 		private int end;
 		
-		public SourceInfo(int start, int end) {
+		public SourceInfo(String module, int start, int end) {
 			super();
+			this.module = module;
 			this.start = start;
 			this.end = end;
 		}
@@ -23,6 +25,10 @@ public class LocatableParserTest2 {
 
 		public int getEnd() {
 			return end;
+		}
+
+		public String getModule() {
+			return module;
 		}
 	}
 	
@@ -70,8 +76,8 @@ public class LocatableParserTest2 {
 
 	public static LocatableHandler<Node> handler = new LocatableHandler<Node>() {
 		@Override
-		public void handle(Node obj, String source, int beginIndex, int endIndex) {
-			obj.setInfo(new SourceInfo(beginIndex, endIndex));
+		public void handle(Node obj, String source, String module, int beginIndex, int endIndex) {
+			obj.setInfo(new SourceInfo(module, beginIndex, endIndex));
 		}
 	};
 	
@@ -91,11 +97,13 @@ public class LocatableParserTest2 {
 	@Test
 	public void test() {
 		Parser<Declaration> parser = DECL.from(TOKENIZER, Scanners.WHITESPACES.optional());
-		Declaration decl = parser.parse("def abcd;");
+		Declaration decl = parser.parse("def abcd;", "module");
 		assertEquals(0, decl.getInfo().getStart());
 		assertEquals(9, decl.getInfo().getEnd());
+		assertEquals("module", decl.getInfo().getModule());
 		assertEquals(4, decl.getId().getInfo().getStart());
 		assertEquals(8, decl.getId().getInfo().getEnd());
+		assertEquals("module", decl.getId().getInfo().getModule());
 	}
 
 }

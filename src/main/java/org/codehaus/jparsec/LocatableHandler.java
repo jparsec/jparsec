@@ -24,5 +24,5 @@ public interface LocatableHandler<T> {
 	 * @param beginIndex beginning index of the source in the parsed input.
 	 * @param endIndex ending index of the source in the parsed input.
 	 */
-	public void handle(T obj, String source, int beginIndex, int endIndex);
+	public void handle(T obj, String source, String module, int beginIndex, int endIndex);
 }

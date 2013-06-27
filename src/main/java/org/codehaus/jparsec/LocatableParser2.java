@@ -32,7 +32,7 @@ public class LocatableParser2<T, U> extends Parser<T> {
 	      return false;
 	    }
 
-	    handler.handle((U) ctxt.result, ctxt.source.subSequence(begin, ctxt.getIndex()).toString(), begin, ctxt.getIndex());
+	    handler.handle((U) ctxt.result, ctxt.source.subSequence(begin, ctxt.getIndex()).toString(), ctxt.module, begin, ctxt.getIndex());
 	    
 	    if(ctxt.result instanceof Locatable) {
 	      Locatable locatable = (Locatable) ctxt.result;
