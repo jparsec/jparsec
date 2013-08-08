@@ -28,7 +28,7 @@ public abstract class Pattern {
   public static final int MISMATCH = -1;
   
   /**
-   * Matches character range against the pattern. The length of the range is {@code len - from}.
+   * Matches character range against the pattern. The length of the range is {@code end - begin}.
    * 
    * @param src the source string.
    * @param begin the beginning index in the sequence.
@@ -37,6 +37,19 @@ public abstract class Pattern {
    * @return the number of characters matched. MISMATCH otherwise.
    */
   public abstract int match(CharSequence src, int begin, int end);
+
+  /**
+   * Derives a new {@link Pattern} with respect to given input character.
+   * 
+   * <p>Defaults to a pattern that never matches (eg. empty language).</p>
+   * 
+   * @param c the character to derive pattern.
+   * @return a new Pattern which is <em>derived</em> from <code>this</code> Pattern assuming character <code>c</code> has
+   * been consumed.
+   */
+  public Pattern derive(char c) {
+    return Patterns.NEVER;
+  }
   
   /**
    * Returns a {@link Pattern} object that sequentially matches the character range against
@@ -127,7 +140,7 @@ public abstract class Pattern {
    * {@code alternative} pattern.
    */
   public final Pattern ifelse(Pattern consequence, Pattern alternative) {
-    return Patterns.ifelse(this, consequence, alternative);
+    return Patterns.ifElse(this, consequence, alternative);
   }
   
   /**

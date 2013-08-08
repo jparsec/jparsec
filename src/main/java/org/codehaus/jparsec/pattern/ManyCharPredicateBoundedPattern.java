@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) Codehaus.org                                                *
+ * Copyright 2013 (C) Codehaus.org                                                *
  * ------------------------------------------------------------------------- *
  * Licensed under the Apache License, Version 2.0 (the "License");           *
  * you may not use this file except in compliance with the License.          *
@@ -13,66 +13,40 @@
  * See the License for the specific language governing permissions and       *
  * limitations under the License.                                            *
  *****************************************************************************/
-package org.codehaus.jparsec;
+package org.codehaus.jparsec.pattern;
 
-import org.codehaus.jparsec.pattern.CharPredicate;
-
-/**
- * Parses a given characgter.
- * 
- * @author Ben Yu
- */
-final class IsCharScanner extends Parser<Void> {
-  private final String name;
+class ManyCharPredicateBoundedPattern extends Pattern {
   private final CharPredicate predicate;
-  
-  IsCharScanner(String name, CharPredicate predicate) {
-    this.name = name;
-    this.predicate = predicate;
-  }
+  private final int min;
 
-  @Override boolean apply(ParseContext ctxt) {
-    if (ctxt.isEof()) {
-      ctxt.expected(name);
-      return false;
-    }
-    char c = ctxt.peekChar();
-    if (predicate.isChar(c)) {
-      ctxt.next();
-      ctxt.result = null;
-      return true;
-    }
-    ctxt.expected(name);
-    return false;
+  public ManyCharPredicateBoundedPattern(CharPredicate predicate, int min) {
+    this.predicate = predicate;
+    this.min = min;
   }
 
   @Override
-  public Incremental<Void> incrementally() {
-    return new IncrementalIsCharScanner();
-  }
-
-  @Override public String toString() {
-    return name;
-  }
-
-  private class IncrementalIsCharScanner extends Incremental<Void> {
-
-    @Override
-    Incremental<Void> parse(ParseContext context) {
-      if (context.isEof()) {
-        return this;
-      }
-      
-      char c = context.peekChar();
-      if (predicate.isChar(c)) {
-        context.next();
-        context.result = null;
-        return new Done<Void>(null);
-      } else {
-        return new Failed<Void>();
-      }
+  public Pattern derive(char c) {
+    if (predicate.isChar(c)) {
+      if (min > 0)
+        return Patterns.many(min - 1, predicate);
+      else
+        return Patterns.many(predicate);
     }
 
+    return Patterns.NEVER;
+  }
+
+  @Override
+  public int match(CharSequence src, int begin, int end) {
+    int minLen = RepeatCharPredicatePattern.matchRepeat(min, predicate, src, end, begin, 0);
+    if (minLen == MISMATCH)
+      return MISMATCH;
+    return ManyCharPredicatePattern.matchMany(predicate, src, end, begin + minLen, minLen);
+  }
+
+  @Override
+  public String toString() {
+    return (min > 1) ? (predicate + "{" + min + ",}") : (predicate + "+");
   }
 
 }

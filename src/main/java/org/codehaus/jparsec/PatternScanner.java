@@ -16,6 +16,7 @@
 package org.codehaus.jparsec;
 
 import org.codehaus.jparsec.pattern.Pattern;
+import org.codehaus.jparsec.pattern.Patterns;
 
 /**
  * Parses a {@link Pattern}.
@@ -25,13 +26,14 @@ import org.codehaus.jparsec.pattern.Pattern;
 final class PatternScanner extends Parser<Void> {
   private final String name;
   private final Pattern pattern;
-  
+
   PatternScanner(String name, Pattern pattern) {
     this.name = name;
     this.pattern = pattern;
   }
 
-  @Override boolean apply(final ParseContext ctxt) {
+  @Override
+  boolean apply(final ParseContext ctxt) {
     int at = ctxt.at;
     CharSequence src = ctxt.characters();
     int matchLength = pattern.match(src, at, src.length());
@@ -43,8 +45,43 @@ final class PatternScanner extends Parser<Void> {
     ctxt.result = null;
     return true;
   }
-  
-  @Override public String toString() {
+
+  @Override
+  public Incremental<Void> incrementally() {
+    return new IncrementalPatternScanner(name, pattern);
+  }
+
+  @Override
+  public String toString() {
     return name;
+  }
+
+  private static class IncrementalPatternScanner extends Incremental<Void> {
+
+    private final String name;
+    private final Pattern pattern;
+
+    public IncrementalPatternScanner(String name, Pattern pattern) {
+      this.name = name;
+      this.pattern = pattern;
+    }
+
+    @Override
+    Incremental<Void> parse(ParseContext ctxt) {
+      CharSequence src = ctxt.characters();
+      Pattern derived = pattern;
+      for (int i = 0; i < src.length(); i++) {
+        derived = derived.derive(src.charAt(i));
+        if (derived == Patterns.ALWAYS) {
+          ctxt.next(i);
+          ctxt.result = null;
+          return new Done<Void>(null);
+        } else if (derived == Patterns.NEVER) {
+          return new Failed<Void>();
+        }
+      }
+
+      return new IncrementalPatternScanner(name, derived);
+    }
   }
 }

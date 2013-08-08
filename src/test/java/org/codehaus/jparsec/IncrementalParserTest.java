@@ -15,64 +15,28 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import org.codehaus.jparsec.pattern.CharPredicate;
+import org.junit.Test;
 
-/**
- * Parses a given characgter.
- * 
- * @author Ben Yu
- */
-final class IsCharScanner extends Parser<Void> {
-  private final String name;
-  private final CharPredicate predicate;
+import static org.fest.assertions.Assertions.assertThat;
+
+public class IncrementalParserTest {
+
+  @Test
+  public void is_not_done_given_single_char_parser_when_fed_empty_input() throws Exception {
+    assertThat(Scanners.isChar('a').incrementally().parse("").isDone()).isFalse();
+  }
   
-  IsCharScanner(String name, CharPredicate predicate) {
-    this.name = name;
-    this.predicate = predicate;
+  @Test
+  public void is_done_given_single_char_parser_when_fed_expected_char() throws Exception {
+    assertThat(Scanners.isChar('a').incrementally().parse("a").isDone()).isTrue();
   }
 
-  @Override boolean apply(ParseContext ctxt) {
-    if (ctxt.isEof()) {
-      ctxt.expected(name);
-      return false;
-    }
-    char c = ctxt.peekChar();
-    if (predicate.isChar(c)) {
-      ctxt.next();
-      ctxt.result = null;
-      return true;
-    }
-    ctxt.expected(name);
-    return false;
-  }
-
-  @Override
-  public Incremental<Void> incrementally() {
-    return new IncrementalIsCharScanner();
-  }
-
-  @Override public String toString() {
-    return name;
-  }
-
-  private class IncrementalIsCharScanner extends Incremental<Void> {
-
-    @Override
-    Incremental<Void> parse(ParseContext context) {
-      if (context.isEof()) {
-        return this;
-      }
-      
-      char c = context.peekChar();
-      if (predicate.isChar(c)) {
-        context.next();
-        context.result = null;
-        return new Done<Void>(null);
-      } else {
-        return new Failed<Void>();
-      }
-    }
-
+  @Test
+  public void is_failed_given_single_char_parser_when_fed_unexpected_char() throws Exception {
+    Parser.Incremental<Void> parsed = Scanners.isChar('a').incrementally().parse("b");
+    
+    assertThat(parsed.isDone()).isTrue();
+    assertThat(parsed.isFailed()).isTrue();
   }
 
 }

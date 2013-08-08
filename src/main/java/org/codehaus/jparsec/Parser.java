@@ -549,6 +549,15 @@ public abstract class Parser<T> {
     return parse(builder, moduleName);
   }
 
+  /**
+   * Parses an input incrementally with this parser.
+   * 
+   * @return an incremental version of this parser.
+   */
+  public Incremental<T> incrementally() {
+    return null;
+  }
+  
   abstract boolean apply(ParseContext ctxt);
 
   /**
@@ -605,4 +614,65 @@ public abstract class Parser<T> {
     return new ParserException(e, null, ctxt.module, ctxt.locator.locate(ctxt.getIndex()));
   }
 
+  public static abstract class Incremental<T> {
+
+    public final Incremental<T> parse(CharSequence input){
+      return parse(new ScannerState(null, input, 0, new DefaultSourceLocator(input)));
+    }
+
+    abstract Incremental<T> parse(ParseContext context);
+    
+    public  boolean isDone(){
+      return false;
+    }
+    
+    public T result() {
+      return null;
+    }
+
+    public boolean isFailed() {
+      return false;
+    }
+  }
+
+  static class Done<T> extends Incremental<T> {
+    private final T result;
+
+    public Done(T result) {
+      this.result = result;
+    }
+
+    @Override
+    Incremental<T> parse(ParseContext context) {
+      return this;
+    }
+
+    @Override
+    public boolean isDone() {
+      return true;
+    }
+
+    @Override
+    public T result() {
+      return result;
+    }
+  }
+
+  static class Failed<T> extends Incremental<T> {
+
+    @Override
+    Incremental<T> parse(ParseContext context) {
+      throw new IllegalStateException("cannot parse anymore, parser has failed");
+    }
+
+    @Override
+    public boolean isDone() {
+      return true;
+    }
+
+    @Override
+    public boolean isFailed() {
+      return true;
+    }
+  }
 }
