@@ -555,7 +555,8 @@ public abstract class Parser<T> {
    * @return an incremental version of this parser.
    */
   public Incremental<T> incrementally() {
-    return null;
+    throw new UnsupportedOperationException("incremental parsing is work-in-progress. Only supported by some Parser" +
+        "implementations");
   }
   
   abstract boolean apply(ParseContext ctxt);
@@ -614,6 +615,36 @@ public abstract class Parser<T> {
     return new ParserException(e, null, ctxt.module, ctxt.locator.locate(ctxt.getIndex()));
   }
 
+  /**
+   * An incremental parser that can be called repeatedly with {@link CharSequence} fragments until completion or failure.
+   * <p>
+   *   An incremental parser builds up its result incrementally, consuming input in distinct calls to {@link #parse(CharSequence)}.
+   *   Each time this method is called it returns a new {@link Incremental} parser that may be in one of 3 states:
+   * </p>
+   * <ol>
+   *   <li>It expects more input,</li>
+   *   <li>It is failed: {@link #isFailed()} returns {@code true},</li>
+   *   <li>It completed parsing: {@link #isDone()} returns {@code true} and result is available through method 
+   *   {@link #result()}.</li>
+   * </ol>
+   * <p>Typical usage would be to use it in a loop with asynchronous input being fed from some source:</p>
+   * <pre>
+   *   Incremental parser = myParser.incrementally();
+   *   while(true) {
+   *     String input = getSomeInput();
+   *     parser = parser.parse(input);
+   *     if(parser.isDone()) {
+   *        doSomethingWith(parser.result());
+   *        break;
+   *     }
+   *     
+   *     if(parser.isFailed()) {
+   *        throw new ParseException("...");
+   *     }
+   *   }
+   * </pre>
+   * @param <T> type of result produced by this {@link Parser}.
+   */
   public static abstract class Incremental<T> {
 
     public final Incremental<T> parse(CharSequence input){
@@ -635,6 +666,7 @@ public abstract class Parser<T> {
     }
   }
 
+  /** An incremental parser which represents a successful parsing */
   static class Done<T> extends Incremental<T> {
     private final T result;
 
@@ -658,6 +690,7 @@ public abstract class Parser<T> {
     }
   }
 
+  /** An incremental parser which represents a failed parsing */
   static class Failed<T> extends Incremental<T> {
 
     @Override
