@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+
+  <head>
+    <meta charset="utf-8">
+
+    <title>jparsec: Parsing Made Easy</title>
+
+    <meta name="author" content="Arnaud Bailly">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/beige-code.css" id="theme">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/tomorrow-night-eighties.css">
+
+    <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+    <script>
+      document.write( '<link rel="stylesheet" href="css/print/' + ( window.location.search.match( /print-pdf/gi ) ? 'pdf' : 'paper' ) + '.css" type="text/css" media="print">' );
+    </script>
+
+    <!--[if lt IE 9]>
+        <script src="lib/js/html5shiv.js"></script>
+        <![endif]-->
+  </head>
+
+  <body>
+
+    <div class="reveal">
+
+      <!-- Any section element inside of this container is displayed as a slide -->
+      <div class="slides">
+
+        <section class="photo cover">
+          <h2 style="margin-top: 1.2em; margin-bottom: 1.2em">jparsec<br/>Parsing&nbsp;Made&nbsp;Easy</h2>
+          <p class="me"><a href="https://twitter.com/abailly">@abailly</a></p>
+        </section>
+
+        <section >
+          <h3>Traditional Parsing</h3>
+          <img src="m/dragon-book.jpg"  />
+        </section>
+
+        <section>
+          <h3>Traditional Parsing</h3>
+          <p class="fragment">Standard language theory: Rationals, Context-free, Contextual, $LL$, $LR$, $LALR$...</p>
+          <p class="fragment"><b>Lexer</b>: Transform a <em>stream of characters</em> into a <em>stream of tokens</em></p>
+          <p class="fragment"><b>Parser</b>: Transform a stream of tokens into a <em>parse tree</em></p>
+          <p class="fragment"><b>Tools</b>: <a href="http://www.antlr.org/">Antlr</a>, <a href="https://javacc.java.net/">Javacc</a>, <a href="http://byaccj.sourceforge.net/">byacc/j</a>... Takes as input an annotated BNF grammar and output executable code</p>
+        </section>
+
+        <section >
+          <h3>Shortcomings</h3>
+          <p class="fragment">Grammar is expressed in different language(s)</p>
+          <p class="fragment">Preprocessing step at build time to generate parsers</p>
+          <p class="fragment">More complex builds, plugins, tools, tools, tools...</p>
+          <img class="fragment" src="m/gasworks.JPG"/>
+            <aside class="notes">
+              <ul>
+                <li>Typically needs configuring a plugin in maven or extra step in ant,</li>
+                <li>Might cause issues in IDE, builds, dependencies ...</li>
+              </ul>
+            </aside>
+        </section>
+
+        <section data-background="m/country-road.jpg">
+          <h1>There has to be a Better Way...</h1>
+        </section>
+
+        <section>
+          <h3>What is a <b>Parser</b> anyway?</h3>
+          <ol>
+            <li class="fragment">A parser is a function from strings to <em>stuff</em></li>
+            <li class="fragment">A <em>partial</em> parser is a <em>function</em> from string to parse-trees and <em>remaining string</em>:
+              <p>$$ \pi: \Sigma^* \longrightarrow \Sigma^* \times T$$</p>
+            </li>
+            <li class="fragment">A <em>full</em> parser is <em>function</em> from string to parse-trees:
+              <p>$$ \lfloor \pi\rfloor: \Sigma^* \longrightarrow T$$</p>
+            </li>
+            <li class="fragment">A full parser can be built from a partial parser
+              <p>$$ \lfloor \pi(w)\rfloor =  \{ t | (\epsilon,t) \in \pi(w) \} $$</p>
+            </li>
+          </ol>
+        </section>
+
+        <section>
+          <h1>???</h1>
+          <img src="m/omg_wtf.jpg"/>
+        </section>
+
+        <section>
+          <h3>Parser Combinators...</h3>
+          <p class="fragment">are <em>pure</em> functions...</p>
+          <p class="fragment">that can be <em>combined</em> arbitrarily...</p>
+          <p class="fragment">to build complex parsers from simple ones</p>
+          <img class="fragment" src="m/kiss.jpg"/>
+        </section>
+
+        <section>
+          <h3>Advantages</h3>
+          <p class="fragment">Grammar and semantics are written in the same language</p>
+          <p class="fragment">Language can be more easily <em>grown</em> piecemeal</p>
+          <p class="fragment">Parser is easier to (unit) test $\longrightarrow$ TDD</p>
+          <p class="fragment">Parsers can be reused, factorized in libraries...</p>
+          <p class="fragment">Implementations for a wide variety of programming languages</p>
+        </section>
+
+        <section>
+          <h3>jparsec</h3>
+          <p class="fragment">Originally developed by Ben Yu (see <a href="http://jparsec.codehaus.org">original site</a> on Codehaus)</p>
+          <p class="fragment">Ported to C# and Ruby</p>
+          <p class="fragment">Now hosted and maintained on <a href="http://github.com/abailly/jparsec">github</a></p>
+        </section>
+
+        <section data-background="m/engrenages.jpg">
+          <div style="background-color: #fff; opacity: .7">
+            <h1>Demo</h1>
+            <h2>Parser Combinators in Actions</h2>
+          </div>
+        </section>
+
+        <section>
+            <h1>Example 1</h1>
+            <h2>Typing expressions</h2>
+            <pre>
+{&lt;?&gt; [{&lt;?&gt; aField :: INTEGER, anOptional :: UUID?}] anotherField :: FLOAT}
+
+{&lt;?&gt; aField :: (STRING-&gt; INTEGER   )}
+
+{&lt;LEGITIMATE_SON&gt; [{&lt;?&gt; aField :: INTEGER, anOptional :: UUID?},
+ {&lt;NAMED_SCHEMA&gt; a :: INTEGER, b :: UUID?}] aDate :: DATETIME}
+            </pre>
+            <aside class="notes">
+              <ul>
+                <li>Describe "schemas" for documents</li>
+                <li>Uses inheritance mechanism, naming, optionals, function types...</li>
+              </ul>
+            </aside>
+        </section>
+
+        <section>
+            <h1>Example 2</h1>
+            <h2>Boolean search queries</h2>
+            <pre>
+((SAUCISSON OR SAUCISSONS) ((INTOXICATION* ALIMENTAIRE* ADJ 1) 
+  OR SANT[EÈÉËÊ] OR NUTRITION* OR APPORT OR APPORTS) WITHIN 25) 
+OR ((SAUCISSON OR SAUCISSONS) (AIL OR LAIL) ADJ 1) OR 
+((SAUCISSON OR SAUCISSONS) 
+   (SALAGE OR SALAGES OR FUMAGE OR FUMAGES OR 
+      (CHAIR CUITIER* ADJ 1)) WITHIN 30) ...
+            </pre>
+            <aside class="notes">
+              <ul>
+                <li>Used to query documents, simple boolean operators + tokens with adjacency limits</li>
+                <li>Not very efficient representation...</li>
+              </ul>
+            </aside>
+        </section>
+
+        <section>
+            <h1>Example 3</h1>
+            <h2>A simple imperative language</h2>
+            <pre>
+// Totals for the first displayed breakdown column
+  
+IF ( NOT bIsBkd AND ( NOT bIsTitle ) ) THEN
+
+{
+	IF ( iLevel == iFirstDisplayedBreakdown 
+    OR ( ( iLevel == ( iFirstDisplayedBreakdown + 1 ) ) 
+         AND bIsVerticalTotal ) ) THEN
+    {
+    		SetBackgroundColor(235, 235, 235),
+    		SetFontBold(TRUE)
+    },
+  // note the absence of parens around conditional...
+	IF Net_total<0. AND ( NOT bIsTotal ) 
+           AND HasTitle( "Net total" )==TRUE THEN 
+    {
+    		SetBackgroundColor(255, 212, 148)
+    		//SetFontBold(TRUE)
+   	} 
+}
+            </pre>
+            <aside class="notes">
+              <ul>
+                <li>A formula language reminiscent of VB</li>
+                <li>Used much like one uses formulas in Excel</li>
+              </ul>
+            </aside>
+        </section>
+
+        <section>
+          <h3>Performance?</h3>
+          <p class="fragment" style="color: #a11"><b>Warning</b> Performance of parsing is rarely a bottleneck in compilers/interpreters...</p>
+          <p class="fragment">Compared two parsers for the same language, one in jparsec, another in Antlr</p>
+            <aside class="notes">
+              <ul>
+                <li>Was "lucky" to need to implement the 2 parsers thoroughly due to thirdparty inclusion policy...</li>
+              </ul>
+            </aside>
+        </section>
+
+        <section>
+          <h3>Performance</h3>
+          <h4>jparsec vs. Antlr</h4>
+          <img src="m/parsing-performance.svg" />
+            <aside class="notes">
+              <ul>
+                <li>antlr scales better, maybe not linearly but close to</li>
+                <li>jparsec parsers might not be optimized: backtracking takes time!</li>
+                <li>in practice, one rarely needs to optimize that stuff unless pathological cases arise</li>
+              </ul>
+            </aside>          
+         </section>
+
+        <section>
+          <h3>Thank you!</h3>
+          <p><a href="https://twitter.com/abailly">@abailly</a></p>
+          <p>Pull requests are welcomed!</p>
+          <p><a href="https://github.com/abailly/jparsec">github.com/abailly/jparsec</a></p>
+        </section>
+
+<!--
+ - gasworks: http://www.cs.virginia.edu/~evans/pictures/2009_04_24-seattle/gasworks-IMG_3520.JPG 
+ - country road: http://islamicsunrays.com/wp-content/uploads/2010/10/country-road-missouri.jpg
+ - omg: http://image.funscrape.com/images/o/omg_wtf-12875.jpg
+ - simple: http://cobaltpm.com/wp-content/uploads/2013/02/keeping-it-simple-project-plan-from-point-a-to-point-b.jpg
+-->
+      </div>
+
+    </div>
+
+    <script src="lib/js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+
+    <script>
+  // Full list of configuration options available here:
+  // https://github.com/hakimel/reveal.js#configuration
+  Reveal.initialize({
+    controls: false,
+    progress: false,
+    history: true,
+    center: true,
+    mouseWheel: true,
+    rollingLinks: false,
+    transition: 'cube', // default/cube/page/concave/zoom/linear/fade/none
+
+    // Optional libraries used to extend on reveal.js
+    dependencies: [
+      { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+      { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+      { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+      { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+      { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } },
+      { src: '/socket.io/socket.io.js', async: true, callback: function() { window.socket = io.connect("http://localhost"); } },
+      { src: 'plugin/notes-server/client.js', async: true },
+      { src: 'plugin/math/math.js', async: true },
+    ]
+  });
+    </script>
+  </body>
+</html>
