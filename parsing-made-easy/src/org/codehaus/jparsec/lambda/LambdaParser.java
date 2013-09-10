@@ -17,13 +17,19 @@ public class LambdaParser {
   private static final Parser<?> WS = _(Scanners.WHITESPACES);
   
   // parsers
+  private static final Parser.Reference<Expr> lambdaRef = Parser.newReference();
+  
   private static final Parser<Expr> var = Mapper.curry(Var.class).sequence(identifier).cast();
   
   private static final Parser<App> app = Mapper.curry(App.class)
-      .sequence(var, WS, var)
+      .sequence(lambdaRef.lazy(), WS, lambdaRef.lazy())
       .between(L_PAREN, R_PAREN);
 
   private static final Parser<Expr> lambda = var.or(app);
+  
+  static {
+    lambdaRef.set(lambda);
+  }
   
   public Expr parse(String input) {
     return lambda.parse(input);

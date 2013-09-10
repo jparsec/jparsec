@@ -4,7 +4,7 @@ public class App implements Expr {
   private final Expr left;
   private final Expr right;
 
-  private App(Expr left, Expr right) {
+  public App(Expr left, Expr right) {
     this.left = left;
     this.right = right;
   }
