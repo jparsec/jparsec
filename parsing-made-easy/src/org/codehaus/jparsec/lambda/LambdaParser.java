@@ -18,7 +18,8 @@ public class LambdaParser {
   private static final Parser<?> WS = _(Scanners.WHITESPACES);
   
   private static final Parser<App> app = Mapper.curry(App.class)
-      .sequence(L_PAREN, var, WS, var, R_PAREN);
+      .sequence(var, WS, var)
+      .between(L_PAREN, R_PAREN);
 
   private static final Parser<Expr> lambda = var.or(app);
   
