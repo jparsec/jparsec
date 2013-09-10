@@ -7,7 +7,6 @@ public class Var {
     this.symbol = symbol;
   }
 
-
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
