@@ -12,5 +12,6 @@ public class LambdaParserTest {
     
     assertThat(parser.parse("x")).isEqualTo(new Var("x"));
     assertThat(parser.parse("y")).isEqualTo(new Var("y"));
+    assertThat(parser.parse("foo")).isEqualTo(new Var("foo"));
   }
 }
