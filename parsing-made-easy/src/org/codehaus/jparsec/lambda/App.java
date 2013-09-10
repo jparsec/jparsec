@@ -1,12 +1,16 @@
 package org.codehaus.jparsec.lambda;
 
 public class App implements Expr {
-  private final Var left;
-  private final Var right;
+  private final Expr left;
+  private final Expr right;
 
-  public App(Var left, Var right) {
+  private App(Expr left, Expr right) {
     this.left = left;
     this.right = right;
+  }
+
+  public static App app(Expr left, Expr right) {
+    return new App(left, right);
   }
 
   @Override

@@ -3,8 +3,12 @@ package org.codehaus.jparsec.lambda;
 public class Var implements Expr {
   private final String symbol;
 
-  public Var(String symbol) {
+  private Var(String symbol) {
     this.symbol = symbol;
+  }
+
+  public static Var var(String symbol) {
+    return new Var(symbol);
   }
 
   @Override
