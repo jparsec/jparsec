@@ -9,10 +9,14 @@ public class LambdaParser {
 
   private static final Parser<String> identifier = Scanners.isChar(CharPredicates.IS_ALPHA).many1().source();
   
-  private static final Parser<Var> var = Mapper.curry(Var.class).sequence(identifier);
+  private static final Parser<Expr> var = Mapper.curry(Var.class).sequence(identifier).cast();
+  
+  private static final Parser<App> app = Mapper.curry(App.class).sequence(var,var);
 
-  public Var parse(String input) {
-    return var.parse(input);
+  private static final Parser<Expr> lambda = var.or(app);
+  
+  public Expr parse(String input) {
+    return lambda.parse(input);
   }
   
 }

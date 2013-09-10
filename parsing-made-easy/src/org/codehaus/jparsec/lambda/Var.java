@@ -1,6 +1,6 @@
 package org.codehaus.jparsec.lambda;
 
-public class Var {
+public class Var implements Expr {
   private final String symbol;
 
   public Var(String symbol) {
