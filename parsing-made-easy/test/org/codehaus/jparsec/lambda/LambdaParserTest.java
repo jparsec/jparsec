@@ -22,5 +22,6 @@ public class LambdaParserTest {
     assertThat(parser.parse("(foo bar)")).isEqualTo(app(var("foo"), var("bar")));
     assertThat(parser.parse("(foo (bar baz))")).isEqualTo(app(var("foo"), app(var("bar"), var("baz"))));
     assertThat(parser.parse("((bar baz) foo)")).isEqualTo(app(app(var("bar"), var("baz")), var("foo")));
+    assertThat(parser.parse("(  ( bar baz  ) foo)  ")).isEqualTo(app(app(var("bar"), var("baz")), var("foo")));
   }
 }
