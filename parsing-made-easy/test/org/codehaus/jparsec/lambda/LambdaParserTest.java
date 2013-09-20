@@ -27,6 +27,6 @@ public class LambdaParserTest {
 
   @Test
   public void canParseAbstractions() throws Exception {
-  assertThat(parser.parse("λfoo.foo")).isEqualTo(new Abs("foo",var("foo")));
+    assertThat(parser.parse("λfoo.foo")).isEqualTo(new Abs("foo", var("foo")));
   }
 }

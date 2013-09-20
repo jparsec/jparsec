@@ -155,6 +155,9 @@ body {
   border: 1px solid #c9c9c9;
   margin: 0;
 }
+.reveal .precise {
+  font-size:80%;
+}
 .reveal code {
   font-size: 28pt;
   border: 1px solid #c9c9c9;
