@@ -24,4 +24,9 @@ public class LambdaParserTest {
     assertThat(parser.parse("((bar baz) foo)")).isEqualTo(app(app(var("bar"), var("baz")), var("foo")));
     assertThat(parser.parse("(  ( bar baz  ) foo)  ")).isEqualTo(app(app(var("bar"), var("baz")), var("foo")));
   }
+
+  @Test
+  public void canParseAbstractions() throws Exception {
+  assertThat(parser.parse("λfoo.foo")).isEqualTo(new Abs("foo",var("foo")));
+  }
 }
