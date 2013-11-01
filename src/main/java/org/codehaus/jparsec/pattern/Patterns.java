@@ -233,8 +233,13 @@ public final class Patterns {
     return new NotStringCaseInsensitivePattern(string);
   }
 
-  static Pattern not(final Pattern pp) {
-    return new NotPattern(pp);
+  /**
+   * 
+   * @param pattern  
+   * @return a {@link Pattern} that matches iff the input does not match nested {@code pattern}. 
+   */
+  public static Pattern not(final Pattern pattern) {
+    return new NotPattern(pattern);
   }
 
   static Pattern peek(final Pattern pp) {

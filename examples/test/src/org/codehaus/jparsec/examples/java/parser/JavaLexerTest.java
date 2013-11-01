@@ -57,12 +57,18 @@ public class JavaLexerTest extends TestCase {
     assertEquals(integer(Radix.DEC, "1", NumberType.FLOAT), scanner.parse("1f"));
     assertEquals(integer(Radix.DEC, "1", NumberType.DOUBLE), scanner.parse("1d"));
     assertEquals(integer(Radix.DEC, "1", NumberType.DOUBLE), scanner.parse("1D"));
-    assertEquals(integer(Radix.OCT, "0", NumberType.DOUBLE), scanner.parse("0d"));
     assertEquals(integer(Radix.OCT, "1", NumberType.FLOAT), scanner.parse("01f"));
+  }
+
+  public void testZero(){
+    Parser<IntegerLiteral> scanner = JavaLexer.INTEGER;
     assertEquals(integer(Radix.HEX, "0D", NumberType.INT), scanner.parse("0X0D"));
     assertEquals(integer(Radix.HEX, "0D", NumberType.LONG), scanner.parse("0X0DL"));
+    assertEquals(integer(Radix.DEC, "0", NumberType.INT), scanner.parse("0"));
+    assertEquals(integer(Radix.DEC, "0", NumberType.DOUBLE), scanner.parse("0d"));
+    assertEquals(integer(Radix.OCT, "0", NumberType.INT), scanner.parse("00"));
   }
-  
+    
   private static DecimalPointNumberLiteral decimal(String number, NumberType type) {
     return new DecimalPointNumberLiteral(number, type);
   }

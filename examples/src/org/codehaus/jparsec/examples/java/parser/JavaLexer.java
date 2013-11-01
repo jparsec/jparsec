@@ -70,11 +70,11 @@ public final class JavaLexer {
     IntegerLiteral map(String text, NumberType type) {
       return new IntegerLiteral(Radix.OCT, text.length() == 1 ? text : text.substring(1), type);
     }
-  }.sequence(Scanners.OCT_INTEGER.source(), numberType(NumberType.INT));
+  }.sequence(JavaScanners.OCT_INTEGER.source(), numberType(NumberType.INT));
   
   static final Parser<IntegerLiteral> DEC_INTEGER =
       Mapper.curry(IntegerLiteral.class, Radix.DEC)
-      .sequence(Scanners.DEC_INTEGER.source(), numberType(NumberType.INT));
+      .sequence(JavaScanners.DEC_INTEGER.source(), numberType(NumberType.INT));
   
   static final Parser<IntegerLiteral> INTEGER = Parsers.or(HEX_INTEGER, OCT_INTEGER, DEC_INTEGER);
   
