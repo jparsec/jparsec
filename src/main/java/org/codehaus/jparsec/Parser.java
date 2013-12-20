@@ -333,6 +333,10 @@ public abstract class Parser<T> {
   public final Parser<T> between(Parser<?> before, Parser<?> after) {
     return before.next(followedBy(after));
   }
+  
+  public final <A,B> Parser<T> reluctantBetween( Parser<A> before, Parser<B> after ) {
+	  return new ReluctantBetweenParser<A, B, T>(before, this, after);
+  }
 
   /**
    * A {@link Parser} that runs {@code this} 1 or more times separated by {@code delim}.
