@@ -1,7 +1,18 @@
-/*
- *  (C) Michael Bar-Sinai
- */
-
+/*****************************************************************************
+ * Copyright (C) Codehaus.org                                                *
+ * ------------------------------------------------------------------------- *
+ * Licensed under the Apache License, Version 2.0 (the "License");           *
+ * you may not use this file except in compliance with the License.          *
+ * You may obtain a copy of the License at                                   *
+ *                                                                           *
+ * http://www.apache.org/licenses/LICENSE-2.0                                *
+ *                                                                           *
+ * Unless required by applicable law or agreed to in writing, software       *
+ * distributed under the License is distributed on an "AS IS" BASIS,         *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+ * See the License for the specific language governing permissions and       *
+ * limitations under the License.                                            *
+ *****************************************************************************/
 package org.codehaus.jparsec;
 
 /**
@@ -10,13 +21,13 @@ package org.codehaus.jparsec;
  * may be present in the body (e.g. {@code (bodyWithParens ()())())}
  * @author michael
  */
-final class ReluctantBetweenParser<A,B,T> extends Parser<T> {
+final class ReluctantBetweenParser<T> extends Parser<T> {
 	
-	private final Parser<A> start;
+	private final Parser<?> start;
 	private final Parser<T> between;
-	private final Parser<B> end;
+	private final Parser<?> end;
 
-	public ReluctantBetweenParser(Parser<A> start, Parser<T> between, Parser<B> end) {
+	public ReluctantBetweenParser(Parser<?> start, Parser<T> between, Parser<?> end) {
 		this.start = start;
 		this.between = between;
 		this.end = end;

@@ -3,7 +3,6 @@ package org.codehaus.jparsec;
 import static junit.framework.Assert.assertEquals;
 import static org.codehaus.jparsec.Scanners.isChar;
 import org.codehaus.jparsec.functors.Pair;
-import org.junit.Test;
 
 /**
  *
@@ -11,7 +10,6 @@ import org.junit.Test;
  */
 public class ReluctantBetweenTest {
 
-	@Test
 	public void testReluctantBetween() {
 		Parser<Pair<String,String>> sut = Parsers.tuple(Scanners.IDENTIFIER.followedBy(Scanners.among(":")),
 				Scanners.ANY_CHAR.many().source()
@@ -21,7 +19,6 @@ public class ReluctantBetweenTest {
 		             );
 	}
 	
-	@Test
 	public void testReluctantBetween_simple() {
 		Asserts.assertParser( Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
 				"(hello)", "hello");
@@ -29,7 +26,6 @@ public class ReluctantBetweenTest {
 				"()", "");
 	}
 	
-	@Test
 	public void testReluctantBetween_fail() {
 		Asserts.assertFailure(Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
 				"(hello", 1,6);
