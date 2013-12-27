@@ -1,8 +1,5 @@
-jparsec (ReluctantBetween fork)
+jparsec
 =======
-
->> This fork was created to add a new parser combination. It makes the start and end greedy, 
->> and the between reluctant.
 
 > This is code repository for jParsec 3.0 development branch. For current version see [Codehaus](http://jparsec.codehaus.org/) site
 
@@ -33,4 +30,6 @@ Look at the [wiki](https://github.com/abailly/jparsec/wiki) for documentation on
 
 # Talking about jparsec
 
+* [Nantes JUG - 2014-01-16](http://nantesjug.org/#/events/2014_01_20): Quickie on
+  for local JUG
 * [JUGSummerCamp 2013](http://www.jugsummercamp.com/edition/4): Directory `parsing-made-easy` contains material for the talk (slides + sample code)
