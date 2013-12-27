@@ -333,6 +333,18 @@ public abstract class Parser<T> {
   public final Parser<T> between(Parser<?> before, Parser<?> after) {
     return before.next(followedBy(after));
   }
+  
+  /**
+   * A {@link Parser} that first runs {@code before} from the input start, 
+   * then runs {@code after} from the input's end, and only
+   * then runs {@code this} on what's left from the input.
+   * In effect, {@code this} behaves reluctantly, giving
+   * {@code after} a chance to grab input that would have been consumed by {@code this}
+   * otherwise.
+   */
+  public final Parser<T> reluctantBetween( Parser<?> before, Parser<?> after ) {
+	  return new ReluctantBetweenParser<T>(before, this, after);
+  }
 
   /**
    * A {@link Parser} that runs {@code this} 1 or more times separated by {@code delim}.
