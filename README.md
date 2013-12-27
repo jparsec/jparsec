@@ -30,6 +30,6 @@ Look at the [wiki](https://github.com/abailly/jparsec/wiki) for documentation on
 
 # Talking about jparsec
 
-* [Nantes JUG - 2014-01-16](http://nantesjug.org/#/events/2014_01_20): Quickie on
-  for local JUG
-* [JUGSummerCamp 2013](http://www.jugsummercamp.com/edition/4): Directory `parsing-made-easy` contains material for the talk (slides + sample code)
+* 2014-01-16 - [Nantes JUG](http://nantesjug.org/#/events/2014_01_20):
+  Quickie on jparsec for local JUG
+* 2013-09-23 - [JUGSummerCamp 2013](http://www.jugsummercamp.com/edition/4): Directory `parsing-made-easy` contains material for the talk (slides + sample code)
