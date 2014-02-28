@@ -1,7 +1,7 @@
 jparsec
 =======
 
-> This is code repository for jParsec 3.0 development branch. For current version see [Codehaus](http://jparsec.codehaus.org/) site
+> This is code repository for jParsec 3.0 development branch. It used to be maintained on  [Codehaus](http://jparsec.codehaus.org/) site. I took over its maintenance on github.
 
 [![Build Status](https://travis-ci.org/abailly/jparsec.png)](https://travis-ci.org/abailly/jparsec)
 
