@@ -19,6 +19,8 @@ package org.codehaus.jparsec;
  * Returns the source string of the part that matches the target parser.
  * 
  * @author Ben Yu
+ *
+ * @see org.codehaus.jparsec.WithSourceParser
  */
 final class ReturnSourceParser extends Parser<String> {
   private final Parser<?> parser;

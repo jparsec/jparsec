@@ -488,6 +488,13 @@ public abstract class Parser<T> {
   }
 
   /**
+   * A {@link Parser} that returns both parsed object and matched string.
+   */
+  public final Parser<WithSource<T>> withSource() {
+    return new WithSourceParser<T>(this);
+  }
+
+  /**
    * A {@link Parser} that takes as input the {@link Token} collection returned by {@code lexer}, and runs {@code
    * this} to parse the tokens.
    * <p/>

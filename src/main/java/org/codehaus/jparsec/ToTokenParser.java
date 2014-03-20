@@ -4,6 +4,8 @@ package org.codehaus.jparsec;
  * Converts the current return value as a {@link Token} with starting index and length.
  * 
  * @author Ben Yu
+ *
+ * @see org.codehaus.jparsec.WithSourceParser
  */
 final class ToTokenParser extends Parser<Token> {
   private final Parser<?> parser;

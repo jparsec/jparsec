@@ -62,6 +62,13 @@ public class ParserTest extends BaseMockTest {
     assertParser(INTEGER.token(), "123", new Token(0, 3, 123));
     assertFailure(INTEGER.token(), "a", 1, 1);
   }
+
+  public void testWithSource() {
+    assertEquals("foo", FOO.withSource().toString());
+    assertParser(FOO.withSource(), "", new WithSource<String>("foo", ""));
+    assertParser(INTEGER.withSource(), "123", new WithSource<Integer>(123, "123"));
+    assertFailure(INTEGER.withSource(), "a", 1, 1);
+  }
   
   @Mock Map<Object, Parser<String>> next;
   public void testNext_withMap() {
