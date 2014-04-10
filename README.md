@@ -5,6 +5,20 @@ jparsec
 
 [![Build Status](https://travis-ci.org/abailly/jparsec.png)](https://travis-ci.org/abailly/jparsec)
 
+# How to Use?
+
+jparsec is available in maven-central.
+
+## Maven
+
+Add the following fragment to your `<dependencies>` section:
+
+      <dependency>
+        <groupId>org.jparsec</groupId>
+        <artifactId>jparsec</artifactId>
+        <version>2.1</version>
+      </dependency>
+
 ## What is jparsec?
 
 Jparsec is a recursive-descent parser combinator framework written for Java. It constructs parsers in native Java language only.
