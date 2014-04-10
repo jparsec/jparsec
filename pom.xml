@@ -14,6 +14,17 @@
 
   <url>http://github.com/abailly/jparsec</url>
 
+  <distributionManagement>
+    <repository>
+      <id>sonatype</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+    <snapshotRepository>
+      <id>sonatype</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+  
   <licenses>
     <license>
       <name>Apache License 2.0</name>
@@ -23,8 +34,8 @@
 
   <scm>
     <url>http://github.com/abailly/jparsec</url>
-    <connection>scm:git:https://github.com/abailly/jparsec.git</connection>
-    <developerConnection>scm:git:ssh://git@github.com:abailly/jparsec.git</developerConnection>
+    <connection>scm:git:git@github.com:abailly/jparsec.git</connection>
+    <developerConnection>scm:git:git@github.com:abailly/jparsec.git</developerConnection>
   </scm>
 
   <developers>
