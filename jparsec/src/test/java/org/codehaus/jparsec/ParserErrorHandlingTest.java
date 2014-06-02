@@ -22,61 +22,69 @@ import static org.codehaus.jparsec.TestParsers.areChars;
 
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.codehaus.jparsec.functors.Unary;
 import org.codehaus.jparsec.util.Lists;
+import org.junit.Test;
 
 /**
  * Unit test for error handling of {@link Parser}.
  * 
  * @author benyu
  */
-public class ParserErrorHandlingTest extends TestCase {
-  
+public class ParserErrorHandlingTest {
+
+  @Test
   public void testNotOverridesNever() {
     assertError(
         isChar('a').next(isChar('x').not()), isChar('a').next(Parsers.never()),
         "ax", 1, 2, "unexpected x.");
   }
-  
+
+  @Test
   public void testExpectOverridesNot() {
     assertError(
         areChars("ab"), isChar('a').next(isChar('x').not()),
         "ax", 1, 2, "b expected, x encountered.");
   }
-  
+
+  @Test
   public void testFailureOverridesExpect() {
     assertError(
         areChars("ab"), isChar('a').next(Parsers.fail("foo")),
         "ax", 1, 2, "foo");
   }
-  
+
+  @Test
   public void testFailureOverridesExplicitExpect() {
     assertError(
         isChar('a').next(Parsers.fail("bar")), isChar('a').next(Parsers.expect("foo")),
         "ax", 1, 2, "bar");
   }
-  
+
+  @Test
   public void testMoreRelevantErrorWins() {
     assertError(areChars("abc"), isChar('a').next(Parsers.expect("foo")), "ab",
         1, 3, "c expected, EOF encountered.");
   }
-  
+
+  @Test
   public void testFirstNeverWins() {
     assertError(Parsers.never(), Parsers.never(), "x", 1, 1, "");
   }
-  
+
+  @Test
   public void testFirstNotWins() {
     assertFailure(
         Parsers.or(isChar('x').not("xxx"), isChar('x').not("X")), "x", 1, 1, "unexpected xxx.");
   }
-  
+
+  @Test
   public void testFirstFailureWins() {
     assertFailure(
         Parsers.or(Parsers.fail("foo"), Parsers.fail("bar")), "x", 1, 1, "foo");
   }
-  
+
+  @Test
   public void testExpectMerged() {
     assertFailure(
         Parsers.or(Parsers.expect("foo"), Parsers.expect("bar")), "x",
@@ -85,37 +93,43 @@ public class ParserErrorHandlingTest extends TestCase {
         Parsers.or(Parsers.expect("foo").label("foo"), Parsers.expect("foo")), "x",
         1, 1, "foo expected, x encountered.");
   }
-  
+
+  @Test
   public void testExpectedMerged() {
     assertFailure(
         Parsers.or(isChar('a'), isChar('b')), "x",
         1, 1, "a or b expected, x encountered.");
   }
-  
+
+  @Test
   public void testErrorSurvivesPlus() {
     assertError(
         Parsers.plus(areChars("abc").atomic(), isChar('a')).next(isChar('x')), areChars("ax"),
         "abx", 1, 3, "c expected, x encountered.");
   }
-  
+
+  @Test
   public void testErrorSurvivesOr() {
     assertError(
         Parsers.or(areChars("abc"), isChar('a')).next(isChar('x')), areChars("ax"),
         "abx", 1, 3, "c expected, x encountered.");
   }
-  
+
+  @Test
   public void testErrorSurvivesLonger() {
     assertError(
         Parsers.longer(areChars("abc"), isChar('a')).next(isChar('x')), areChars("ax"),
         "abx", 1, 3, "c expected, x encountered.");
   }
-  
+
+  @Test
   public void testErrorSurvivesShorter() {
     assertError(
         Parsers.shorter(areChars("abc"), isChar('a')).next(isChar('x')), areChars("ax"),
         "abx", 1, 3, "c expected, x encountered.");
   }
-  
+
+  @Test
   public void testErrorSurvivesRepetition() {
     assertError(
         areChars("abc").many(), areChars("ax"), "abx", 1, 3, "c expected, x encountered.");
@@ -138,11 +152,13 @@ public class ParserErrorHandlingTest extends TestCase {
     assertError(
         areChars("abc").skipTimes(1), areChars("ax"), "abx", 1, 3, "c expected, x encountered.");
   }
-  
+
+  @Test
   public void testOuterExpectWins() {
     assertFailure(Parsers.expect("foo").label("bar"), "", 1, 1, "bar expected, EOF encountered.");
   }
-  
+
+  @Test
   public void testTokenLevelError() {
     Terminals terminals =
         Terminals.caseSensitive(new String[] {"+", "-"}, new String[] {"foo", "bar", "baz"});
@@ -162,7 +178,8 @@ public class ParserErrorHandlingTest extends TestCase {
     assertError(foobar2, areChars("foox"), "+foo -baz",
         1, 6, "foo or bar expected, baz encountered.");
   }
-  
+
+  @Test
   public void testEmptyTokenCounts() {
     Terminals terminals =
       Terminals.caseSensitive(new String[] {"+", "-"}, new String[] {"foo", "bar", "baz"});

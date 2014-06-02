@@ -1,38 +1,46 @@
 package org.codehaus.jparsec;
 
-import junit.framework.TestCase;
-
 import org.codehaus.jparsec.Tokens.Fragment;
 import org.codehaus.jparsec.Tokens.Tag;
 import org.codehaus.jparsec.functors.Map;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Unit test for {@link TokenizerMaps}.
  * 
  * @author Ben Yu
  */
-public class TokenizerMapsTest extends TestCase {
-  
+public class TokenizerMapsTest {
+
+  @Test
   public void testFragment() {
     assertFragment("foo", TokenizerMaps.fragment("foo"));
   }
-  
+
+  @Test
   public void testReservedFragment() {
     assertFragment(Tag.RESERVED, TokenizerMaps.RESERVED_FRAGMENT);
   }
-  
+
+  @Test
   public void testIdentifierFragment() {
     assertFragment(Tag.IDENTIFIER, TokenizerMaps.IDENTIFIER_FRAGMENT);
   }
-  
+
+  @Test
   public void testIntegerFragment() {
     assertFragment(Tag.INTEGER, TokenizerMaps.INTEGER_FRAGMENT);
   }
-  
+
+  @Test
   public void testDecimalFragment() {
     assertFragment(Tag.DECIMAL, TokenizerMaps.DECIMAL_FRAGMENT);
   }
-  
+
+  @Test
   public void testSingleQuoteChar() {
     assertEquals("SINGLE_QUOTE_CHAR", TokenizerMaps.SINGLE_QUOTE_CHAR.toString());
     assertEquals(Character.valueOf('a'), TokenizerMaps.SINGLE_QUOTE_CHAR.map("'a'"));
@@ -42,32 +50,38 @@ public class TokenizerMapsTest extends TestCase {
       fail();
     } catch (IllegalStateException e) {}
   }
-  
+
+  @Test
   public void testDecAsLong() {
     assertEquals("DEC_AS_LONG", TokenizerMaps.DEC_AS_LONG.toString());
     assertEquals(Long.valueOf(123L), TokenizerMaps.DEC_AS_LONG.map("123"));
   }
-  
+
+  @Test
   public void testOctAsLong() {
     assertEquals("OCT_AS_LONG", TokenizerMaps.OCT_AS_LONG.toString());
     assertEquals(Long.valueOf(10L), TokenizerMaps.OCT_AS_LONG.map("012"));
   }
-  
+
+  @Test
   public void testHexAsLong() {
     assertEquals("HEX_AS_LONG", TokenizerMaps.HEX_AS_LONG.toString());
     assertEquals(Long.valueOf(255L), TokenizerMaps.HEX_AS_LONG.map("0xff"));
   }
-  
+
+  @Test
   public void testDoubleQuoteString() {
     assertEquals("DOUBLE_QUOTE_STRING", TokenizerMaps.DOUBLE_QUOTE_STRING.toString());
     assertEquals("c:\\home", TokenizerMaps.DOUBLE_QUOTE_STRING.map("\"c:\\\\home\""));
   }
-  
+
+  @Test
   public void testSingleQuoteString() {
     assertEquals("SINGLE_QUOTE_STRING", TokenizerMaps.SINGLE_QUOTE_STRING.toString());
     assertEquals("'a'", TokenizerMaps.SINGLE_QUOTE_STRING.map("'''a'''"));
   }
-  
+
+  @Test
   public void testScientificNotation() {
     assertEquals("SCIENTIFIC_NOTATION", TokenizerMaps.SCIENTIFIC_NOTATION.toString());
     assertEquals(new Tokens.ScientificNotation("1", "2"),

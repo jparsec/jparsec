@@ -3,34 +3,42 @@ package org.codehaus.jparsec;
 import static org.codehaus.jparsec.Asserts.assertFailure;
 import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.codehaus.jparsec.Scanners.WHITESPACES;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.codehaus.jparsec.Tokens.Tag;
 
-
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Unit test for {@link Terminals}.
  * 
  * @author Ben Yu
  */
-public class TerminalsTest extends TestCase {
-  
+public class TerminalsTest {
+
+  @Test
   public void testSingleQuoteChar() {
     assertParser(Terminals.CharLiteral.SINGLE_QUOTE_TOKENIZER, "'a'", 'a');
     assertParser(Terminals.CharLiteral.SINGLE_QUOTE_TOKENIZER, "'\\''", '\'');
   }
-  
+
+  @Test
   public void testDoubleQuoteString() {
     assertParser(Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER, "\"a\\r\\n\\t\"", "a\r\n\t");
     assertParser(Terminals.StringLiteral.DOUBLE_QUOTE_TOKENIZER, "\"\\\"\"", "\"");
   }
-  
+
+  @Test
   public void testSingleQuoteString() {
     assertParser(Terminals.StringLiteral.SINGLE_QUOTE_TOKENIZER, "'ab'", "ab");
     assertParser(Terminals.StringLiteral.SINGLE_QUOTE_TOKENIZER, "'a''b'", "a'b");
   }
-  
+
+  @Test
   public void testDecimalLiteralTokenizer() {
     assertParser(Terminals.DecimalLiteral.TOKENIZER, "1", Tokens.decimalLiteral("1"));
     assertParser(Terminals.DecimalLiteral.TOKENIZER, "01", Tokens.decimalLiteral("01"));
@@ -41,7 +49,8 @@ public class TerminalsTest extends TestCase {
     assertParser(Terminals.DecimalLiteral.TOKENIZER, ".2", Tokens.decimalLiteral(".2"));
     assertFailure(Terminals.DecimalLiteral.TOKENIZER, "12x", 1, 3, "EOF expected, x encountered.");
   }
-  
+
+  @Test
   public void testIntegerLiteralTokenizer() {
     assertParser(Terminals.IntegerLiteral.TOKENIZER, "1", Tokens.fragment("1", Tag.INTEGER));
     assertParser(Terminals.IntegerLiteral.TOKENIZER, "12", Tokens.fragment("12", Tag.INTEGER));
@@ -49,7 +58,8 @@ public class TerminalsTest extends TestCase {
     assertParser(Terminals.IntegerLiteral.TOKENIZER, "01", Tokens.fragment("01", Tag.INTEGER));
     assertFailure(Terminals.IntegerLiteral.TOKENIZER, "12x", 1, 3, "EOF expected, x encountered.");
   }
-  
+
+  @Test
   public void testScientificNumberLiteralTokenizer() {
     assertParser(Terminals.ScientificNumberLiteral.TOKENIZER,
         "1E2", Tokens.scientificNotation("1", "2"));
@@ -60,14 +70,16 @@ public class TerminalsTest extends TestCase {
     assertFailure(Terminals.ScientificNumberLiteral.TOKENIZER,
         "1e2x", 1, 4, "EOF expected, x encountered.");
   }
-  
+
+  @Test
   public void testLongLiteralDecTokenizer() {
     assertParser(Terminals.LongLiteral.DEC_TOKENIZER, "1", 1L);
     assertParser(Terminals.LongLiteral.DEC_TOKENIZER, "10", 10L);
     assertFailure(Terminals.LongLiteral.DEC_TOKENIZER, "0", 1, 1);
     assertFailure(Terminals.LongLiteral.DEC_TOKENIZER, "12x", 1, 3, "EOF expected, x encountered.");
   }
-  
+
+  @Test
   public void testLongLiteralHexTokenizer() {
     assertParser(Terminals.LongLiteral.HEX_TOKENIZER, "0x0", 0L);
     assertParser(Terminals.LongLiteral.HEX_TOKENIZER, "0X10", 0X10L);
@@ -78,14 +90,16 @@ public class TerminalsTest extends TestCase {
     assertFailure(Terminals.LongLiteral.HEX_TOKENIZER,
         "0x12x", 1, 5, "EOF expected, x encountered.");
   }
-  
+
+  @Test
   public void testTokenizeHexAsLong_throwsIfStringIsTooShort() {
     try {
       NumberLiteralsTranslator.tokenizeHexAsLong("0x");
       fail();
     } catch (IllegalStateException e) {}
   }
-  
+
+  @Test
   public void testLongLiteralOctTokenizer() {
     assertParser(Terminals.LongLiteral.OCT_TOKENIZER, "0", 0L);
     assertParser(Terminals.LongLiteral.OCT_TOKENIZER, "017", 15L);
@@ -94,7 +108,8 @@ public class TerminalsTest extends TestCase {
     assertFailure(Terminals.LongLiteral.OCT_TOKENIZER, "08", 1, 2);
     assertFailure(Terminals.LongLiteral.OCT_TOKENIZER, "01x", 1, 3, "EOF expected, x encountered.");
   }
-  
+
+  @Test
   public void testLongLiteralTokenizer() {
     assertParser(Terminals.LongLiteral.TOKENIZER, "0", 0L);
     assertParser(Terminals.LongLiteral.TOKENIZER, "010", 8L);
@@ -103,7 +118,8 @@ public class TerminalsTest extends TestCase {
     assertParser(Terminals.LongLiteral.TOKENIZER, "9", 9L);
     assertFailure(Terminals.LongLiteral.TOKENIZER, "1x", 1, 2, "EOF expected, x encountered.");
   }
-  
+
+  @Test
   public void testIdentifierTokenizer() {
     assertParser(Terminals.Identifier.TOKENIZER, "foo", Tokens.identifier("foo"));
     assertParser(Terminals.Identifier.TOKENIZER, "foo1", Tokens.identifier("foo1"));
@@ -112,42 +128,49 @@ public class TerminalsTest extends TestCase {
     assertParser(Terminals.Identifier.TOKENIZER, "_foo", Tokens.identifier("_foo"));
     assertFailure(Terminals.Identifier.TOKENIZER, "1foo", 1, 1);
   }
-  
+
+  @Test
   public void testCharLiteralParser() {
     assertParser(
         Terminals.CharLiteral.PARSER.from(Terminals.CharLiteral.SINGLE_QUOTE_TOKENIZER, WHITESPACES),
         "'a'", 'a');
   }
-  
+
+  @Test
   public void testLongLiteralParser() {
     assertParser(Terminals.LongLiteral.PARSER.from(Terminals.LongLiteral.DEC_TOKENIZER, WHITESPACES),
         "1", 1L);
   }
-  
+
+  @Test
   public void testStringLiteralParser() {
     assertParser(
         Terminals.StringLiteral.PARSER.from(
             Terminals.StringLiteral.SINGLE_QUOTE_TOKENIZER, WHITESPACES),
         "'abc'", "abc");
   }
-  
+
+  @Test
   public void testIdentifierParser() {
     assertParser(Terminals.Identifier.PARSER.from(Terminals.Identifier.TOKENIZER, WHITESPACES),
         "foo", "foo");
   }
-  
+
+  @Test
   public void testIntegerLiteralParser() {
     assertParser(
         Terminals.IntegerLiteral.PARSER.from(Terminals.IntegerLiteral.TOKENIZER, WHITESPACES),
         "123", "123");
   }
-  
+
+  @Test
   public void testDecimalLiteralParser() {
     assertParser(
         Terminals.DecimalLiteral.PARSER.from(Terminals.DecimalLiteral.TOKENIZER, WHITESPACES),
         "1.23", "1.23");
   }
-  
+
+  @Test
   public void testFromFragment() {
     assertEquals("", Terminals.fromFragment().toString());
     assertEquals("1", Terminals.fromFragment(1).toString());
@@ -158,13 +181,15 @@ public class TerminalsTest extends TestCase {
     assertNull(fromToken.map(new Token(0, 3, Tokens.fragment("test", "bar"))));
     assertNull(fromToken.map(new Token(0, 3, Tokens.fragment("test", 2))));
   }
-  
+
+  @Test
   public void testToken_noTokenName() {
     Terminals terminals = Terminals.operators("+", "-");
     Parser<Token> parser = terminals.token().from(terminals.tokenizer(), WHITESPACES);
     assertFailure(parser, "+", 1, 1);
   }
-  
+
+  @Test
   public void testToken_oneTokenNameOnly() {
     Terminals terminals = Terminals.operators("+", "-");
     Parser<Token> parser =
@@ -172,7 +197,8 @@ public class TerminalsTest extends TestCase {
     assertParser(parser, "+", new Token(0, 1, Tokens.reserved("+")));
     assertFailure(parser, "-", 1, 1, "+ expected, - encountered.");
   }
-  
+
+  @Test
   public void testToken_tokenNamesListed() {
     Terminals terminals = Terminals.operators("+", "-");
     Parser<Token> parser = terminals.token("+", "-").from(terminals.tokenizer(), WHITESPACES);
@@ -180,7 +206,8 @@ public class TerminalsTest extends TestCase {
     assertParser(parser, "-", new Token(0, 1, Tokens.reserved("-")));
     assertFailure(parser, "*", 1, 1, "+ or - expected, * encountered.");
   }
-  
+
+  @Test
   public void testPhrase() {
     Terminals terminals =
         Terminals.caseSensitive(new String[] {}, new String[] {"hello", "world", "hell"});
@@ -191,7 +218,8 @@ public class TerminalsTest extends TestCase {
     assertFailure(parser, "hell", 1, 1, "hello world");
     assertParser(parser.optional(), "hello hell", null, "hello hell");
   }
-  
+
+  @Test
   public void testCaseSensitive() {
     Terminals terminals =
         Terminals.caseSensitive(new String[]{"+", "-"}, new String[]{"foo", "bar", "baz"});
@@ -207,7 +235,8 @@ public class TerminalsTest extends TestCase {
     assertParser(
         Terminals.Identifier.PARSER.from(terminals.tokenizer(), WHITESPACES), "FOO", "FOO");
   }
-  
+
+  @Test
   public void testCaseInsensitive() {
     Terminals terminals =
         Terminals.caseInsensitive(new String[]{"+", "-"}, new String[]{"foo", "bar", "baz"});
@@ -223,7 +252,8 @@ public class TerminalsTest extends TestCase {
     assertParser(
         Terminals.Identifier.PARSER.from(terminals.tokenizer(), WHITESPACES), "xxx", "xxx");
   }
-  
+
+  @Test
   public void testCaseSensitive_withScanner() {
     Terminals terminals = Terminals.caseSensitive(
         Scanners.INTEGER, new String[]{"+", "-"}, new String[]{"12", "34"});
@@ -238,7 +268,8 @@ public class TerminalsTest extends TestCase {
   assertParser(
       Terminals.Identifier.PARSER.from(terminals.tokenizer(), WHITESPACES), "123", "123");
   }
-  
+
+  @Test
   public void testCaseInsensitive_withScanner() {
     Terminals terminals = Terminals.caseInsensitive(
         Scanners.INTEGER, new String[]{"+", "-"}, new String[]{"12", "34"});
@@ -253,7 +284,8 @@ public class TerminalsTest extends TestCase {
   assertParser(
       Terminals.Identifier.PARSER.from(terminals.tokenizer(), WHITESPACES), "123", "123");
   }
-  
+
+  @Test
   public void testEquals() {
     assertTrue(Terminals.equals("a", "a", true));
     assertTrue(Terminals.equals("a", "a", false));
@@ -261,7 +293,8 @@ public class TerminalsTest extends TestCase {
     assertFalse(Terminals.equals("a", "A", true));
     assertFalse(Terminals.equals("a", "b", false));
   }
-  
+
+  @Test
   public void testCheckDup() {
     Terminals.checkDup(new String[]{"a", "b"}, new String[]{"+", "-"}, true);
     Terminals.checkDup(new String[]{"a", "b"}, new String[]{"A", "B"}, true);

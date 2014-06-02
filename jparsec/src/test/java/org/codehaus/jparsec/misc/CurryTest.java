@@ -3,7 +3,7 @@ package org.codehaus.jparsec.misc;
 import static org.codehaus.jparsec.Parsers.constant;
 import static org.codehaus.jparsec.Scanners.string;
 import static org.codehaus.jparsec.misc.Mapper._;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
@@ -11,13 +11,14 @@ import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.functors.Binary;
 import org.codehaus.jparsec.functors.Unary;
 import org.codehaus.jparsec.util.ObjectTester;
+import org.junit.Test;
 
 /**
  * Unit test for {@link Curry}.
  * 
  * @author Ben Yu
  */
-public class CurryTest extends TestCase {
+public class CurryTest {
   
   static final class Foo {
     final String name;
@@ -54,7 +55,8 @@ public class CurryTest extends TestCase {
       this.c = c;
     }
   }
-  
+
+  @Test
   public void testSequence() {
     Parser<Foo> parser =
         Curry.of(Foo.class).sequence(Parsers.constant("foo"), Parsers.constant(1));
@@ -62,14 +64,16 @@ public class CurryTest extends TestCase {
     assertEquals("foo", foo.name);
     assertEquals(1, foo.size);
   }
-  
+
+  @Test
   public void testUnary() {
     Unary<Object> unary = Curry.<Object>of(Foo.class, 1).unary().parse("");
     Foo foo = (Foo) unary.map("foo");
     assertEquals("foo", foo.name);
     assertEquals(1, foo.size);
   }
-  
+
+  @Test
   public void testBinary() {
     Binary<Object> binary = Curry.<Object>of(Foo.class).binary().parse("");
     Foo foo = (Foo) binary.map("foo", 2);
@@ -150,7 +154,8 @@ public class CurryTest extends TestCase {
       this.right = right;
     }
   }
-  
+
+  @Test
   public void testPrefix() {
     Expr result = Curry.<Expr>of(PrefixExpr.class).prefix(constant("x"))
         .parse("").map(FAKE_EXPR);
@@ -158,7 +163,8 @@ public class CurryTest extends TestCase {
     assertEquals("x", prefix.op);
     assertSame(FAKE_EXPR, prefix.expr);
   }
-  
+
+  @Test
   public void testPrefix_onlyOneUnskippedOperator() {
     Expr result = Curry.<Expr>of(PrefixExpr.class).prefix(_(string("foo")), constant("x"))
         .parse("foo").map(FAKE_EXPR);
@@ -166,7 +172,8 @@ public class CurryTest extends TestCase {
     assertEquals("x", prefix.op);
     assertSame(FAKE_EXPR, prefix.expr);
   }
-  
+
+  @Test
   public void testPrefix_multiOp() {
     Expr result = Curry.<Expr>of(PrefixExpr2.class).prefix(constant("x"), constant(2))
         .parse("").map(FAKE_EXPR);
@@ -175,7 +182,8 @@ public class CurryTest extends TestCase {
     assertEquals(2, prefix.size);
     assertSame(FAKE_EXPR, prefix.expr);
   }
-  
+
+  @Test
   public void testPostfix() {
     Expr result = Curry.<Expr>of(PostfixExpr.class).postfix(constant("x"))
         .parse("").map(FAKE_EXPR);
@@ -183,7 +191,8 @@ public class CurryTest extends TestCase {
     assertEquals("x", postfix.op);
     assertSame(FAKE_EXPR, postfix.expr);
   }
-  
+
+  @Test
   public void testPostfix_onlyOneUnskippedOperator() {
     Expr result = Curry.<Expr>of(PostfixExpr.class).postfix(_(string("foo")), constant("x"))
         .parse("foo").map(FAKE_EXPR);
@@ -191,7 +200,8 @@ public class CurryTest extends TestCase {
     assertEquals("x", postfix.op);
     assertSame(FAKE_EXPR, postfix.expr);
   }
-  
+
+  @Test
   public void testPostfix_multiOp() {
     Expr result = Curry.<Expr>of(PostfixExpr2.class).postfix(constant(1), constant("x"))
         .parse("").map(FAKE_EXPR);
@@ -200,7 +210,8 @@ public class CurryTest extends TestCase {
     assertEquals(1, postfix.size);
     assertSame(FAKE_EXPR, postfix.expr);
   }
-  
+
+  @Test
   public void testInfix() {
     Expr left = FAKE_EXPR;
     Expr right = new Expr() {};
@@ -211,7 +222,8 @@ public class CurryTest extends TestCase {
     assertSame(left, infix.left);
     assertSame(right, infix.right);
   }
-  
+
+  @Test
   public void testInfix_onlyOneUnskippedOperator() {
     Expr left = FAKE_EXPR;
     Expr right = new Expr() {};
@@ -222,7 +234,8 @@ public class CurryTest extends TestCase {
     assertSame(left, infix.left);
     assertSame(right, infix.right);
   }
-  
+
+  @Test
   public void testInfix_multiOp() {
     Expr left = FAKE_EXPR;
     Expr right = new Expr() {};
@@ -240,7 +253,8 @@ public class CurryTest extends TestCase {
       throw new AssertionError(message);
     }
   }
-  
+
+  @Test
   public void testSequence_propagatesError() {
     Parser<ThrowError> parser = Curry.of(ThrowError.class).sequence(Parsers.constant("foo"));
     try {
@@ -256,7 +270,8 @@ public class CurryTest extends TestCase {
       throw new IllegalArgumentException(message);
     }
   }
-  
+
+  @Test
   public void testSequence_propagatesUncheckedException() {
     Parser<ThrowUncheckedException> parser =
         Curry.of(ThrowUncheckedException.class).sequence(Parsers.constant("foo"));
@@ -273,7 +288,8 @@ public class CurryTest extends TestCase {
       throw new Exception(message);
     }
   }
-  
+
+  @Test
   public void testSequence_propagatesCheckedException() {
     Parser<ThrowCheckedException> parser =
         Curry.of(ThrowCheckedException.class).sequence(Parsers.constant("foo"));
@@ -284,15 +300,18 @@ public class CurryTest extends TestCase {
       assertEquals("foo", e.getCause().getCause().getMessage());
     }
   }
-  
+
+  @Test
   public void testToString() {
     assertEquals(Foo.class.getName(), Curry.of(Foo.class).toString());
   }
-  
+
+  @Test
   public void testName() {
     assertEquals(Foo.class.getName(), Curry.of(Foo.class).name());
   }
-  
+
+  @Test
   public void testEquals() {
     ObjectTester.assertEqual(Curry.of(Foo.class), Curry.of(Foo.class));
     ObjectTester.assertEqual(Curry.of(Foo.class, "foo"), Curry.of(Foo.class, "foo"));
@@ -303,7 +322,8 @@ public class CurryTest extends TestCase {
   static abstract class AbstractBar {
     public AbstractBar() {}
   }
-  
+
+  @Test
   public void testAbstractClass() {
     try {
       Curry.of(AbstractBar.class);
@@ -316,7 +336,8 @@ public class CurryTest extends TestCase {
   static class NoPublicConstructor {
     NoPublicConstructor() {}
   }
-  
+
+  @Test
   public void testNoPublicConstructor() {
     try {
       Curry.of(NoPublicConstructor.class);
@@ -331,7 +352,8 @@ public class CurryTest extends TestCase {
     public AmbiguousConstructor(int i) {}
     public AmbiguousConstructor(String n) {}
   }
-  
+
+  @Test
   public void testAmbiguousConstructor() {
     try {
       Curry.of(AmbiguousConstructor.class);
@@ -345,7 +367,8 @@ public class CurryTest extends TestCase {
   static class VarargConstructor {
     public VarargConstructor(String... names) {}
   }
-  
+
+  @Test
   public void testVarargConstructor() {
     try {
       Curry.of(VarargConstructor.class);
@@ -355,14 +378,16 @@ public class CurryTest extends TestCase {
           e.getMessage().contains("Cannot curry for constructor with varargs"));
     }
   }
-  
+
+  @Test
   public void testTooManyCurryArgs() {
     try {
       Curry.of(Foo.class, "foo", 1, 2);
       fail();
     } catch (IllegalArgumentException e) {}
   }
-  
+
+  @Test
   public void testCurryArgTypeMismatch() {
     try {
       Curry.of(Foo.class, 1L);
@@ -371,7 +396,8 @@ public class CurryTest extends TestCase {
       assertTrue(e.getMessage(), e.getMessage().contains("Long"));
     }
   }
-  
+
+  @Test
   public void testAmbiguousCurryArg() {
     try {
       Curry.of(Foo.class, 1, 2);
@@ -380,7 +406,8 @@ public class CurryTest extends TestCase {
       assertTrue(e.getMessage(), e.getMessage().contains("int"));
     }
   }
-  
+
+  @Test
   public void testWrongArgumentType() {
     try {
       Curry.<Object>of(Foo.class).asBinary().map("foo", 2L);
@@ -389,7 +416,8 @@ public class CurryTest extends TestCase {
       assertTrue(e.getMessage(), e.getMessage().contains("int"));
     }
   }
-  
+
+  @Test
   public void testAsUnary_wrongParamNumber() {
     Curry<Foo> curry = Curry.of(Foo.class);
     try {
@@ -397,7 +425,8 @@ public class CurryTest extends TestCase {
       fail();
     } catch (IllegalArgumentException e) {}
   }
-  
+
+  @Test
   public void testAsBinary_wrongParamNumber() {
     Curry<Foo> curry = Curry.of(Foo.class, 1);
     try {
@@ -405,7 +434,8 @@ public class CurryTest extends TestCase {
       fail();
     } catch (IllegalArgumentException e) {}
   }
-  
+
+  @Test
   public void testPrefix_wrongParamNumber() {
     Curry<Foo> curry = Curry.of(Foo.class, 1);
     try {
@@ -416,7 +446,8 @@ public class CurryTest extends TestCase {
       assertTrue(e.getMessage(), e.getMessage().contains("3 will be provided"));
     }
   }
-  
+
+  @Test
   public void testPrefix_multiOp_wrongParamNumber() {
     Curry<Foo> curry = Curry.of(Foo.class);
     try {
@@ -427,7 +458,8 @@ public class CurryTest extends TestCase {
       assertTrue(e.getMessage(), e.getMessage().contains("3 will be provided"));
     }
   }
-  
+
+  @Test
   public void testPostfix_wrongParamNumber() {
     Curry<Foo> curry = Curry.of(Foo.class, 1);
     try {
@@ -438,7 +470,8 @@ public class CurryTest extends TestCase {
       assertTrue(e.getMessage(), e.getMessage().contains("3 will be provided"));
     }
   }
-  
+
+  @Test
   public void testPostfix_multiOp_wrongParamNumber() {
     Curry<Foo> curry = Curry.of(Foo.class);
     try {
@@ -449,7 +482,8 @@ public class CurryTest extends TestCase {
       assertTrue(e.getMessage(), e.getMessage().contains("3 will be provided"));
     }
   }
-  
+
+  @Test
   public void testInfix_wrongParamNumber() {
     Curry<Foo> curry = Curry.of(Foo.class);
     try {
@@ -460,7 +494,8 @@ public class CurryTest extends TestCase {
       assertTrue(e.getMessage(), e.getMessage().contains("3 will be provided"));
     }
   }
-  
+
+  @Test
   public void testInfix_multiOp_wrongParamNumber() {
     Curry<Foo> curry = Curry.of(Foo.class);
     try {
@@ -471,7 +506,8 @@ public class CurryTest extends TestCase {
       assertTrue(e.getMessage(), e.getMessage().contains("4 will be provided"));
     }
   }
-  
+
+  @Test
   public void testInvoke_wrongParameterNumber() throws Throwable {
     try {
       Curry.of(Foo.class, 1).invoke(new Object[] {"foo", "bar"});
@@ -480,4 +516,5 @@ public class CurryTest extends TestCase {
       assertTrue(e.getMessage(), e.getMessage().contains("1 parameters expected, 2 provided: "));
     }
   }
+
 }

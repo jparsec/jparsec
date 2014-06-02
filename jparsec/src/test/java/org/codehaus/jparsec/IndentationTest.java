@@ -22,22 +22,25 @@ import static org.codehaus.jparsec.Asserts.assertScanner;
 import static org.codehaus.jparsec.Indentation.Punctuation.INDENT;
 import static org.codehaus.jparsec.Indentation.Punctuation.OUTDENT;
 import static org.codehaus.jparsec.pattern.Pattern.MISMATCH;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.codehaus.jparsec.pattern.CharPredicate;
 import org.codehaus.jparsec.pattern.Pattern;
 import org.codehaus.jparsec.util.Lists;
+import org.junit.Test;
 
 /**
  * Unit test for {@link Indentation}.
  * 
  * @author benyu
  */
-public class IndentationTest extends TestCase {
-  
+public class IndentationTest {
+
+  @Test
   public void testInlineWhitespace() {
     CharPredicate predicate = Indentation.INLINE_WHITESPACE;
     assertTrue(predicate.isChar(' '));
@@ -46,7 +49,8 @@ public class IndentationTest extends TestCase {
     assertFalse(predicate.isChar('\n'));
     assertEquals("whitespace", predicate.toString());
   }
-  
+
+  @Test
   public void testLineContinuation() {
     Pattern pattern = Indentation.LINE_CONTINUATION;
     assertEquals(MISMATCH, pattern.match("", 0, 0));
@@ -56,7 +60,8 @@ public class IndentationTest extends TestCase {
     assertEquals(2, pattern.match("\\\n", 0, 2));
     assertEquals(6, pattern.match("\\  \t\r\n", 0, 6));
   }
-  
+
+  @Test
   public void testInlineWhitespaces() {
     Pattern pattern = Indentation.INLINE_WHITESPACES;
     assertEquals(MISMATCH, pattern.match("", 0, 0));
@@ -66,14 +71,16 @@ public class IndentationTest extends TestCase {
     assertEquals(2, pattern.match("  ", 0, 2));
     assertEquals(4, pattern.match("  \t\r", 0, 4));
   }
-  
+
+  @Test
   public void testWhitespaces() {
     Parser<Void> scanner = Indentation.WHITESPACES;
     assertEquals("whitespaces", scanner.toString());
     assertScanner(scanner, "  \r\t\\ \t\n \r");
     assertFailure(scanner, " \r\n", 1, 3, "EOF expected, \n encountered.");
   }
-  
+
+  @Test
   public void testAnalyzeIndentations() {
     assertEquals(tokenList(), analyze());
     assertEquals(tokenList("foo"), analyze("foo"));
@@ -94,7 +101,8 @@ public class IndentationTest extends TestCase {
         "foo", 2, INDENT, "bar", 4, INDENT, "baz", 3, OUTDENT, INDENT, "end", OUTDENT, OUTDENT),
         analyze("foo", "\n", 1, "bar", "\n", 3, "baz", "\n", 2, "end"));
   }
-  
+
+  @Test
   public void testIndent() {
     Parser<Token> parser = new Indentation().indent();
     assertParser(parser.from(Parsers.constant(tokenList(INDENT))),
@@ -102,7 +110,8 @@ public class IndentationTest extends TestCase {
     assertFailure(parser.from(Parsers.constant(tokenList(OUTDENT))), "",
         1, 1, "INDENT expected, OUTDENT encountered.");
   }
-  
+
+  @Test
   public void testOutdent() {
     Parser<Token> parser = new Indentation().outdent();
     assertParser(parser.from(Parsers.constant(tokenList(OUTDENT))),
@@ -110,7 +119,8 @@ public class IndentationTest extends TestCase {
     assertFailure(parser.from(Parsers.constant(tokenList(INDENT))), "",
         1, 1, "OUTDENT expected, INDENT encountered.");
   }
-  
+
+  @Test
   public void testLexer() {
     Parser<List<Token>> parser =
         new Indentation().lexer(Scanners.IDENTIFIER, Indentation.WHITESPACES.optional());

@@ -1,28 +1,32 @@
 package org.codehaus.jparsec;
 
 import static org.codehaus.jparsec.OperatorTable.Associativity.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import org.codehaus.jparsec.OperatorTable.Associativity;
 import org.codehaus.jparsec.OperatorTable.Operator;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
-
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Unit test for {@link OperatorTable}.
  * 
  * @author Ben Yu
  */
-public class OperatorTableTest extends TestCase {
+public class OperatorTableTest {
   private static final Parser<?> OP = Parsers.never();
   private static final Parser<Map<Integer, Integer>> UNARY_OP = Parsers.never();
   private static final Parser<Map2<Integer, Integer, Integer>> BINARY_OP = Parsers.never();
-  
+
+  @Test
   public void testAssociativityOrder() {
     assertTotalOrder(PREFIX, POSTFIX, LASSOC, NASSOC, RASSOC);
   }
-  
+
+  @Test
   public void testOperatorOrder() {
     assertTotalOrder(
         operator(2, PREFIX), operator(2, POSTFIX),
@@ -30,7 +34,8 @@ public class OperatorTableTest extends TestCase {
         operator(1, PREFIX), operator(1, POSTFIX),
         operator(1, LASSOC), operator(1, NASSOC), operator(1, RASSOC));
   }
-  
+
+  @Test
   public void testGetOperators() {
     OperatorTable<Integer> table = new OperatorTable<Integer>()
        .infixl(BINARY_OP, 2)
