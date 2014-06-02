@@ -44,7 +44,7 @@ public final class Token {
     return len;
   }
   
-  /** Returns the index of the token in the orginal source. */
+  /** Returns the index of the token in the original source. */
   public int index() {
     return ind;
   }

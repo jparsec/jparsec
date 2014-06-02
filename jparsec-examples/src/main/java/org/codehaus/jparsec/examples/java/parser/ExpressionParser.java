@@ -184,7 +184,7 @@ public final class ExpressionParser {
       term("false").<Expression>retn(new BooleanLiteral(false)));
   
   static final Parser<Expression> SCIENTIFIC_LITERAL =
-      Parsers.<Expression>tokenType(ScientificNumberLiteral.class, "sicentific number literal");
+      Parsers.<Expression>tokenType(ScientificNumberLiteral.class, "scientific number literal");
 
   @SuppressWarnings("unchecked")
   static final Parser<Expression> ATOM = Parsers.or(

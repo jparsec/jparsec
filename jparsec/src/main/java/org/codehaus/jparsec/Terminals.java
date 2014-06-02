@@ -188,7 +188,7 @@ public final class Terminals extends Lexicon {
      * A tokenizer that parses any identifier and returns a {@link Fragment} token tagged as
      * {@link Tag#IDENTIFIER}.
      * 
-     * <p> An identifier starts with an alphametic character or underscore,
+     * <p> An identifier starts with an alphabetic character or underscore,
      * and is followed by 0 or more alphanumeric characters or underscore.
      */
     public static final Parser<Fragment> TOKENIZER =
