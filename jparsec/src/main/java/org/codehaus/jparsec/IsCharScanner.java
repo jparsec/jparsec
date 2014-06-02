@@ -18,7 +18,7 @@ package org.codehaus.jparsec;
 import org.codehaus.jparsec.pattern.CharPredicate;
 
 /**
- * Parses a given characgter.
+ * Parses a given character.
  * 
  * @author Ben Yu
  */
