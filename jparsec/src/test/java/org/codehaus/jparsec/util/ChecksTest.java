@@ -40,13 +40,13 @@ public class ChecksTest extends TestCase {
       assertEquals("one = 1", e.getMessage());
     }
   }
-  
-  public void checkNotNullState_noThrowIfObjectIsntNull() {
+
+  public void testCheckNotNullState_noThrowIfObjectIsntNull() {
     Checks.checkNotNullState("1", "whatever");
     Checks.checkNotNullState("1", "whatever", 1, 2);
     Checks.checkNotNullState("1", "bad format %s and %s", 1);
   }
-  
+
   public void testCheckNotNullState_throwsIfObjectIsNull() {
     try {
       Checks.checkNotNullState(null, "object = %s", "null");
