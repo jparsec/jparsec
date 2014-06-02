@@ -147,8 +147,8 @@ public class DeclarationParserTest extends TestCase {
     Parser<Declaration> parser =
         DeclarationParser.annotationDef(StatementParser.modifier(IDENTIFIER), FIELD);
     assertResult(parser, "@interface Foo{}", AnnotationDef.class, "@interface Foo {}");
-    assertResult(parser, "@Target({METHOD, FIELD}) @RentionPolicy(RUNTIME) @interface Foo{}",
-        AnnotationDef.class, "@Target({METHOD, FIELD}) @RentionPolicy(RUNTIME) @interface Foo {}");
+    assertResult(parser, "@Target({METHOD, FIELD}) @RetentionPolicy(RUNTIME) @interface Foo{}",
+        AnnotationDef.class, "@Target({METHOD, FIELD}) @RetentionPolicy(RUNTIME) @interface Foo {}");
     assertResult(parser, "@interface Foo{int i;int j;}",
         AnnotationDef.class, "@interface Foo {int i; int j;}");
   }

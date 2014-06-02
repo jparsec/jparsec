@@ -102,9 +102,7 @@ public final class IntList {
   
   private void grow(int l) {
     int[] nbuf = new int[buf.length + l];
-    for(int i = 0; i < buf.length; i++) {
-      nbuf[i] = buf[i];
-    }
+    System.arraycopy(buf, 0, nbuf, 0, buf.length);
     buf = nbuf;
   }
   

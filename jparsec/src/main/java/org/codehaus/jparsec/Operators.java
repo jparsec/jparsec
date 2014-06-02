@@ -115,7 +115,7 @@ final class Operators {
     }
     
     /**
-     * Collapes the names in each suite by traversing the suites in reverse order, so that smaller
+     * Collapses the names in each suite by traversing the suites in reverse order, so that smaller
      * suites are collapsed first and generally shorter operators will be placed before longer ones
      * unless it is contained by a longer operator.
      */

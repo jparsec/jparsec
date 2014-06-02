@@ -26,7 +26,7 @@ import org.codehaus.jparsec.pattern.Patterns;
  * <p>
  * Some scanners like {@link #IDENTIFIER} and {@link #INTEGER} return the matched string,
  * while others like {@link #WHITESPACES} return nothing, as indicated by the {@link Void}
- * type parameter. In case the matched string is still needed nontheless,
+ * type parameter. In case the matched string is still needed nonetheless,
  * use the {@link Parser#source()} method.
  * 
  * @author Ben Yu
@@ -279,7 +279,7 @@ public final class Scanners {
    * A scanner that succeeds and consumes the current character if it is equal to {@code ch}.
    * 
    * @param ch the expected character.
-   * @param name the name of what's expected logically. Is used in error mesage.
+   * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
    */
   public static Parser<Void> notChar(char ch, String name) {
@@ -452,7 +452,7 @@ public final class Scanners {
    * A scanner that after character level {@code outer} succeeds,
    * subsequently feeds the recognized characters to {@code inner} for a nested scanning.
    * 
-   * <p> Is useful for scenaios like parsing string interpolation grammar.
+   * <p> Is useful for scenarios like parsing string interpolation grammar.
    */
   public static Parser<Void> nestedScanner(Parser<?> outer, Parser<Void> inner) {
     return new NestedScanner(outer, inner);
