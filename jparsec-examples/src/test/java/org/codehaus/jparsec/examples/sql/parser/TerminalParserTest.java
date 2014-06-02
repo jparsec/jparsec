@@ -1,13 +1,11 @@
 package org.codehaus.jparsec.examples.sql.parser;
 
-import java.util.Arrays;
-
+import junit.framework.TestCase;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.examples.sql.ast.QualifiedName;
-import org.codehaus.jparsec.examples.sql.parser.TerminalParser;
 
-import junit.framework.TestCase;
+import java.util.Arrays;
 
 /**
  * Unit test for {@link TerminalParser}.
