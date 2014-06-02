@@ -2,57 +2,60 @@
 
 package org.codehaus.jparsec.util;
 
-import junit.framework.TestCase;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * Unit test for {@link Checks}.
  * 
  * @author Ben Yu
  */
-public class ChecksTest extends TestCase {
-  
-  public void testCheckArgument_noThrowIfConditionIsTrue() {
+public class ChecksTest {
+
+  @Rule
+  public ExpectedException exception = ExpectedException.none();
+
+  @Test
+  public void checkArgument_noThrowIfConditionIsTrue() {
     Checks.checkArgument(true, "whatever");
     Checks.checkArgument(true, "whatever", 1, 2);
     Checks.checkArgument(true, "bad format %s and %s", 1);
   }
-  
-  public void testCheckArgument_throwsIfConditionIsFalse() {
-    try {
-      Checks.checkArgument(false, "one = %s", 1);
-      fail();
-    } catch (IllegalArgumentException e) {
-      assertEquals("one = 1", e.getMessage());
-    }
+
+  @Test
+  public void checkArgument_throwsIfConditionIsFalse() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("one = 1");
+    Checks.checkArgument(false, "one = %s", 1);
   }
-  
-  public void testCheckState_noThrowIfConditionIsTrue() {
+
+  @Test
+  public void checkState_noThrowIfConditionIsTrue() {
     Checks.checkState(true, "whatever");
     Checks.checkState(true, "whatever", 1, 2);
     Checks.checkState(true, "bad format %s and %s", 1);
   }
-  
-  public void testCheckState_throwsIfConditionIsFalse() {
-    try {
-      Checks.checkState(false, "one = %s", 1);
-      fail();
-    } catch (IllegalStateException e) {
-      assertEquals("one = 1", e.getMessage());
-    }
+
+  @Test
+  public void checkState_throwsIfConditionIsFalse() {
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("one = 1");
+    Checks.checkState(false, "one = %s", 1);
   }
 
-  public void testCheckNotNullState_noThrowIfObjectIsntNull() {
+  @Test
+  public void checkNotNullState_noThrowIfObjectIsntNull() {
     Checks.checkNotNullState("1", "whatever");
     Checks.checkNotNullState("1", "whatever", 1, 2);
     Checks.checkNotNullState("1", "bad format %s and %s", 1);
   }
 
-  public void testCheckNotNullState_throwsIfObjectIsNull() {
-    try {
-      Checks.checkNotNullState(null, "object = %s", "null");
-      fail();
-    } catch (IllegalStateException e) {
-      assertEquals("object = null", e.getMessage());
-    }
+  @Test
+  public void checkNotNullState_throwsIfObjectIsNull() {
+    exception.expect(IllegalStateException.class);
+    exception.expectMessage("object = null");
+    Checks.checkNotNullState(null, "object = %s", "null");
   }
+
 }

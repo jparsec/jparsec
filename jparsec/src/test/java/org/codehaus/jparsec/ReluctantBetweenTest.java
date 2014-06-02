@@ -1,33 +1,33 @@
 package org.codehaus.jparsec;
 
 import static org.codehaus.jparsec.Scanners.isChar;
-
-import junit.framework.TestCase;
 import org.codehaus.jparsec.functors.Pair;
+import org.junit.Test;
 
 /**
  *
  * @author michael
  */
-public class ReluctantBetweenTest extends TestCase {
+public class ReluctantBetweenTest {
 
-	public void testReluctantBetween() {
+    @Test
+	public void parsing_input_with_delimiting_character_inside_delimiters () {
 		Parser<Pair<String,String>> sut = Parsers.tuple(Scanners.IDENTIFIER.followedBy(Scanners.among(":")),
 				Scanners.ANY_CHAR.many().source()
 				).reluctantBetween(Scanners.isChar('('), Scanners.isChar(')'));
-		assertEquals( new Pair<String,String>("hello","world)"),
-				      sut.parse("(hello:world))") 
-		             );
+        Asserts.assertParser(sut, "(hello:world))", new Pair<String,String>("hello","world)"));
 	}
-	
-	public void testReluctantBetween_simple() {
+
+    @Test
+	public void parsing_simple_input() {
 		Asserts.assertParser( Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
 				"(hello)", "hello");
 		Asserts.assertParser( Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
 				"()", "");
 	}
-	
-	public void testReluctantBetween_fail() {
+
+    @Test
+	public void parsing_incorrect_input() {
 		Asserts.assertFailure(Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
 				"(hello", 1,6);
 	}
