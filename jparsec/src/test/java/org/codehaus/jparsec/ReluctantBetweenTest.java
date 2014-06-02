@@ -1,14 +1,15 @@
 package org.codehaus.jparsec;
 
-import static junit.framework.Assert.assertEquals;
 import static org.codehaus.jparsec.Scanners.isChar;
+
+import junit.framework.TestCase;
 import org.codehaus.jparsec.functors.Pair;
 
 /**
  *
  * @author michael
  */
-public class ReluctantBetweenTest {
+public class ReluctantBetweenTest extends TestCase {
 
 	public void testReluctantBetween() {
 		Parser<Pair<String,String>> sut = Parsers.tuple(Scanners.IDENTIFIER.followedBy(Scanners.among(":")),
