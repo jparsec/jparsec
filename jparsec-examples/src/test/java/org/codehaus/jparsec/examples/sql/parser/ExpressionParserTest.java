@@ -8,8 +8,6 @@ import static org.codehaus.jparsec.examples.sql.parser.TerminalParserTest.assert
 
 import java.util.Arrays;
 
-import junit.framework.TestCase;
-
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.examples.sql.ast.BetweenExpression;
 import org.codehaus.jparsec.examples.sql.ast.BinaryExpression;
@@ -29,43 +27,48 @@ import org.codehaus.jparsec.examples.sql.ast.TupleExpression;
 import org.codehaus.jparsec.examples.sql.ast.UnaryExpression;
 import org.codehaus.jparsec.examples.sql.ast.UnaryRelationalExpression;
 import org.codehaus.jparsec.examples.sql.ast.WildcardExpression;
-import org.codehaus.jparsec.examples.sql.parser.ExpressionParser;
-import org.codehaus.jparsec.examples.sql.parser.RelationParser;
 import org.codehaus.jparsec.functors.Tuples;
+import org.junit.Test;
 
 /**
  * Unit test for {@link ExpressionParser}.
  * 
  * @author Ben Yu
  */
-public class ExpressionParserTest extends TestCase {
-  
+public class ExpressionParserTest {
+
+  @Test
   public void testNumber() {
     assertParser(ExpressionParser.NUMBER, "1.2", new NumberExpression("1.2"));
   }
-  
+
+  @Test
   public void testQualifiedName() {
     Parser<Expression> parser = QUALIFIED_NAME;
     assertParser(parser, "a", name("a"));
     assertParser(parser, "a . bc", name("a", "bc"));
   }
-  
+
+  @Test
   public void testQualifiedWildcard() {
     assertParser(ExpressionParser.QUALIFIED_WILDCARD, "a.b.*",
         new WildcardExpression(QualifiedName.of("a", "b")));
   }
-  
+
+  @Test
   public void testWildcard() {
     assertParser(ExpressionParser.WILDCARD, "a.b.*",
         new WildcardExpression(QualifiedName.of("a", "b")));
     assertParser(ExpressionParser.WILDCARD, "*",
         new WildcardExpression(QualifiedName.of()));
   }
-  
+
+  @Test
   public void testString() {
     assertParser(ExpressionParser.STRING, "'foo'", new StringExpression("foo"));
   }
-  
+
+  @Test
   public void testFunctionCall() {
     Parser<Expression> parser = ExpressionParser.functionCall(NUMBER);
     assertParser(parser, "f()", FunctionExpression.of(QualifiedName.of("f")));
@@ -74,7 +77,8 @@ public class ExpressionParserTest extends TestCase {
     assertParser(parser, "a.b(1, 2)",
         FunctionExpression.of(QualifiedName.of("a", "b"), number(1), number(2)));
   }
-  
+
+  @Test
   public void testBetween() {
     Parser<Expression> parser = ExpressionParser.between(NUMBER);
     assertParser(parser, "1 BETWEEN 0 and 2",
@@ -82,7 +86,8 @@ public class ExpressionParserTest extends TestCase {
     assertParser(parser, "1 not between 2 and 0",
         new BetweenExpression(number(1), false, number(2), number(0)));
   }
-  
+
+  @Test
   public void testTuple() {
     Parser<Expression> parser = ExpressionParser.tuple(NUMBER);
     assertParser(parser, "()", TupleExpression.of());
@@ -91,8 +96,8 @@ public class ExpressionParserTest extends TestCase {
     assertFailure(parser, "1", 1, 1, "( expected, 1 encountered.");
     assertFailure(parser, "", 1, 1);
   }
-  
-  @SuppressWarnings("unchecked")
+
+  @Test
   public void testSimpleCase() {
     Parser<Expression> parser = ExpressionParser.simpleCase(NUMBER);
     assertParser(parser, "case 1 when 1 then 2 else 3 end",
@@ -100,8 +105,8 @@ public class ExpressionParserTest extends TestCase {
     assertParser(parser, "case 1 when 1 then 2 end",
         simpleCase(number(1), number(1), number(2), null));
   }
-  
-  @SuppressWarnings("unchecked")
+
+  @Test
   public void testFullCase() {
     Parser<Expression> parser =
         ExpressionParser.fullCase(ExpressionParser.QUALIFIED_NAME, NUMBER);
@@ -109,7 +114,8 @@ public class ExpressionParserTest extends TestCase {
         fullCase(name("a"), number(2), number(3)));
     assertParser(parser, "case when a then 2 end", fullCase(name("a"), number(2), null));
   }
-  
+
+  @Test
   public void testArithmetic() {
     Parser<Expression> parser = ExpressionParser.arithmetic(NUMBER);
     assertParser(parser, "1", number(1));
@@ -134,8 +140,8 @@ public class ExpressionParserTest extends TestCase {
                 FunctionExpression.of(QualifiedName.of("foo", "bar"), new BinaryExpression(
                     number(1), Op.DIV, number(2))))));
   }
-  
-  @SuppressWarnings("unchecked")
+
+  @Test
   public void testExpression() {
     Parser<Expression> parser = ExpressionParser.expression(NUMBER);
     assertParser(parser,
@@ -150,7 +156,8 @@ public class ExpressionParserTest extends TestCase {
         )
     );
   }
-  
+
+  @Test
   public void testCompare() {
     Parser<Expression> parser = ExpressionParser.compare(NUMBER);
     assertParser(parser, "1 = 1", new BinaryExpression(number(1), Op.EQ, number(1)));
@@ -169,7 +176,8 @@ public class ExpressionParserTest extends TestCase {
     assertParser(parser, "1 not between 2 and 0",
         new BetweenExpression(number(1), false, number(2), number(0)));
   }
-  
+
+  @Test
   public void testLike() {
     Parser<Expression> parser = ExpressionParser.like(NUMBER);
     assertParser(parser, "1 like 2", new LikeExpression(number(1), true, number(2), null));
@@ -179,7 +187,8 @@ public class ExpressionParserTest extends TestCase {
     assertParser(parser, "1 not like 2 escape 3",
         new LikeExpression(number(1), false, number(2), number(3)));
   }
-  
+
+  @Test
   public void testLogical() {
     Parser<Expression> parser = ExpressionParser.logical(NUMBER);
     assertParser(parser, "1", number(1));
@@ -195,43 +204,50 @@ public class ExpressionParserTest extends TestCase {
     assertParser(parser, "not 1 and 2", new BinaryExpression(
         new UnaryExpression(Op.NOT, number(1)), Op.AND, number(2)));
   }
-  
+
+  @Test
   public void testExists() {
     assertParser(ExpressionParser.exists(RelationParser.TABLE), "exists t",
         new UnaryRelationalExpression(table("t"), Op.EXISTS));
   }
-  
+
+  @Test
   public void testNotExists() {
     assertParser(ExpressionParser.notExists(RelationParser.TABLE), "not exists t",
         new UnaryRelationalExpression(table("t"), Op.NOT_EXISTS));
   }
-  
+
+  @Test
   public void testInRelation() {
     assertParser(ExpressionParser.inRelation(NUMBER, RelationParser.TABLE),
         "1 in (table)",
         new BinaryRelationalExpression(number(1), Op.IN, table("table")));
   }
-  
+
+  @Test
   public void testNotInRelation() {
     assertParser(ExpressionParser.notInRelation(NUMBER, RelationParser.TABLE),
         "1 not in (table)",
         new BinaryRelationalExpression(number(1), Op.NOT_IN, table("table")));
   }
-  
+
+  @Test
   public void testIn() {
     assertParser(ExpressionParser.in(NUMBER), "1 in (2)",
         new BinaryExpression(number(1), Op.IN, TupleExpression.of(number(2))));
     assertParser(ExpressionParser.in(NUMBER), "1 in (2, 3)",
         new BinaryExpression(number(1), Op.IN, TupleExpression.of(number(2), number(3))));
   }
-  
+
+  @Test
   public void testNotIn() {
     assertParser(ExpressionParser.notIn(NUMBER), "1 not in (2)",
         new BinaryExpression(number(1), Op.NOT_IN, TupleExpression.of(number(2))));
     assertParser(ExpressionParser.notIn(NUMBER), "1 not in (2, 3)",
         new BinaryExpression(number(1), Op.NOT_IN, TupleExpression.of(number(2), number(3))));
   }
-  
+
+  @Test
   public void testCondition() {
     Parser<Expression> parser =
         ExpressionParser.condition(NUMBER, RelationParser.TABLE);

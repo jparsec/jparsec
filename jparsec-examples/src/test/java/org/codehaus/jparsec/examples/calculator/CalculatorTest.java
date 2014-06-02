@@ -1,15 +1,17 @@
 package org.codehaus.jparsec.examples.calculator;
 
-import org.codehaus.jparsec.examples.calculator.Calculator;
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit test for {@link Calculator}.
  * 
  * @author Ben Yu
  */
-public class CalculatorTest extends TestCase {
+public class CalculatorTest {
+
+  @Test
   public void testEvaluate() {
     assertResult(1, "1");
     assertResult(1, "(1)");

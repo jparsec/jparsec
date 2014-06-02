@@ -37,15 +37,16 @@ import org.codehaus.jparsec.examples.java.ast.statement.Annotation;
 import org.codehaus.jparsec.examples.java.ast.statement.Modifier;
 import org.codehaus.jparsec.examples.sql.ast.FunctionExpression;
 
-import junit.framework.TestCase;
+import org.junit.Test;
 
 /**
  * Integration test for the entire java parser.
  * 
  * @author benyu
  */
-public class JavaParserIntegrationTest extends TestCase {
-  
+public class JavaParserIntegrationTest {
+
+  @Test
   public void testParse() throws Exception {
     parseJavaSourceFiles(
         DeclarationParser.class, StatementParser.class, ExpressionParser.class,

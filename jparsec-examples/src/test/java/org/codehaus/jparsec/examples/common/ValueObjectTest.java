@@ -1,16 +1,16 @@
 package org.codehaus.jparsec.examples.common;
 
-import junit.framework.TestCase;
-
-import org.codehaus.jparsec.examples.common.ValueObject;
 import org.codehaus.jparsec.util.ObjectTester;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit test for {@link ValueObject}.
  * 
  * @author Ben Yu
  */
-public class ValueObjectTest extends TestCase {
+public class ValueObjectTest {
   
   private static final class BadObject {
     
@@ -63,7 +63,8 @@ public class ValueObjectTest extends TestCase {
       this.name = name;
     }
   }
-  
+
+  @Test
   public void testEquals() {
     Animal animal = new Animal("male", 1);
     ObjectTester.assertEqual(animal, animal, new Animal("male", 1));
@@ -73,7 +74,8 @@ public class ValueObjectTest extends TestCase {
     ObjectTester.assertEqual(new Dog("male", 1, "tom"), new Dog("male", 1, "tom"));
     ObjectTester.assertNotEqual(new Dog("male", 1, "tom"), null, new Mammal("male", 1), 1);
   }
-  
+
+  @Test
   public void testToString() {
     assertEquals("Dog {age=1, sex=male, name=tom}", new Dog("male", 1, "tom").toString());
     assertEquals("Person {name=ben}", new Person("ben").toString());

@@ -1,7 +1,5 @@
 package org.codehaus.jparsec.examples.java.parser;
 
-import junit.framework.TestCase;
-
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.examples.java.ast.expression.DecimalPointNumberLiteral;
@@ -9,19 +7,26 @@ import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.NumberType;
 import org.codehaus.jparsec.examples.java.ast.expression.ScientificNumberLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral.Radix;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * Unit test for {@link JavaLexer}.
  * 
  * @author Ben Yu
  */
-public class JavaLexerTest extends TestCase {
-  
+public class JavaLexerTest {
+
+  @Test
   public void testIdentifier() {
     Parser<String> scanner = JavaLexer.IDENTIFIER;
     assertEquals("foo", scanner.parse("foo"));
     assertEquals("foo_123_", scanner.parse("foo_123_"));
   }
+
+  @Test
   public void testDecimalPointScanner() {
     Parser<Void> scanner = JavaLexer.DECIMAL_POINT_SCANNER;
     scanner.parse("0.1");
@@ -29,7 +34,8 @@ public class JavaLexerTest extends TestCase {
     scanner.parse(".12");
     assertFailure(scanner, "1", 1, 1);
   }
-  
+
+  @Test
   public void testDecimalPointNumber() {
     Parser<DecimalPointNumberLiteral> scanner = JavaLexer.DECIMAL_POINT_NUMBER;
     assertEquals(decimal("1.0", NumberType.DOUBLE), scanner.parse("1.0"));
@@ -38,7 +44,8 @@ public class JavaLexerTest extends TestCase {
     assertEquals(decimal(".0", NumberType.DOUBLE), scanner.parse(".0D"));
     assertEquals(decimal("10.0", NumberType.DOUBLE), scanner.parse("10.0d"));
   }
-  
+
+  @Test
   public void testScientificNumberLiteral() {
     Parser<ScientificNumberLiteral> scanner = JavaLexer.SCIENTIFIC_NUMBER_LITERAL;
     assertEquals(scientific("1e2", NumberType.DOUBLE), scanner.parse("1e2"));
@@ -47,7 +54,8 @@ public class JavaLexerTest extends TestCase {
     assertEquals(scientific("1e2", NumberType.FLOAT), scanner.parse("1e2f"));
     assertEquals(scientific("1e2", NumberType.FLOAT), scanner.parse("1e2F"));
   }
-  
+
+  @Test
   public void testInteger() {
     Parser<IntegerLiteral> scanner = JavaLexer.INTEGER;
     assertEquals(integer(Radix.DEC, "123", NumberType.INT), scanner.parse("123"));
@@ -60,6 +68,7 @@ public class JavaLexerTest extends TestCase {
     assertEquals(integer(Radix.OCT, "1", NumberType.FLOAT), scanner.parse("01f"));
   }
 
+  @Test
   public void testZero(){
     Parser<IntegerLiteral> scanner = JavaLexer.INTEGER;
     assertEquals(integer(Radix.HEX, "0D", NumberType.INT), scanner.parse("0X0D"));
