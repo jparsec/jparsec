@@ -8,8 +8,6 @@ import static org.codehaus.jparsec.examples.sql.parser.TerminalParserTest.assert
 import java.util.Arrays;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.examples.sql.ast.AliasedRelation;
 import org.codehaus.jparsec.examples.sql.ast.BinaryExpression;
@@ -26,64 +24,73 @@ import org.codehaus.jparsec.examples.sql.ast.Select;
 import org.codehaus.jparsec.examples.sql.ast.TableRelation;
 import org.codehaus.jparsec.examples.sql.ast.UnaryRelationalExpression;
 import org.codehaus.jparsec.examples.sql.ast.UnionRelation;
-import org.codehaus.jparsec.examples.sql.parser.RelationParser;
+import org.junit.Test;
 
 /**
  * Unit test for {@link RelationParser}.
  * 
  * @author Ben Yu
  */
-public class RelationParserTest extends TestCase {
-  
+public class RelationParserTest {
+
+  @Test
   public void testTable() {
     assertParser(TABLE, "a.b", table("a", "b"));
   }
-  
+
+  @Test
   public void testAliasable() {
     Parser<Relation> parser = RelationParser.aliasable(TABLE);
     assertParser(parser, "table t", new AliasedRelation(table("table"), "t"));
     assertParser(parser, "table as t", new AliasedRelation(table("table"), "t"));
     assertParser(parser, "table", table("table"));
   }
-  
+
+  @Test
   public void testOrderByItem() {
     Parser<OrderBy.Item> parser = RelationParser.orderByItem(NUMBER);
     assertParser(parser, "1", new OrderBy.Item(number(1), true));
     assertParser(parser, "1 asc", new OrderBy.Item(number(1), true));
     assertParser(parser, "1 desc", new OrderBy.Item(number(1), false));
   }
-  
+
+  @Test
   public void testOrderByClause() {
     Parser<OrderBy> parser = RelationParser.orderByClause(NUMBER);
     assertParser(parser, "order by 1, 2 desc, 3 asc", new OrderBy(Arrays.asList(
         new OrderBy.Item(number(1), true), new OrderBy.Item(number(2), false),
         new OrderBy.Item(number(3), true))));
   }
-  
+
+  @Test
   public void testInnerJoin() {
     Parser<JoinType> parser = RelationParser.INNER_JOIN;
     assertParser(parser, "join", JoinType.INNER);
     assertParser(parser, "inner join", JoinType.INNER);
   }
-  
+
+  @Test
   public void testLeftJoin() {
     Parser<JoinType> parser = RelationParser.LEFT_JOIN;
     assertParser(parser, "left join", JoinType.LEFT);
     assertParser(parser, "left outer join", JoinType.LEFT);
   }
-  
+
+  @Test
   public void testRightJoin() {
     Parser<JoinType> parser = RelationParser.RIGHT_JOIN;
     assertParser(parser, "right join", JoinType.RIGHT);
     assertParser(parser, "right outer join", JoinType.RIGHT);
   }
-  
+
+  @Test
   public void testFullJoin() {
     Parser<JoinType> parser = RelationParser.FULL_JOIN;
     assertParser(parser, "full join", JoinType.FULL);
     assertParser(parser, "full outer join", JoinType.FULL);
   }
-  
+
+  @Test
   public void testJoin() {
     Parser<Relation> parser = RelationParser.join(TABLE, NUMBER);
     assertParser(parser, "a", table("a"));
@@ -106,7 +113,8 @@ public class RelationParserTest extends TestCase {
         new CrossJoinRelation(table("a"),
             new JoinRelation(table("b"), JoinType.FULL, table("c"), number(1))));
   }
-  
+
+  @Test
   public void testUnion() {
     Parser<Relation> parser = RelationParser.union(TABLE);
     assertParser(parser, "a", table("a"));
@@ -125,20 +133,23 @@ public class RelationParserTest extends TestCase {
         )
     );
   }
-  
+
+  @Test
   public void testProjection() {
     Parser<Projection> parser = RelationParser.projection(NUMBER);
     assertParser(parser, "1", new Projection(number(1), null));
     assertParser(parser, "1 id", new Projection(number(1), "id"));
     assertParser(parser, "1 as id", new Projection(number(1), "id"));
   }
-  
+
+  @Test
   public void testSelectClause() {
     Parser<Boolean> parser = RelationParser.selectClause();
     assertParser(parser, "select", false);
     assertParser(parser, "select distinct", true);
   }
-  
+
+  @Test
   public void testFromClause() {
     Parser<List<Relation>> parser = RelationParser.fromClause(TABLE);
     assertListParser(parser, "from a", table("a"));
@@ -146,14 +157,16 @@ public class RelationParserTest extends TestCase {
     assertListParser(parser, "from table1 t1, t2",
         new AliasedRelation(table("table1"), "t1"), table("t2"));
   }
-  
+
+  @Test
   public void testGroupByClause() {
     Parser<GroupBy> parser = RelationParser.groupByClause(NUMBER, NUMBER);
     assertParser(parser, "group by 1, 2", new GroupBy(Arrays.asList(number(1), number(2)), null));
     assertParser(parser, "group by 1, 2 having 3",
         new GroupBy(Arrays.asList(number(1), number(2)), number(3)));
   }
-  
+
+  @Test
   public void testSelect() {
     Parser<Relation> parser = RelationParser.select(NUMBER, NUMBER, TABLE);
     assertParser(parser, "select distinct 1, 2 as id from t1, t2",
@@ -183,7 +196,8 @@ public class RelationParserTest extends TestCase {
             null, null, new OrderBy(Arrays.asList(
                 new OrderBy.Item(number(2), true), new OrderBy.Item(number(3), false)))));
   }
-  
+
+  @Test
   public void testQuery() {
     Parser<Relation> parser = RelationParser.query(NUMBER, NUMBER, TABLE);
     assertParser(parser, "select 1 from t",
@@ -203,7 +217,8 @@ public class RelationParserTest extends TestCase {
                 Arrays.asList(table("b")),
                 null, null, null)));
   }
-  
+
+  @Test
   public void testCompleteQuery() {
     Parser<Relation> parser = RelationParser.query();
     assertParser(parser, "select 1 from t",

@@ -1,19 +1,25 @@
 package org.codehaus.jparsec.misc;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for {@link Reflection}.
  * 
  * @author Ben Yu
  */
-public class ReflectionTest extends TestCase {
-  
+public class ReflectionTest {
+
+  @Test
   public void testGetClassName() {
     assertEquals(String.class.getName(), Reflection.getClassName("1"));
     assertEquals("null", Reflection.getClassName(null));
   }
-  
+
+  @Test
   public void testIsInstance() {
     assertFalse(Reflection.isInstance(int.class, null));
     assertFalse(Reflection.isInstance(Integer.class, null));
@@ -21,7 +27,8 @@ public class ReflectionTest extends TestCase {
     assertTrue(Reflection.isInstance(String.class, "1"));
     assertTrue(Reflection.isInstance(int.class, 1));
   }
-  
+
+  @Test
   public void testIsAssignable() {
     assertFalse(Reflection.isAssignable(int.class, null));
     assertTrue(Reflection.isAssignable(Integer.class, null));
@@ -29,7 +36,8 @@ public class ReflectionTest extends TestCase {
     assertTrue(Reflection.isAssignable(String.class, "1"));
     assertTrue(Reflection.isAssignable(int.class, 1));
   }
-  
+
+  @Test
   public void testWrapperClass() {
     assertEquals(Byte.class, Reflection.wrapperClass(byte.class));
     assertEquals(Short.class, Reflection.wrapperClass(short.class));
@@ -42,4 +50,5 @@ public class ReflectionTest extends TestCase {
     assertEquals(Void.class, Reflection.wrapperClass(void.class));
     assertEquals(String.class, Reflection.wrapperClass(String.class));
   }
+
 }

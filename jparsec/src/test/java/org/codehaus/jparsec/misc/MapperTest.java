@@ -2,24 +2,24 @@ package org.codehaus.jparsec.misc;
 
 import static org.codehaus.jparsec.Parsers.constant;
 import static org.codehaus.jparsec.misc.Mapper._;
+import static org.junit.Assert.*;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.functors.Binary;
 import org.codehaus.jparsec.functors.Unary;
+import org.junit.Test;
 
 /**
  * Unit test for {@link Mapper}.
  * 
  * @author Ben Yu
  */
-public class MapperTest extends TestCase {
+public class MapperTest {
   
   static final class Foo {
     final String name;
@@ -37,30 +37,35 @@ public class MapperTest extends TestCase {
   }
 
   private static final Mapper<CharSequence> MAPPER = new CharSequenceMap();
-  
+
+  @Test
   public void testName() {
     assertEquals(String.class.getName(), MAPPER.name());
   }
-  
+
+  @Test
   public void testSequence() {
     assertEquals("foo1",
         MAPPER.sequence(Parsers.constant("foo"), Parsers.constant(1)).parse(""));
   }
-  
+
+  @Test
   public void testCurry_sequence() {
     Parser<Foo> parser =
         Mapper.curry(Foo.class).sequence(Parsers.constant("foo"));
     Foo foo = parser.parse("");
     assertEquals("foo", foo.name);
   }
-  
+
+  @Test
   public void testAsMap() {
     assertEquals(String.class.getName(), MAPPER.asMap().toString());
     assertEquals("s1", MAPPER.asMap().map(new Object[]{"s", 1}));
     assertEquals("null1", MAPPER.asMap().map(new Object[]{null, 1}));
     assertEquals("snull", MAPPER.asMap().map(new Object[]{"s", null}));
   }
-  
+
+  @Test
   public void testUnary() {
     Parser<Unary<Object>> parser = new Mapper<Object>() {
       @SuppressWarnings("unused")
@@ -72,7 +77,8 @@ public class MapperTest extends TestCase {
     Unary<Object> unary = parser.parse("");
     assertEquals(new Integer(10), unary.map("10"));
   }
-  
+
+  @Test
   public void testBinary() {
     Parser<Binary<Object>> parser = new Mapper<Object>() {
       @SuppressWarnings("unused")
@@ -84,7 +90,8 @@ public class MapperTest extends TestCase {
     Binary<Object> binary = parser.parse("");
     assertEquals("a1", binary.map("a", 1));
   }
-  
+
+  @Test
   public void testPrefix() {
     Unary<Object> unary = new Mapper<Object>() {
       @SuppressWarnings("unused")
@@ -94,7 +101,8 @@ public class MapperTest extends TestCase {
     }.prefix(constant("a")).parse("");
     assertEquals("a1", unary.map(1));
   }
-  
+
+  @Test
   public void testPrefix_multiOp() {
     Unary<Object> unary = new Mapper<Object>() {
       @SuppressWarnings("unused")
@@ -104,7 +112,8 @@ public class MapperTest extends TestCase {
     }.prefix(constant("a"), constant(1)).parse("");
     assertEquals("a12", unary.map(2));
   }
-  
+
+  @Test
   public void testPostfix() {
     Unary<Object> unary = new Mapper<Object>() {
       @SuppressWarnings("unused")
@@ -114,7 +123,8 @@ public class MapperTest extends TestCase {
     }.postfix(constant(2)).parse("");
     assertEquals("a2", unary.map("a"));
   }
-  
+
+  @Test
   public void testPostfix_multiOp() {
     Unary<Object> unary = new Mapper<Object>() {
       @SuppressWarnings("unused")
@@ -124,7 +134,8 @@ public class MapperTest extends TestCase {
     }.postfix(constant(1), constant(2)).parse("");
     assertEquals("a12", unary.map("a"));
   }
-  
+
+  @Test
   public void testInfix() {
     Binary<Object> unary = new Mapper<Object>() {
       @SuppressWarnings("unused")
@@ -134,7 +145,8 @@ public class MapperTest extends TestCase {
     }.infix(constant(1)).parse("");
     assertEquals("a12", unary.map("a", 2));
   }
-  
+
+  @Test
   public void testInfix_multiOp() {
     Binary<Object> unary = new Mapper<Object>() {
       @SuppressWarnings("unused")
@@ -144,7 +156,8 @@ public class MapperTest extends TestCase {
     }.infix(constant(1), constant(2)).parse("");
     assertEquals("a123", unary.map("a", 3));
   }
-  
+
+  @Test
   public void testMap_errorPropagated() {
     final Error error = new Error();
     Mapper<String> collector = new Mapper<String>() {
@@ -160,7 +173,8 @@ public class MapperTest extends TestCase {
       assertSame(error, e);
     }
   }
-  
+
+  @Test
   public void testMap_runtimeExceptionPropagated() {
     final RuntimeException exception = new RuntimeException();
     Mapper<String> collector = new Mapper<String>() {
@@ -176,7 +190,8 @@ public class MapperTest extends TestCase {
       assertSame(exception, e);
     }
   }
-  
+
+  @Test
   public void testMap_exceptionPropagated() {
     final Exception exception = new Exception();
     Mapper<String> collector = new Mapper<String>() {
@@ -192,7 +207,8 @@ public class MapperTest extends TestCase {
       assertSame(exception, e.getCause());
     }
   }
-  
+
+  @Test
   public void testWrongParameters() {
     try {
       MAPPER.asMap().map(new Object[]{1, 2, 3});
@@ -202,7 +218,8 @@ public class MapperTest extends TestCase {
           e.getMessage().contains("3 arguments received, 2 expected"));
     }
   }
-  
+
+  @Test
   public void testWrongParametersForSequencing() {
     assertWrongParameters(Mapper.curry(Foo.class), 1, 0);
     assertWrongParameters(Mapper.curry(Foo.class, "foo"), 0, 1);
@@ -217,12 +234,13 @@ public class MapperTest extends TestCase {
       }
     };
   }
-  
+
+  @Test
   public void testTargetTypeUnknownAtConstructionTime() {
     assertFoo("foo", fooMapper().sequence(constant("foo"), constant(1)).parse(""));
   }
-  
-  @SuppressWarnings("unchecked")
+
+  @Test
   public void testNonGenericMapper() {
     assertEquals("1", new Mapper() {
       @SuppressWarnings("unused")
@@ -260,7 +278,8 @@ public class MapperTest extends TestCase {
       }
     };
   }
-  
+
+  @Test
   public void testParametersSkippedForSequence() {
     assertEquals("foo12truec",
         Mapper.curry(Thing.class, "foo", 1, 2L).sequence(
@@ -273,7 +292,8 @@ public class MapperTest extends TestCase {
     assertFoo("foo",
         fooMapper().sequence(_(constant("bar")), constant("foo"), constant(1)).parse(""));
   }
-  
+
+  @Test
   public void testParametersSkippedForPrefix() {
     assertEquals("foo12truec",
         Mapper.<Object>curry(Thing.class, "foo", 2L).prefix(
@@ -282,7 +302,8 @@ public class MapperTest extends TestCase {
         thingMapper().prefix(
             constant(1), _(constant("bar")), constant(true)).parse("").map('c').toString());
   }
-  
+
+  @Test
   public void testParametersSkippedForPostfix() {
     assertEquals("foo12truec",
         Mapper.<Object>curry(Thing.class, "foo", 2L).postfix(
@@ -291,7 +312,8 @@ public class MapperTest extends TestCase {
         thingMapper().postfix(
             _(constant("bar")), constant(true), constant('c')).parse("").map(1).toString());
   }
-  
+
+  @Test
   public void testParametersSkippedForInfix() {
     assertEquals("foo12truec",
         Mapper.<Object>curry(Thing.class, "foo", 2L).infix(
@@ -300,7 +322,8 @@ public class MapperTest extends TestCase {
         thingMapper().infix(
             constant(true), _(constant("bar"))).parse("").map(1, 'c').toString());
   }
-  
+
+  @Test
   public void testInvalidSkipForPrefix() {
     try {
       Mapper.<Object>curry(Foo.class).prefix(_(constant("bar")));
@@ -327,7 +350,8 @@ public class MapperTest extends TestCase {
       assertEquals("Cannot skip all parser parameters.", e.getMessage());
     }
   }
-  
+
+  @Test
   public void testInvalidSkipForPostfix() {
     try {
       Mapper.<Object>curry(Foo.class).postfix(_(constant("bar")));
@@ -354,7 +378,8 @@ public class MapperTest extends TestCase {
       assertEquals("Cannot skip all parser parameters.", e.getMessage());
     }
   }
-  
+
+  @Test
   public void testInvalidSkipForInfix() {
     try {
       Mapper.<Object>curry(Foo.class).infix(_(constant("bar")));
@@ -402,7 +427,8 @@ public class MapperTest extends TestCase {
           e.getMessage().contains(provided + " provided."));
     }
   }
-  
+
+  @Test
   public void testWrongType() {
     try {
       MAPPER.asMap().map(new Object[]{1, 1});
@@ -414,14 +440,16 @@ public class MapperTest extends TestCase {
           e.getMessage().contains(Integer.class.getName() + " provided"));
     }
   }
-  
+
+  @Test
   public void testMissingMapperMethod() {
     try { 
       new Mapper<String>() {};
       fail();
     } catch (IllegalStateException e) {}
   }
-  
+
+  @Test
   public void testAmbiguousMapperMethods() {
     try { 
       new Mapper<String>() {
@@ -437,7 +465,8 @@ public class MapperTest extends TestCase {
       fail();
     } catch (IllegalStateException e) {}
   }
-  
+
+  @Test
   public void testIncompatibleReturnType() {
     try {
       new Mapper<String>() {
@@ -449,7 +478,8 @@ public class MapperTest extends TestCase {
       fail();
     } catch (IllegalStateException e) {}
   }
-  
+
+  @Test
   public void testIncompatibleGenericReturnType() {
     try {
       new Mapper<List<String>>() {
@@ -468,12 +498,15 @@ public class MapperTest extends TestCase {
       return "sub." + s + n;
     }
   }
-  
+
+  @Test
   public void testMapperMethodInSuperclass() {
     assertEquals("s1", new CharSequenceMap(){}.map("s", 1));
   }
-  
+
+  @Test
   public void testMapperMethodInSubclass() {
     assertEquals("sub.s1", new CharSequenceSubMap().map("s", 1));
   }
+
 }

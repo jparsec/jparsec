@@ -1,6 +1,7 @@
 package org.codehaus.jparsec.util;
 
-import junit.framework.Assert;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * Tests any {@link Object} for {@link Object#equals(Object)} and {@link Object#hashCode()}.
@@ -12,16 +13,16 @@ public final class ObjectTester {
   
   public static void assertEqual(Object obj, Object... values) {
     for (Object value : values) {
-      Assert.assertEquals(value, obj);
-      Assert.assertEquals(obj.hashCode(), value.hashCode());
+      assertEquals(value, obj);
+      assertEquals(obj.hashCode(), value.hashCode());
     }
   }
   
   public static void assertNotEqual(Object obj, Object... values) {
-    Assert.assertFalse(obj.equals(new AnotherType()));
-    Assert.assertFalse(obj.equals(null));
+    assertFalse(obj.equals(new AnotherType()));
+    assertFalse(obj.equals(null));
     for (Object value : values) {
-      Assert.assertFalse(obj.equals(value));
+      assertFalse(obj.equals(value));
     }
   }
 }

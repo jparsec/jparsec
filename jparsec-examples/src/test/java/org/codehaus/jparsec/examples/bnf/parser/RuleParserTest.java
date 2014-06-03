@@ -18,8 +18,6 @@ package org.codehaus.jparsec.examples.bnf.parser;
 
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.examples.bnf.ast.AltRule;
 import org.codehaus.jparsec.examples.bnf.ast.LiteralRule;
@@ -27,25 +25,32 @@ import org.codehaus.jparsec.examples.bnf.ast.Rule;
 import org.codehaus.jparsec.examples.bnf.ast.RuleDef;
 import org.codehaus.jparsec.examples.bnf.ast.RuleReference;
 import org.codehaus.jparsec.examples.bnf.ast.SequentialRule;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Unit test for {@link RuleParser}.
  * 
  * @author benyu
  */
-public class RuleParserTest extends TestCase {
-  
+public class RuleParserTest {
+
+  @Test
   public void testLiteral() {
     assertParser(RuleParser.LITERAL, "'foo'", LiteralRule.class, "'foo'");
     assertParser(RuleParser.LITERAL, "\"bar\"", LiteralRule.class, "'bar'");
     assertParser(RuleParser.LITERAL, "'\"'", LiteralRule.class, "'\"'");
     assertParser(RuleParser.LITERAL, "\"'\"", LiteralRule.class, "'''");
   }
-  
+
+  @Test
   public void testIdent() {
     assertParser(RuleParser.IDENT, "foo", RuleReference.class, "foo");
   }
-  
+
+  @Test
   public void testRule() {
     Parser<Rule> parser = RuleParser.rule();
     assertParser(parser, "foo", RuleReference.class, "foo");
@@ -60,13 +65,15 @@ public class RuleParserTest extends TestCase {
     assertParser(parser, "foo | \n  bar | baz \n| 'foo'",
         AltRule.class, "(foo | (bar | baz) | 'foo')");
   }
-  
+
+  @Test
   public void testRuleDef() {
     Parser<RuleDef> parser = RuleParser.RULE_DEF;
     assertParser(parser, "foo ::= bar | 'baz' \n  'a' | 'b'",
         RuleDef.class, "foo ::= (bar | 'baz' ('a' | 'b'))");
   }
-  
+
+  @Test
   public void testRuleDefs() {
     Parser<List<RuleDef>> parser = RuleParser.RULE_DEFS;
     assertParser(parser, "foo ::= bar \n baz | 'baz' \n\n #line comment \nbar::='bar'",

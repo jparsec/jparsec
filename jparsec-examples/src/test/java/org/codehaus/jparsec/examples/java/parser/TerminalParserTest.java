@@ -1,8 +1,9 @@
 package org.codehaus.jparsec.examples.java.parser;
 
 import static org.codehaus.jparsec.examples.java.parser.TerminalParser.parse;
-import junit.framework.Assert;
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Token;
@@ -13,20 +14,23 @@ import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.NumberType;
 import org.codehaus.jparsec.examples.java.ast.expression.ScientificNumberLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral.Radix;
+import org.junit.Test;
 
 /**
  * Unit test for {@link TerminalParser}.
  * 
  * @author Ben Yu
  */
-public class TerminalParserTest extends TestCase {
-  
+public class TerminalParserTest {
+
+  @Test
   public void testParse() {
     assertParser(TerminalParser.term("."),
         "  . /** javadoc */ /* regular doc */ \n // line comment",
         new Token(2, 1, Tokens.reserved(".")));
   }
-  
+
+  @Test
   public void testAdjacent() {
     assertOperator(TerminalParser.adjacent(""), "");
     assertOperator(TerminalParser.adjacent("<"), "<");
@@ -39,7 +43,8 @@ public class TerminalParserTest extends TestCase {
     assertParser(TerminalParser.adjacent(">>").optional(), ">+", null, ">+");
     assertOperator(TerminalParser.adjacent(">>").or(TerminalParser.adjacent(">+")), ">+");
   }
-  
+
+  @Test
   public void testTerm() {
     assertOperator(TerminalParser.term("<<"), "<<");
     assertOperator(TerminalParser.term(">>"), ">>");
@@ -53,7 +58,8 @@ public class TerminalParserTest extends TestCase {
       fail();
     } catch (IllegalArgumentException e) {}
   }
-  
+
+  @Test
   public void testLexer() {
     Parser<?> parser = TerminalParser.TOKENIZER;
     assertEquals(new ScientificNumberLiteral("1e2", NumberType.DOUBLE), parser.parse("1e2"));
@@ -93,8 +99,8 @@ public class TerminalParserTest extends TestCase {
 
   static <T> void assertToString(
       Class<? extends T> expectedType, String expectedResult, T result) {
-    Assert.assertTrue(expectedType.isInstance(result));
-    Assert.assertEquals(expectedResult, result.toString());
+    assertTrue(expectedType.isInstance(result));
+    assertEquals(expectedResult, result.toString());
   }
   
   static void assertFailure(Parser<?> parser, String source, int line, int column) {
@@ -105,11 +111,11 @@ public class TerminalParserTest extends TestCase {
       Parser<?> parser, String source, int line, int column, String errorMessage) {
     try {
       TerminalParser.parse(parser, source);
-      Assert.fail();
+      fail();
     } catch (ParserException e) {
-      Assert.assertTrue(e.getMessage(), e.getMessage().contains(errorMessage));
-      Assert.assertEquals(line, e.getLocation().line);
-      Assert.assertEquals(column, e.getLocation().column);
+      assertTrue(e.getMessage(), e.getMessage().contains(errorMessage));
+      assertEquals(line, e.getLocation().line);
+      assertEquals(column, e.getLocation().column);
     }
   }
 }

@@ -1,15 +1,17 @@
 package org.codehaus.jparsec;
 
+import org.junit.Test;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit test for {@link Operators}.
  * 
  * @author Ben Yu
  */
-public class OperatorsTest extends TestCase {
-  
+public class OperatorsTest {
+
+  @Test
   public void testSort() {
     Asserts.assertArrayEquals(Operators.sort());
     Asserts.assertArrayEquals(Operators.sort("="), "=");
@@ -18,7 +20,8 @@ public class OperatorsTest extends TestCase {
     Asserts.assertArrayEquals(Operators.sort("+", "+=", "+++", "-", "-="),
         "-=", "-", "+=", "+++", "+");
   }
-  
+
+  @Test
   public void testLexicon() {
     String[] ops = {"++", "--", "+", "-", "+=", "-=", "+++",
         "=", "==", "===", "!", "!=", "<", "<=", ">", ">=", "<>"};
@@ -30,4 +33,5 @@ public class OperatorsTest extends TestCase {
       Asserts.assertParser(lexicon.tokenizer, op, Tokens.reserved(op));
     }
   }
+
 }

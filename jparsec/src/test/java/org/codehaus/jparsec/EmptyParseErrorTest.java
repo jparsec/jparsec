@@ -16,14 +16,19 @@
 
 package org.codehaus.jparsec;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * Unit test for {@link EmptyParseError}.
  * 
  * @author benyu
  */
-public class EmptyParseErrorTest extends TestCase {
+public class EmptyParseErrorTest {
+
+  @Test
   public void testEmptyParseError() {
     EmptyParseError error = new EmptyParseError(1, "foo");
     assertEquals(1, error.getIndex());
@@ -32,4 +37,5 @@ public class EmptyParseErrorTest extends TestCase {
     assertNull(error.getFailureMessage());
     assertEquals(0, error.getExpected().size());
   }
+
 }

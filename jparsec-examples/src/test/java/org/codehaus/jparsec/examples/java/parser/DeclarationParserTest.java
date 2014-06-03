@@ -4,12 +4,11 @@ import static org.codehaus.jparsec.examples.java.parser.ExpressionParser.IDENTIF
 import static org.codehaus.jparsec.examples.java.parser.StatementParser.SYSTEM_MODIFIER;
 import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.assertFailure;
 import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.assertResult;
+import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import junit.framework.TestCase;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.examples.java.ast.declaration.AnnotationDef;
@@ -27,29 +26,33 @@ import org.codehaus.jparsec.examples.java.ast.declaration.MethodDef;
 import org.codehaus.jparsec.examples.java.ast.declaration.Program;
 import org.codehaus.jparsec.examples.java.ast.declaration.QualifiedName;
 import org.codehaus.jparsec.examples.java.ast.declaration.TypeParameterDef;
+import org.junit.Test;
 
 /**
  * Unit test for {@link DeclarationParser}.
  * 
  * @author Ben Yu
  */
-public class DeclarationParserTest extends TestCase {
+public class DeclarationParserTest {
   
   private static final Parser<Member> FIELD = DeclarationParser.fieldDef(IDENTIFIER);
 
+  @Test
   public void testRemoveNulls() {
     List<?> list = new ArrayList<String>(Arrays.asList("a", "b", null, "1", "2", null));
     DeclarationParser.removeNulls(list);
     assertEquals(Arrays.asList("a", "b", "1", "2"), list);
   }
-  
+
+  @Test
   public void testFieldDef() {
     assertResult(FIELD, "int f;", FieldDef.class, "int f;");
     assertResult(FIELD, "static final int f;", FieldDef.class, "static final int f;");
     assertResult(FIELD, "int f = foo;", FieldDef.class, "int f = foo;");
     assertResult(FIELD, "int[] a = {foo};", FieldDef.class, "int[] a = {foo};");
   }
-  
+
+  @Test
   public void testBody() {
     Parser<DefBody> parser = DeclarationParser.body(FIELD);
     assertResult(parser, "{}", DefBody.class, "{}");
@@ -57,7 +60,8 @@ public class DeclarationParserTest extends TestCase {
     assertResult(parser, "{int f=foo; int g;}", DefBody.class, "{int f = foo; int g;}");
     assertResult(parser, "{;int f=foo;;; int g;;}", DefBody.class, "{int f = foo; int g;}");
   }
-  
+
+  @Test
   public void testTypeParameter() {
     Parser<TypeParameterDef> parser = DeclarationParser.TYPE_PARAMETER;
     assertResult(parser, "T", TypeParameterDef.class, "T");
@@ -66,7 +70,8 @@ public class DeclarationParserTest extends TestCase {
     assertResult(parser, "T extends Enum<?>", TypeParameterDef.class, "T extends Enum<?>");
     assertFailure(parser, "T extends ?", 1, 11, "? encountered.");
   }
-  
+
+  @Test
   public void testMethodDef() {
     Parser<Member> parser = DeclarationParser.methodDef(
         SYSTEM_MODIFIER, IDENTIFIER, StatementParser.BREAK);
@@ -88,7 +93,8 @@ public class DeclarationParserTest extends TestCase {
     assertResult(parser, "<K, V extends K> void f(int i) {}",
         MethodDef.class, "<K, V extends K> void f(int i) {}");
   }
-  
+
+  @Test
   public void testConstructorDef() {
     Parser<Member> parser = DeclarationParser.constructorDef(
         SYSTEM_MODIFIER, StatementParser.BREAK);
@@ -98,7 +104,8 @@ public class DeclarationParserTest extends TestCase {
     assertResult(parser, "Foo(final int i, List<Foo> l) {}",
         ConstructorDef.class, "Foo(final int i, List<Foo> l) {}");
   }
-  
+
+  @Test
   public void testInitializerDef() {
     Parser<Member> parser = DeclarationParser.initializerDef(StatementParser.BREAK);
     assertResult(parser, "static {}", ClassInitializerDef.class, "static {}");
@@ -106,7 +113,8 @@ public class DeclarationParserTest extends TestCase {
     assertResult(parser, " {}", ClassInitializerDef.class, "{}");
     assertResult(parser, " {break;}", ClassInitializerDef.class, "{break;}");
   }
-  
+
+  @Test
   public void testClassDef() {
     Parser<Declaration> parser = DeclarationParser.classDef(SYSTEM_MODIFIER, FIELD);
     assertResult(parser, "public final class Foo {}", ClassDef.class, "public final class Foo {}");
@@ -124,7 +132,8 @@ public class DeclarationParserTest extends TestCase {
     assertResult(parser, "final class Foo<T extends Foo<T>> {int i; int j;}",
         ClassDef.class, "final class Foo<T extends Foo<T>> {int i; int j;}");
   }
-  
+
+  @Test
   public void testInterfaceDef() {
     Parser<Declaration> parser = DeclarationParser.interfaceDef(SYSTEM_MODIFIER, FIELD);
     assertResult(parser, "public native interface Foo {}",
@@ -142,7 +151,8 @@ public class DeclarationParserTest extends TestCase {
     assertResult(parser, "interface Foo<T extends Foo<T>> {int i; int j;}",
         InterfaceDef.class, "interface Foo<T extends Foo<T>> {int i; int j;}");
   }
-  
+
+  @Test
   public void testAnnotationDef() {
     Parser<Declaration> parser =
         DeclarationParser.annotationDef(StatementParser.modifier(IDENTIFIER), FIELD);
@@ -152,7 +162,8 @@ public class DeclarationParserTest extends TestCase {
     assertResult(parser, "@interface Foo{int i;int j;}",
         AnnotationDef.class, "@interface Foo {int i; int j;}");
   }
-  
+
+  @Test
   public void testEnumDef() {
     Parser<Declaration> parser = DeclarationParser.enumDef(IDENTIFIER, FIELD);
     assertResult(parser, "enum Foo {}", EnumDef.class, "enum Foo {}");
@@ -164,19 +175,22 @@ public class DeclarationParserTest extends TestCase {
         EnumDef.class, "enum Foo {ONE, TWO(two); int i; int j;}");
     assertResult(parser, "enum Foo {ONE, TWO}", EnumDef.class, "enum Foo {ONE, TWO}");
   }
-  
+
+  @Test
   public void testQualifiedName() {
     Parser<QualifiedName> parser = DeclarationParser.QUALIFIED_NAME;
     assertResult(parser, "foo.bar", QualifiedName.class, "foo.bar");
     assertResult(parser, "foo", QualifiedName.class, "foo");
   }
-  
+
+  @Test
   public void testPackage() {
     Parser<QualifiedName> parser = DeclarationParser.PACKAGE;
     assertResult(parser, "package foo.bar;", QualifiedName.class, "foo.bar");
     assertResult(parser, "package foo;", QualifiedName.class, "foo");
   }
-  
+
+  @Test
   public void testImport() {
     Parser<Import> parser = DeclarationParser.IMPORT;
     assertResult(parser, "import foo;", Import.class, "import foo;");
@@ -185,7 +199,8 @@ public class DeclarationParserTest extends TestCase {
     assertResult(parser, "import static foo;", Import.class, "import static foo;");
     assertResult(parser, "import static foo.*;", Import.class, "import static foo.*;");
   }
-  
+
+  @Test
   public void testProgram() {
     Parser<Program> parser = DeclarationParser.program();
     assertResult(parser, "package foo; import foo.bar.*; class Foo {int[] a = {1}; Foo(){}}",

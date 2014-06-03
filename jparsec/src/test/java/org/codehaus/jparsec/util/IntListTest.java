@@ -1,14 +1,19 @@
 package org.codehaus.jparsec.util;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.fail;
 
 /**
  * Unit test for {@link IntList}.
  * 
  * @author Ben Yu
  */
-public class IntListTest extends TestCase {
-  
+public class IntListTest {
+
+  @Test
   public void testCalcSize() {
     assertEquals(4, IntList.calcSize(4, 1));
     assertEquals(3, IntList.calcSize(1, 3));
@@ -16,17 +21,20 @@ public class IntListTest extends TestCase {
     assertEquals(3, IntList.calcSize(3, 3));
     assertEquals(6, IntList.calcSize(4, 3));
   }
-  
+
+  @Test
   public void testConstructor() {
     IntList intList = new IntList();
     assertEquals(0, intList.size());
   }
-  
+
+  @Test
   public void testConstructor_withCapacity() {
     IntList intList = new IntList(1);
     assertEquals(0, intList.size());
   }
-  
+
+  @Test
   public void testToArray() {
     IntList intList = new IntList();
     assertEqualArray(intList.toArray());
@@ -34,7 +42,8 @@ public class IntListTest extends TestCase {
     assertSame(intList, intList.add(2));
     assertEqualArray(intList.toArray(), 1, 2);
   }
-  
+
+  @Test
   public void testGet() {
     IntList intList = new IntList();
     assertEquals(0, intList.size());
@@ -43,7 +52,8 @@ public class IntListTest extends TestCase {
     assertEquals(1, intList.size());
     assertEqualArray(intList.toArray(), 1);
   }
-  
+
+  @Test
   public void testGet_throwsForNegativeIndex() {
     IntList intList = new IntList();
     try {
@@ -51,7 +61,8 @@ public class IntListTest extends TestCase {
       fail();
     } catch (ArrayIndexOutOfBoundsException e) {}
   }
-  
+
+  @Test
   public void testGet_throwsForIndexOutOfBounds() {
     IntList intList = new IntList();
     try {
@@ -59,7 +70,8 @@ public class IntListTest extends TestCase {
       fail();
     } catch (ArrayIndexOutOfBoundsException e) {}
   }
-  
+
+  @Test
   public void testSet() {
     IntList intList = new IntList(0);
     intList.add(1);
@@ -67,7 +79,8 @@ public class IntListTest extends TestCase {
     assertEquals(2, intList.get(0));
     assertEqualArray(intList.toArray(), 2);
   }
-  
+
+  @Test
   public void testEnsureCapacity() {
     IntList intList = new IntList(0);
     intList.add(1);
@@ -75,7 +88,8 @@ public class IntListTest extends TestCase {
     assertEquals(1, intList.size());
     assertEqualArray(intList.toArray(), 1);
   }
-  
+
+  @Test
   public void testSet_throwsForNegativeIndex() {
     IntList intList = new IntList();
     try {
@@ -83,7 +97,8 @@ public class IntListTest extends TestCase {
       fail();
     } catch (ArrayIndexOutOfBoundsException e) {}
   }
-  
+
+  @Test
   public void testSet_throwsForIndexOutOfBounds() {
     IntList intList = new IntList();
     try {

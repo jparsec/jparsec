@@ -5,29 +5,34 @@ import static org.codehaus.jparsec.pattern.CharPredicates.NEVER;
 import static org.codehaus.jparsec.pattern.CharPredicates.and;
 import static org.codehaus.jparsec.pattern.CharPredicates.not;
 import static org.codehaus.jparsec.pattern.CharPredicates.or;
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 /**
  * Unit test for {@link CharPredicates}.
  * 
  * @author Ben Yu
  */
-public class CharPredicatesTest extends TestCase {
-  
+public class CharPredicatesTest {
+
+  @Test
   public void testIsChar() {
     CharPredicate predicate = CharPredicates.isChar('a');
     assertTrue(predicate.isChar('a'));
     assertFalse(predicate.isChar('x'));
     assertEquals("a", predicate.toString());
   }
-  
+
+  @Test
   public void testNotChar() {
     CharPredicate predicate = CharPredicates.notChar('a');
     assertFalse(predicate.isChar('a'));
     assertTrue(predicate.isChar('x'));
     assertEquals("^a", predicate.toString());
   }
-  
+
+  @Test
   public void testRange() {
     CharPredicate predicate = CharPredicates.range('1', '3');
     assertTrue(predicate.isChar('1'));
@@ -37,7 +42,8 @@ public class CharPredicatesTest extends TestCase {
     assertFalse(predicate.isChar('4'));
     assertEquals("[1-3]", predicate.toString());
   }
-  
+
+  @Test
   public void testIsDigit() {
     CharPredicate predicate = CharPredicates.IS_DIGIT;
     assertTrue(predicate.isChar('0'));
@@ -46,7 +52,8 @@ public class CharPredicatesTest extends TestCase {
     assertFalse(predicate.isChar(' '));
     assertEquals("[0-9]", predicate.toString());
   }
-  
+
+  @Test
   public void testNotRange() {
     CharPredicate predicate = CharPredicates.notRange('1', '3');
     assertFalse(predicate.isChar('1'));
@@ -56,7 +63,8 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar('4'));
     assertEquals("[^1-3]", predicate.toString());
   }
-  
+
+  @Test
   public void testAmong() {
     CharPredicate predicate = CharPredicates.among("a1");
     assertTrue(predicate.isChar('a'));
@@ -64,7 +72,8 @@ public class CharPredicatesTest extends TestCase {
     assertFalse(predicate.isChar(' '));
     assertEquals("[a1]", predicate.toString());
   }
-  
+
+  @Test
   public void testNotAmong() {
     CharPredicate predicate = CharPredicates.notAmong("a1");
     assertFalse(predicate.isChar('a'));
@@ -72,7 +81,8 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar(' '));
     assertEquals("^[a1]", predicate.toString());
   }
-  
+
+  @Test
   public void testIsHexDigit() {
     CharPredicate predicate = CharPredicates.IS_HEX_DIGIT;
     assertFalse(predicate.isChar('g'));
@@ -87,7 +97,8 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar('1'));
     assertEquals("[0-9a-fA-F]", predicate.toString());
   }
-  
+
+  @Test
   public void testIsUpperCase() {
     CharPredicate predicate = CharPredicates.IS_UPPER_CASE;
     assertFalse(predicate.isChar('a'));
@@ -97,7 +108,8 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar('Z'));
     assertEquals("uppercase", predicate.toString());
   }
-  
+
+  @Test
   public void testIsLowerCase() {
     CharPredicate predicate = CharPredicates.IS_LOWER_CASE;
     assertFalse(predicate.isChar('A'));
@@ -107,7 +119,8 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar('z'));
     assertEquals("lowercase", predicate.toString());
   }
-  
+
+  @Test
   public void testIsWhitespace() {
     CharPredicate predicate = CharPredicates.IS_WHITESPACE;
     assertFalse(predicate.isChar('A'));
@@ -118,7 +131,8 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar('\n'));
     assertEquals("whitespace", predicate.toString());
   }
-  
+
+  @Test
   public void testIsAlpha() {
     CharPredicate predicate = CharPredicates.IS_ALPHA;
     assertFalse(predicate.isChar('-'));
@@ -128,7 +142,8 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar('Z'));
     assertEquals("[a-zA-Z]", predicate.toString());
   }
-  
+
+  @Test
   public void testIsAlpha_() {
     CharPredicate predicate = CharPredicates.IS_ALPHA_;
     assertFalse(predicate.isChar('-'));
@@ -138,7 +153,8 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar('Z'));
     assertEquals("[a-zA-Z_]", predicate.toString());
   }
-  
+
+  @Test
   public void testIsAlphaNumeric() {
     CharPredicate predicate = CharPredicates.IS_ALPHA_NUMERIC;
     assertFalse(predicate.isChar('-'));
@@ -148,7 +164,8 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar('Z'));
     assertEquals("[0-9a-zA-Z]", predicate.toString());
   }
-  
+
+  @Test
   public void testIsAlphaNumeric_() {
     CharPredicate predicate = CharPredicates.IS_ALPHA_NUMERIC_;
     assertFalse(predicate.isChar('-'));
@@ -158,7 +175,8 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar('Z'));
     assertEquals("[0-9a-zA-Z_]", predicate.toString());
   }
-  
+
+  @Test
   public void testIsLetter() {
     CharPredicate predicate = CharPredicates.IS_LETTER;
     assertFalse(predicate.isChar('-'));
@@ -168,27 +186,31 @@ public class CharPredicatesTest extends TestCase {
     assertTrue(predicate.isChar('Z'));
     assertEquals("letter", predicate.toString());
   }
-  
+
+  @Test
   public void testAlways() {
     assertTrue(ALWAYS.isChar('a'));
     assertTrue(ALWAYS.isChar('>'));
     assertTrue(ALWAYS.isChar('0'));
     assertEquals("any character", ALWAYS.toString());
   }
-  
+
+  @Test
   public void testNever() {
     assertFalse(NEVER.isChar('a'));
     assertFalse(NEVER.isChar('>'));
     assertFalse(NEVER.isChar('0'));
     assertEquals("none", NEVER.toString());
   }
-  
+
+  @Test
   public void testNot() {
     assertFalse(not(ALWAYS).isChar('a'));
     assertTrue(not(NEVER).isChar('a'));
     assertEquals("^any character", not(ALWAYS).toString());
   }
-  
+
+  @Test
   public void testAnd() {
     assertSame(ALWAYS, and());
     assertSame(CharPredicates.IS_ALPHA, and(CharPredicates.IS_ALPHA));
@@ -203,7 +225,8 @@ public class CharPredicatesTest extends TestCase {
     assertEquals("any character and none", and(ALWAYS, NEVER).toString());
     assertEquals("any character and none and any character", and(ALWAYS, NEVER, ALWAYS).toString());
   }
-  
+
+  @Test
   public void testOr() {
     assertSame(NEVER, or());
     assertSame(CharPredicates.IS_ALPHA, or(CharPredicates.IS_ALPHA));
