@@ -22,41 +22,29 @@ import java.lang.annotation.Target;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.easymock.EasyMock;
 import org.easymock.IMocksControl;
 
-import junit.framework.TestCase;
+import org.junit.After;
+import org.junit.Before;
 
 /**
  * Provides convenient API for using EasyMock.
  * 
  * @author Ben Yu
  */
-public abstract class BaseMockTest extends TestCase {
+public abstract class BaseMockTest {
 
   /** Annotates a field as being mocked. */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.FIELD)
   protected @interface Mock {}
-  
-  private static final Map<Class<?>, List<Field>> mockFields =
-      new ConcurrentHashMap<Class<?>, List<Field>>();
-  
+
   private static List<Field> getMockFields(Class<?> type) {
-    List<Field> fields = mockFields.get(type);
-    if (fields != null) {
-      return fields;
-    }
-    if (type == TestCase.class || type == BaseMockTest.class || type == Object.class) {
-      return Arrays.asList();
-    }
-    fields = new ArrayList<Field>();
+    List<Field> fields = new ArrayList<Field>();
     for (Field field : type.getDeclaredFields()) {
       if (field.isAnnotationPresent(Mock.class)) {
         fields.add(field);
@@ -68,28 +56,25 @@ public abstract class BaseMockTest extends TestCase {
       fields.addAll(getMockFields(superclass));
     }
     fields = Collections.unmodifiableList(fields);
-    mockFields.put(type, fields);
     return fields;
   }
   
   private IMocksControl control;
   private boolean replayed;
-  private boolean verified;
-  
-  @Override public void runBare() throws Throwable {
+
+  @Before
+  public void setUp() throws Exception {
     replayed = false;
-    verified = false;
     control = EasyMock.createControl();
     for (Field field : getMockFields(getClass())) {
       field.set(this, mock(field.getType()));
     }
-    super.runBare();
   }
   
-  @Override protected void runTest() throws Throwable {
-    super.runTest();
-    if (replayed && !verified) {
-      verify();
+  @After
+  public void tearDown() throws Exception {
+    if (replayed) {
+      control.verify();
     }
   }
 
@@ -102,9 +87,5 @@ public abstract class BaseMockTest extends TestCase {
     control.replay();
     replayed = true;
   }
-  
-  protected final void verify() {
-    verified = true;
-    control.verify();
-  }
+
 }

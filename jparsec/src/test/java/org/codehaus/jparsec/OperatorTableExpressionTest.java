@@ -2,10 +2,12 @@ package org.codehaus.jparsec;
 
 import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.easymock.EasyMock.expect;
+import static org.junit.Assert.assertSame;
 
 import org.codehaus.jparsec.easymock.BaseMockTest;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
+import org.junit.Test;
 
 /**
  * Unit test for {@link OperatorTable} for building expression parsers.
@@ -25,7 +27,8 @@ public class OperatorTableExpressionTest extends BaseMockTest {
   @Mock Map<String, String> percent;
   @Mock Map2<String, String, String> point;
   @Mock Map2<String, String, String> power;
-  
+
+  @Test
   public void testBuildExpressionParser() {
     String source = "1+2.3-30%-1+~5*20000%%^2^1*~~3";
     expect(point.map("2", "3")).andReturn("2.3");
@@ -46,7 +49,8 @@ public class OperatorTableExpressionTest extends BaseMockTest {
     replay();
     assertParser(parser(), source, "-58.0");
   }
-  
+
+  @Test
   public void testEmptyOperatorTable() {
     Parser<String> operand = Parsers.constant("foo");
     assertSame(operand, new OperatorTable<String>().build(operand));

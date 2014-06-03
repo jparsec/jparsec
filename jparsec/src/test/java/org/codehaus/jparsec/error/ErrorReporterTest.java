@@ -5,6 +5,9 @@ import static org.easymock.EasyMock.expect;
 import java.util.Arrays;
 
 import org.codehaus.jparsec.easymock.BaseMockTest;
+import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit test for {@link ErrorReporter}.
@@ -14,21 +17,25 @@ import org.codehaus.jparsec.easymock.BaseMockTest;
 public class ErrorReporterTest extends BaseMockTest {
   
   @Mock ParseErrorDetails error;
-  
+
+  @Test
   public void testToString_null() {
     assertEquals("", ErrorReporter.toString(null, null));
   }
-  
+
+  @Test
   public void testToString_nullError() {
     assertEquals("line 3, column 5", ErrorReporter.toString(null, new Location(3, 5)));
   }
-  
+
+  @Test
   public void testToString_failure() {
     expect(error.getFailureMessage()).andReturn("failure").atLeastOnce();
     replay();
     assertEquals("line 3, column 5:\nfailure", ErrorReporter.toString(error, new Location(3, 5)));
   }
-  
+
+  @Test
   public void testToString_expected() {
     expect(error.getFailureMessage()).andReturn(null).atLeastOnce();
     expect(error.getExpected()).andReturn(Arrays.asList("foo", "bar")).atLeastOnce();
@@ -37,7 +44,8 @@ public class ErrorReporterTest extends BaseMockTest {
     assertEquals("line 3, column 5:\nfoo or bar expected, baz encountered."
         , ErrorReporter.toString(error, new Location(3, 5)));
   }
-  
+
+  @Test
   public void testToString_unexpected() {
     expect(error.getFailureMessage()).andReturn(null).atLeastOnce();
     expect(error.getExpected()).andReturn(Arrays.<String>asList());
@@ -46,7 +54,8 @@ public class ErrorReporterTest extends BaseMockTest {
     assertEquals("line 3, column 5:\nunexpected foo."
         , ErrorReporter.toString(error, new Location(3, 5)));
   }
-  
+
+  @Test
   public void testReportList() {
     assertEquals("", reportList());
     assertEquals("foo", reportList("foo"));

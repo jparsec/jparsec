@@ -75,37 +75,5 @@ public class InternalFunctorsTest {
     assertEquals("sequence", map.toString());
     assertEquals("five", map.map(1, "two", "three", "four", "five"));
   }
-  
-  public static class FallbackTest extends BaseMockTest {
-    @Mock Map<String, Integer> map1;
-    @Mock Map<String, Integer> map2;
-     
-    public void testFirstMapReturnsNonNull() {
-      expect(map1.map("one")).andReturn(1);
-      replay();
-      assertEquals(Integer.valueOf(1), fallback().map("one"));
-    }
-    
-    public void testFirstMapReturnsNull() {
-      expect(map1.map("one")).andReturn(null);
-      expect(map2.map("one")).andReturn(1);
-      replay();
-      assertEquals(Integer.valueOf(1), fallback().map("one"));
-    }
-  
-    public void testBothMapsReturnNull() {
-      expect(map1.map("null")).andReturn(null);
-      expect(map2.map("null")).andReturn(null);
-      replay();
-      assertNull(fallback().map("null"));
-    }
-    
-    public void testToString() {
-      assertEquals("fallback", fallback().toString());
-    }
-    
-    private Map<String, Integer> fallback() {
-      return InternalFunctors.fallback(map1, map2);
-    }
-  }
+
 }
