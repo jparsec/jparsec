@@ -80,7 +80,7 @@ public final class Scanners {
    * used as escape character. 
    */
   public static final Parser<String> DOUBLE_QUOTE_STRING = quotedBy(
-      pattern(Patterns.regex("((\\\\.)|[^\"\\\\])*") ,"quoted string"), Scanners.isChar('"'))
+      pattern(Patterns.regex("(\\\\.|[^\"\\\\])").many() ,"quoted string"), Scanners.isChar('"'))
       .source();
   
   /** Scanner for a c/c++/java style character literal. such as 'a' or '\\'. */

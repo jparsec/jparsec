@@ -1,14 +1,12 @@
 package org.codehaus.jparsec;
 
-import static org.codehaus.jparsec.Asserts.assertFailure;
-import static org.codehaus.jparsec.Asserts.assertScanner;
-import static org.codehaus.jparsec.Asserts.assertStringScanner;
-import static org.codehaus.jparsec.TestParsers.areChars;
-import static org.junit.Assert.assertEquals;
-
 import org.codehaus.jparsec.pattern.CharPredicates;
 import org.codehaus.jparsec.pattern.Patterns;
 import org.junit.Test;
+
+import static org.codehaus.jparsec.Asserts.*;
+import static org.codehaus.jparsec.TestParsers.areChars;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Unit test for {@link Scanners}.
@@ -579,6 +577,16 @@ public class ScannersTest {
     assertScanner(Scanners.isChar(' ').next(scanner), " aab");
     assertScanner(Scanners.isChar(' ').next(scanner), " aab1", "1");
     assertScanner(Scanners.isChar(' ').next(scanner), " aa1", "1");
+  }
+
+  @Test
+  public void veryLongDoublyQuotedStringWithEscapedDoubleQuotes() {
+    String test = "\"";
+    for (int i = 0; i < 100; ++ i)
+      test += "\n\\\"dsvtrbdfvbgf\\\"";
+    test += "\"";
+
+    Scanners.DOUBLE_QUOTE_STRING.parse(test);
   }
 
 }
