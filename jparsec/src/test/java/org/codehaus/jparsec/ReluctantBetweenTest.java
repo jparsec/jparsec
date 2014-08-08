@@ -22,6 +22,8 @@ public class ReluctantBetweenTest {
 	public void parsing_simple_input() {
 		Asserts.assertParser( Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
 				"(hello)", "hello");
+		Asserts.assertParser(Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')').optional()),
+				"(hello", "hello");
 		Asserts.assertParser( Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
 				"()", "");
 	}
@@ -29,7 +31,7 @@ public class ReluctantBetweenTest {
     @Test
 	public void parsing_incorrect_input() {
 		Asserts.assertFailure(Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
-				"(hello", 1,6);
+				"(hello", 1,7);
 	}
 
 }
