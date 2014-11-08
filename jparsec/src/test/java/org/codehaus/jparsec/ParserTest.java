@@ -118,7 +118,9 @@ public class ParserTest extends BaseMockTest {
     Parser<String> comma = Scanners.isChar(',').source();
     Parser<?> dot = Scanners.isChar('.');
     Parser<List<Object>> parser = INTEGER.cast().or(comma).until(dot);
-    assertParser(parser, "123,456.", Arrays.asList(123, ",", 456), "");
+    assertParser(parser, "123,456.", Arrays.asList(123, ",", 456), ".");
+    assertFailure(parser, "", 1, 1);
+    assertParser(parser, ".", Arrays.asList(), ".");
   }
 
   @Test
