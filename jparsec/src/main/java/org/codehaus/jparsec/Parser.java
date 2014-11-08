@@ -124,6 +124,13 @@ public abstract class Parser<T> {
   }
 
   /**
+   * Matches multiple this parser until the given parser succeeds.
+   */
+  public final Parser<List<T>> until(Parser<?> parser) {
+    return parser.not().next(this).many().followedBy(parser);
+  }
+
+  /**
    * A {@link Parser} that sequentially executes {@code this} and then {@code parser}, whose return value is ignored.
    */
   public final Parser<T> followedBy(Parser<?> parser) {
