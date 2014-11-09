@@ -1,5 +1,16 @@
 package org.codehaus.jparsec;
 
+import org.codehaus.jparsec.easymock.BaseMockTest;
+import org.codehaus.jparsec.error.ParserException;
+import org.codehaus.jparsec.functors.Map;
+import org.codehaus.jparsec.functors.Map2;
+import org.codehaus.jparsec.functors.Maps;
+import org.junit.Test;
+
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+
 import static org.codehaus.jparsec.Asserts.assertFailure;
 import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.codehaus.jparsec.Parsers.constant;
@@ -7,20 +18,7 @@ import static org.codehaus.jparsec.Scanners.string;
 import static org.codehaus.jparsec.TestParsers.areChars;
 import static org.codehaus.jparsec.TestParsers.isChar;
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
-
-import org.codehaus.jparsec.easymock.BaseMockTest;
-import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
-import org.codehaus.jparsec.functors.Maps;
-import org.junit.Test;
+import static org.junit.Assert.*;
 
 /**
  * Unit test for {@link Parser}.
@@ -113,6 +111,16 @@ public class ParserTest extends BaseMockTest {
   public void testRetn() {
     assertParser(COMMA.retn(1), ",", 1);
     assertFailure(FAILURE.retn(1), "", 1, 1, "failure");
+  }
+
+  @Test
+  public void testUntil() {
+    Parser<String> comma = Scanners.isChar(',').source();
+    Parser<?> dot = Scanners.isChar('.');
+    Parser<List<Object>> parser = INTEGER.cast().or(comma).until(dot);
+    assertParser(parser, "123,456.", Arrays.asList(123, ",", 456), ".");
+    assertFailure(parser, "", 1, 1);
+    assertParser(parser, ".", Arrays.asList(), ".");
   }
 
   @Test

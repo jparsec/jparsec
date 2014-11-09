@@ -124,6 +124,16 @@ public abstract class Parser<T> {
   }
 
   /**
+   * A {@link Parser} that matches this parser zero or many times
+   * until the given parser succeeds. The input that matches the given parser
+   * will not be consumed. The input that matches this parser will
+   * be collected in a list that will be returned by this function.
+   */
+  public final Parser<List<T>> until(Parser<?> parser) {
+    return parser.not().next(this).many().followedBy(parser.peek());
+  }
+
+  /**
    * A {@link Parser} that sequentially executes {@code this} and then {@code parser}, whose return value is ignored.
    */
   public final Parser<T> followedBy(Parser<?> parser) {
