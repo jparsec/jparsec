@@ -91,14 +91,15 @@ public final class Parsers {
    * Runs a character level {@code parser} against {@code src} using {@code locator} to locate
    * error location.
    */
-  static <T> T parse(
-      CharSequence src, Parser<T> parser, SourceLocator locator, String module) {
+  static <T> Pair<T, ParserException> tryParse(
+          CharSequence src, Parser<T> parser, SourceLocator locator, String module) {
     ScannerState ctxt = new ScannerState(module, src, 0, locator);
     if (!parser.run(ctxt)) {
-      throw new ParserException(
-          ctxt.renderError(), ctxt.module, locator.locate(ctxt.errorIndex()));
+      ParserException parserException = new ParserException(
+              ctxt.renderError(), ctxt.module, locator.locate(ctxt.errorIndex()));
+      return new Pair<T, ParserException>(null, parserException);
     }
-    return parser.getReturn(ctxt);
+    return new Pair<T, ParserException>(parser.getReturn(ctxt), null);
   }
 
   /**

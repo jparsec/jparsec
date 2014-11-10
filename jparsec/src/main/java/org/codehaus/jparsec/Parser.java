@@ -20,6 +20,7 @@ import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Maps;
+import org.codehaus.jparsec.functors.Pair;
 import org.codehaus.jparsec.util.Checks;
 
 import java.io.IOException;
@@ -548,7 +549,23 @@ public abstract class Parser<T> {
    * @return the result
    */
   public final T parse(CharSequence source, String moduleName) {
-    return parse(source, moduleName, new DefaultSourceLocator(source));
+    Pair<T, ParserException> ret = tryParse(source, moduleName, new DefaultSourceLocator(source));
+    if (ret.b != null) {
+      throw ret.b;
+    }
+    return ret.a;
+  }
+
+  /**
+   * Parses {@code source}. Different from the parse counter part,
+   * this method doesn't throw {@code ParserException}.
+   *
+   * @param source     the source string
+   * @param moduleName the name of the module, this name appears in error message
+   * @return the result
+   */
+  public final Pair<T, ParserException> tryParse(CharSequence source, String moduleName) {
+    return tryParse(source, moduleName, new DefaultSourceLocator(source));
   }
 
   /**
@@ -559,10 +576,26 @@ public abstract class Parser<T> {
   }
 
   /**
+   * Parses {@code source}. Different from the parse counter part,
+   * this method doesn't throw {@code ParserException}.
+   */
+  public final Pair<T, ParserException> tryParse(CharSequence source) {
+    return tryParse(source, null);
+  }
+
+  /**
    * Parses source read from {@code readable}.
    */
   public final T parse(Readable readable) throws IOException {
     return parse(readable, null);
+  }
+
+  /**
+   * Parses source read from {@code readable}. Different from the parse counter part,
+   * this method doesn't throw {@code ParserException}.
+   */
+  public final Pair<T, ParserException> tryParse(Readable readable) throws IOException {
+    return tryParse(readable, null);
   }
 
   /**
@@ -576,6 +609,20 @@ public abstract class Parser<T> {
     StringBuilder builder = new StringBuilder();
     copy(readable, builder);
     return parse(builder, moduleName);
+  }
+
+  /**
+   * Parses source read from {@code readable}. Different from the parse counter part,
+   * this method doesn't throw {@code ParserException}.
+   *
+   * @param readable   where the source is read from
+   * @param moduleName the name of the module, this name appears in error message
+   * @return the result
+   */
+  public final Pair<T, ParserException> tryParse(Readable readable, String moduleName) throws IOException {
+    StringBuilder builder = new StringBuilder();
+    copy(readable, builder);
+    return tryParse(builder, moduleName);
   }
 
   /**
@@ -621,8 +668,8 @@ public abstract class Parser<T> {
    * @param sourceLocator maps an index of char into line and column numbers
    * @return the result
    */
-  final T parse(CharSequence source, String moduleName, SourceLocator sourceLocator) {
-    return Parsers.parse(source, followedBy(Parsers.EOF), sourceLocator, moduleName);
+  final Pair<T, ParserException> tryParse(CharSequence source, String moduleName, SourceLocator sourceLocator) {
+    return Parsers.tryParse(source, followedBy(Parsers.EOF), sourceLocator, moduleName);
   }
 
   @SuppressWarnings("unchecked")
