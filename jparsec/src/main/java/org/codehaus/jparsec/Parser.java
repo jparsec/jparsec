@@ -505,6 +505,14 @@ public abstract class Parser<T> {
   }
 
   /**
+   * A {@link Parser} that marks this parser with the given name (implies {@link #label(String)},
+   * so that {@link #tryParseTree(CharSequence)} can treat this parser as a parse tree node.
+   */
+  public final Parser<T> node(String name) {
+    return new NodeParser<T>(this, name).label(name);
+  }
+
+  /**
    * A {@link Parser} that takes as input the {@link Token} collection returned by {@code lexer}, and runs {@code
    * this} to parse the tokens.
    * <p/>
@@ -552,6 +560,19 @@ public abstract class Parser<T> {
   }
 
   /**
+   * Parses {@code source}. Different from the {@code parse()} counterpart, this method doesn't
+   * throw a {@code ParserException} on a failed match, but returns a ParseException that
+   * contains the {@code ParserException}.
+   *
+   * @param source     the source string
+   * @param moduleName the name of the module, this name appears in error message
+   * @return the result
+   */
+  public final ParseResult<T> tryParse(CharSequence source, String moduleName) {
+    return tryParse(source, moduleName, new DefaultSourceLocator(source));
+  }
+
+  /**
    * Parses {@code source}.
    */
   public final T parse(CharSequence source) {
@@ -559,10 +580,38 @@ public abstract class Parser<T> {
   }
 
   /**
+   * Try to parse {@code source}. Different from the {@code parse()} counterpart, this method doesn't
+   * throw a {@code ParserException} on a failed match, but returns a ParseException that
+   * contains the {@code ParserException}.
+   */
+  public final ParseResult<T> tryParse(CharSequence source) {
+    return tryParse(source, null);
+  }
+
+  /**
+   * Try to parse {@code source} and return a parse tree. On a failed match, the returned
+   * parse tree contains the partial match. A parse tree contains the nodes which
+   * corresponds to the parsers that are decorated with {@link #node(String)}.
+   * <p/>
+   * The effect is similar to the parse tree view in ANTLRWorks.
+   */
+  public final ParseTree tryParseTree(CharSequence source) {
+  }
+
+  /**
    * Parses source read from {@code readable}.
    */
   public final T parse(Readable readable) throws IOException {
     return parse(readable, null);
+  }
+
+  /**
+   * Parses source read from {@code readable}. Different from the {@code parse()} counterpart, this method doesn't
+   * throw a {@code ParserException} on a failed match, but returns a ParseException that
+   * contains the {@code ParserException}.
+   */
+  public final ParseResult<T> tryParse(Readable readable) throws IOException {
+    return tryParse(readable, null);
   }
 
   /**
@@ -576,6 +625,21 @@ public abstract class Parser<T> {
     StringBuilder builder = new StringBuilder();
     copy(readable, builder);
     return parse(builder, moduleName);
+  }
+
+  /**
+   * Parses source read from {@code readable}. Different from the {@code parse()} counterpart, this method doesn't
+   * throw a {@code ParserException} on a failed match, but returns a ParseException that
+   * contains the {@code ParserException}.
+   *
+   * @param readable   where the source is read from
+   * @param moduleName the name of the module, this name appears in error message
+   * @return the result
+   */
+  public final ParseResult<T> tryParse(Readable readable, String moduleName) throws IOException {
+    StringBuilder builder = new StringBuilder();
+    copy(readable, builder);
+    return tryParse(builder, moduleName);
   }
 
   /**
@@ -623,6 +687,20 @@ public abstract class Parser<T> {
    */
   final T parse(CharSequence source, String moduleName, SourceLocator sourceLocator) {
     return Parsers.parse(source, followedBy(Parsers.EOF), sourceLocator, moduleName);
+  }
+
+  /**
+   * Parses a source string. Different from the {@code parse()} counterpart, this method doesn't
+   * throw a {@code ParserException} on a failed match, but returns a ParseException that
+   * contains the {@code ParserException}.
+   *
+   * @param source        the source string
+   * @param moduleName    the name of the module, this name appears in error message
+   * @param sourceLocator maps an index of char into line and column numbers
+   * @return the result
+   */
+  final ParseResult<T> tryParse(CharSequence source, String moduleName, SourceLocator sourceLocator) {
+    return Parsers.tryParse(source, followedBy(Parsers.EOF), sourceLocator, moduleName);
   }
 
   @SuppressWarnings("unchecked")

@@ -102,6 +102,29 @@ public final class Parsers {
   }
 
   /**
+   * Runs a character level {@code parser} against {@code src} using {@code locator} to locate
+   * error location. Different from the {@code parse()} counterpart, this method doesn't
+   * throw a {@code ParserException} on a failed match, but returns a ParseException that
+   * contains the {@code ParserException}.
+   */
+  static <T> ParseResult<T> tryParse(
+      CharSequence src, Parser<T> parser, SourceLocator locator, String module) {
+    ParseResult<T> parseResult = ParseResult.create();
+    ScannerState ctxt = new ScannerState(module, src, 0, locator);
+
+    if (!parser.run(ctxt)) {
+      ParserException parserException = new ParserException(
+          ctxt.renderError(), ctxt.module, locator.locate(ctxt.errorIndex()));
+      parseResult.setException(parserException);
+      return parseResult;
+    }
+
+    T result = parser.getReturn(ctxt);
+    parseResult.setResult(result);
+    return parseResult;
+  }
+
+  /**
    * A {@link Parser} that always succeeds and invokes {@link Runnable#run()} against
    * {@code runnable}.
    */
