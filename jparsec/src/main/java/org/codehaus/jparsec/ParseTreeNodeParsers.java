@@ -15,57 +15,19 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import java.util.List;
-
 /**
- * Represents a parse tree node.
+ * Factory class for {@link org.codehaus.jparsec.ParseTreeNode}.
  *
  * @author Winter Young
  * @since 3.0
  */
-public interface ParseTreeNode {
-  /**
-   * Get the name.
-   */
-  String getParseTreeNodeName();
+class ParseTreeNodeParsers {
+  private ParseTreeNodeParsers() {}
 
   /**
-   * Get sub nodes.
+   * Creates a clean copy with only the underlying parser and name.
    */
-  List<ParseTreeNode> getChildren();
-
-  /**
-   * Add a sub node.
-   */
-  void addChild(ParseTreeNode child);
-
-  /**
-   * On a successful match, this is the start index (inclusive). Default is null, which means no match.
-   */
-  Integer getMatchedStart();
-
-  /**
-   * On a successful match, this is the start index (inclusive). Default is null, which means no match.
-   */
-  void setMatchedStart(Integer matchedStart);
-
-  /**
-   * On a successful match, this is the end index (exclusive). Default is null, which means no match.
-   */
-  Integer getMatchedEnd();
-
-  /**
-   * On a successful match, this is the end index (exclusive). Default is null, which means no match.
-   */
-  void setMatchedEnd(Integer matchedEnd);
-
-  /**
-   * On a successful match, this is the matched string. Default is null, which means no match.
-   */
-  String getMatchedString();
-
-  /**
-   * On a successful match, this is the matched string. Default is null, which means no match.
-   */
-  void setMatchedString(String matchedString);
+  static <T> ParseTreeNodeParser<T> createCleanCopy(ParseTreeNodeParser<T> nodeParser) {
+    return new ParseTreeNodeParser<T>(nodeParser.getParser(), nodeParser.getParseTreeNodeName());
+  }
 }

@@ -505,11 +505,11 @@ public abstract class Parser<T> {
   }
 
   /**
-   * A {@link Parser} that marks this parser with the given name (implies {@link #label(String)},
+   * A {@link Parser} that marks this parser with the given name (implies {@link #label(String)}),
    * so that {@link #tryParseTree(CharSequence)} can treat this parser as a parse tree node.
    */
   public final Parser<T> node(String name) {
-    return new NodeParser<T>(this, name).label(name);
+    return new ParseTreeNodeParser<T>(label(name), name);
   }
 
   /**
@@ -596,6 +596,7 @@ public abstract class Parser<T> {
    * The effect is similar to the parse tree view in ANTLRWorks.
    */
   public final ParseTree tryParseTree(CharSequence source) {
+    return Parsers.tryParseTree(source, followedBy(Parsers.EOF).node("ROOT"), new DefaultSourceLocator(source), null);
   }
 
   /**
@@ -710,7 +711,12 @@ public abstract class Parser<T> {
 
   final boolean run(ParseContext ctxt) {
     try {
-      return apply(ctxt);
+      ctxt.partialMatchedEnd = ctxt.at;
+      boolean ok = apply(ctxt);
+      if (ok) {
+        ctxt.partialMatchedEnd = ctxt.at;
+      }
+      return ok;
     } catch (RuntimeException e) {
       throw asParserException(e, ctxt);
     }

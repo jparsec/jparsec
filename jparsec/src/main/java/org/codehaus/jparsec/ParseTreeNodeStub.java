@@ -15,57 +15,64 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
- * Represents a parse tree node.
+ * This stub is used when no some characters where found successfully matched, but no parser decorated with
+ * {@code node()} method was found, then an instance of this class is created to fill the place where a node
+ * is required.
  *
  * @author Winter Young
  * @since 3.0
  */
-public interface ParseTreeNode {
-  /**
-   * Get the name.
-   */
-  String getParseTreeNodeName();
+public class ParseTreeNodeStub implements ParseTreeNode {
+  private Integer matchedStart;
+  private Integer matchedEnd;
+  private String matchedString;
 
-  /**
-   * Get sub nodes.
-   */
-  List<ParseTreeNode> getChildren();
+  @Override
+  public String getParseTreeNodeName() {
+    return "STUB";
+  }
 
-  /**
-   * Add a sub node.
-   */
-  void addChild(ParseTreeNode child);
+  @Override
+  public List<ParseTreeNode> getChildren() {
+    return Collections.emptyList();
+  }
 
-  /**
-   * On a successful match, this is the start index (inclusive). Default is null, which means no match.
-   */
-  Integer getMatchedStart();
+  @Override
+  public void addChild(ParseTreeNode child) {
+    throw new UnsupportedOperationException();
+  }
 
-  /**
-   * On a successful match, this is the start index (inclusive). Default is null, which means no match.
-   */
-  void setMatchedStart(Integer matchedStart);
+  @Override
+  public Integer getMatchedStart() {
+    return matchedStart;
+  }
 
-  /**
-   * On a successful match, this is the end index (exclusive). Default is null, which means no match.
-   */
-  Integer getMatchedEnd();
+  @Override
+  public void setMatchedStart(Integer matchedStart) {
+    this.matchedStart = matchedStart;
+  }
 
-  /**
-   * On a successful match, this is the end index (exclusive). Default is null, which means no match.
-   */
-  void setMatchedEnd(Integer matchedEnd);
+  @Override
+  public Integer getMatchedEnd() {
+    return matchedEnd;
+  }
 
-  /**
-   * On a successful match, this is the matched string. Default is null, which means no match.
-   */
-  String getMatchedString();
+  @Override
+  public void setMatchedEnd(Integer matchedEnd) {
+    this.matchedEnd = matchedEnd;
+  }
 
-  /**
-   * On a successful match, this is the matched string. Default is null, which means no match.
-   */
-  void setMatchedString(String matchedString);
+  @Override
+  public String getMatchedString() {
+    return matchedString;
+  }
+
+  @Override
+  public void setMatchedString(String matchedString) {
+    this.matchedString = matchedString;
+  }
 }

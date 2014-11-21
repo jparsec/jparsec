@@ -15,13 +15,13 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.error.ParseErrorDetails;
 import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.util.Lists;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Represents the context state during parsing.
@@ -38,13 +38,120 @@ abstract class ParseContext {
   
   /** The current position of the input. Points to the token array for token level. */
   int at;
+
+  /**
+   * On a failed match, this records the end of the previous successful match.
+   * On a successful match, this records the end of the match.
+   */
+  int partialMatchedEnd;
   
   /** The current logical step. */
   int step;
   
   /** The current parse result. */
   Object result;
-  
+
+  /** The current parse tree node. */
+  ParseTreeNode parseTreeNode;
+
+  public ParseTree createParseTree() {
+    bottomUpWalkParseTree(parseTreeNode);
+    topDownWalkParseTree(parseTreeNode, true);
+    return new ParseTree(parseTreeNode);
+  }
+
+  private Integer bottomUpWalkParseTree(ParseTreeNode node) {
+    List<ParseTreeNode> children = node.getChildren();
+    Integer end = node.getMatchedEnd();
+    if (!children.isEmpty()) {
+      for (ParseTreeNode child : children) {
+        Integer childEnd = bottomUpWalkParseTree(child);
+        if (end == null || end < childEnd) {
+          end = childEnd;
+        }
+      }
+      node.setMatchedEnd(end);
+    }
+    return end;
+  }
+
+  private void topDownWalkParseTree(ParseTreeNode node, boolean root) {
+    List<ParseTreeNode> children = node.getChildren();
+    fillStubsToChildren(node, children);
+    if (root) {
+      fillStubToRoot(node, children);
+    }
+
+    if (children.isEmpty()) {
+      fillNodeString(node);
+    } else {
+      for (ParseTreeNode child : children) {
+        topDownWalkParseTree(child, false);
+      }
+    }
+  }
+
+  private void fillStubToRoot(ParseTreeNode node, List<ParseTreeNode> children) {
+    Integer end = node.getMatchedEnd();
+    if (partialMatchedEnd > end) {
+      fillStubToRoot(node, end);
+    } else if (partialMatchedEnd == end && children.size() > 0) {
+      ParseTreeNode lastChild = children.get(children.size() - 1);
+      end = lastChild.getMatchedEnd();
+      if (partialMatchedEnd > end) {
+        fillStubToRoot(node, end);
+      }
+    }
+  }
+
+  private void fillStubToRoot(ParseTreeNode node, Integer end) {
+    ParseTreeNodeStub stub = new ParseTreeNodeStub();
+    stub.setMatchedStart(end);
+    stub.setMatchedEnd(partialMatchedEnd);
+    node.addChild(stub);
+  }
+
+  private void fillNodeString(ParseTreeNode node) {
+    Integer start = node.getMatchedStart();
+    Integer end = node.getMatchedEnd();
+
+    if (end > start) {
+      String str = source.subSequence(start, end).toString();
+      node.setMatchedString(str);
+    }
+  }
+
+  private void fillStubsToChildren(ParseTreeNode node, List<ParseTreeNode> children) {
+    List<ParseTreeNode> newChildren = Lists.arrayList();
+
+    Integer start = node.getMatchedStart();
+    for (ParseTreeNode child : children) {
+      Integer childStart = child.getMatchedStart();
+
+      if (childStart > start) {
+        ParseTreeNodeStub stub = new ParseTreeNodeStub();
+        stub.setMatchedStart(start);
+        stub.setMatchedEnd(childStart);
+        newChildren.add(stub);
+      }
+      newChildren.add(child);
+
+      start = child.getMatchedEnd();
+    }
+
+    if (partialMatchedEnd > start
+        && partialMatchedEnd < node.getMatchedEnd()
+        && !(node instanceof ParseTreeNodeStub)) {
+      ParseTreeNodeStub stub = new ParseTreeNodeStub();
+      stub.setMatchedStart(start);
+      stub.setMatchedEnd(partialMatchedEnd);
+      newChildren.add(stub);
+    }
+
+    children.clear();
+    children.addAll(newChildren);
+  }
+
   enum ErrorType {
     
     /** Default value, no error. */
@@ -214,7 +321,7 @@ abstract class ParseContext {
     this.at = at;
     this.result = ret;
   }
-  
+
   final void setErrorState(
       int errorAt, int errorIndex, ErrorType errorType, List<Object> errors) {
     setErrorState(errorAt, errorIndex, errorType);

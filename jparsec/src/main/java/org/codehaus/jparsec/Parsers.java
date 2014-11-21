@@ -15,23 +15,14 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import org.codehaus.jparsec.annotations.Private;
+import org.codehaus.jparsec.error.ParserException;
+import org.codehaus.jparsec.functors.*;
+import org.codehaus.jparsec.util.Lists;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.codehaus.jparsec.annotations.Private;
-import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
-import org.codehaus.jparsec.functors.Map3;
-import org.codehaus.jparsec.functors.Map4;
-import org.codehaus.jparsec.functors.Map5;
-import org.codehaus.jparsec.functors.Maps;
-import org.codehaus.jparsec.functors.Pair;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
-import org.codehaus.jparsec.util.Lists;
 
 /**
  * Provides common {@link Parser} implementations.
@@ -91,15 +82,14 @@ public final class Parsers {
    * Runs a character level {@code parser} against {@code src} using {@code locator} to locate
    * error location.
    */
-  static <T> Pair<T, ParserException> tryParse(
+  static <T> T parse(
           CharSequence src, Parser<T> parser, SourceLocator locator, String module) {
     ScannerState ctxt = new ScannerState(module, src, 0, locator);
     if (!parser.run(ctxt)) {
-      ParserException parserException = new ParserException(
+      throw new ParserException(
               ctxt.renderError(), ctxt.module, locator.locate(ctxt.errorIndex()));
-      return new Pair<T, ParserException>(null, parserException);
     }
-    return new Pair<T, ParserException>(parser.getReturn(ctxt), null);
+    return parser.getReturn(ctxt);
   }
 
   /**
@@ -123,6 +113,21 @@ public final class Parsers {
     T result = parser.getReturn(ctxt);
     parseResult.setResult(result);
     return parseResult;
+  }
+
+  /**
+   * Try to parse {@code source} and return a parse tree. On a failed match, the returned
+   * parse tree contains the partial match.
+   */
+  static ParseTree tryParseTree(
+      CharSequence src, Parser<?> parser, SourceLocator locator, String module) {
+    if (parser instanceof ParseTreeNode) {
+      ScannerState ctxt = new ScannerState(module, src, 0, locator);
+      parser.run(ctxt);
+      return ctxt.createParseTree();
+    }
+
+    throw new IllegalArgumentException("parser is required to be decorated with node()");
   }
 
   /**

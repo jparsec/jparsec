@@ -15,6 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -23,57 +25,95 @@ import java.util.List;
  * @author Winter Young
  * @since 3.0
  */
-class NodeParser<T> extends Parser<T> implements ParseTreeNode {
+class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
   private Parser<T> parser;
   private String name;
+  private List<ParseTreeNode> children = new LinkedList<ParseTreeNode>();
+  private Integer matchedStart;
+  private Integer matchedEnd;
+  private String matchedString;
 
-  public NodeParser(Parser<T> parser, String name) {
+  public ParseTreeNodeParser(Parser<T> parser, String name) {
     this.parser = parser;
     this.name = name;
   }
 
   @Override
   boolean apply(ParseContext ctxt) {
-    return false;
+    ParseTreeNode originalNode = ctxt.parseTreeNode;
+    ParseTreeNode currentNode = ParseTreeNodeParsers.createCleanCopy(this);
+
+    if (originalNode != null) {
+      originalNode.addChild(currentNode);
+    }
+    ctxt.parseTreeNode = currentNode;
+
+    currentNode.setMatchedStart(ctxt.at);
+    boolean ok = parser.run(ctxt);
+    if (ok) {
+      currentNode.setMatchedEnd(ctxt.at);
+    } else if (currentNode.getChildren().isEmpty()) {
+      Integer end = currentNode.getMatchedStart();
+      if (end == null || end < ctxt.partialMatchedEnd) {
+        end = ctxt.partialMatchedEnd;
+      }
+      currentNode.setMatchedEnd(end);
+    }
+
+    if (originalNode == null) {
+      ctxt.parseTreeNode = currentNode;
+    } else {
+      ctxt.parseTreeNode = originalNode;
+    }
+    return ok;
+  }
+
+  @Override
+  public String getParseTreeNodeName() {
+    return name;
   }
 
   @Override
   public List<ParseTreeNode> getChildren() {
-    return null;
+    return children;
   }
 
   @Override
-  public void addChildren(List<ParseTreeNode> children) {
-
+  public void addChild(ParseTreeNode child) {
+    children.add(child);
   }
 
   @Override
   public Integer getMatchedStart() {
-    return null;
+    return matchedStart;
   }
 
   @Override
   public void setMatchedStart(Integer matchedStart) {
-
+    this.matchedStart = matchedStart;
   }
 
   @Override
   public Integer getMatchedEnd() {
-    return null;
+    return matchedEnd;
   }
 
   @Override
   public void setMatchedEnd(Integer matchedEnd) {
-
+    this.matchedEnd = matchedEnd;
   }
 
   @Override
   public String getMatchedString() {
-    return null;
+    return matchedString;
   }
 
   @Override
   public void setMatchedString(String matchedString) {
+    this.matchedString = matchedString;
+  }
 
+  Parser<T> getParser() {
+    return parser;
   }
 }

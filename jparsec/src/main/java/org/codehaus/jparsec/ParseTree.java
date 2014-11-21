@@ -15,8 +15,6 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import org.codehaus.jparsec.util.Lists;
-
 import java.util.List;
 
 /**
@@ -26,12 +24,57 @@ import java.util.List;
  * @since 3.0
  */
 public class ParseTree {
-  private List<ParseTreeNode> children = Lists.arrayList();
+  /**
+   * The root node.
+   */
+  private ParseTreeNode rootNode;
 
-  public List<ParseTreeNode> getChildren() {
-    return children;
+  public ParseTree(ParseTreeNode rootNode) {
+    this.rootNode = rootNode;
   }
 
+  /**
+   * Format to json.
+   */
   public String toJson() {
+    StringBuilder sb = new StringBuilder();
+    int indentLevel = 0;
+    toJson(sb, rootNode, indentLevel, false);
+    return sb.toString();
   }
+
+  private void toJson(StringBuilder sb, ParseTreeNode node, int indentLevel, boolean appendDot) {
+    line(sb, indentLevel, "{");
+
+    List<ParseTreeNode> children = node.getChildren();
+    if (node instanceof ParseTreeNodeStub || children.isEmpty()) {
+      line(sb, indentLevel + 1, "matched: " + node.getMatchedString());
+    } else {
+      line(sb, indentLevel + 1, "name: ", node.getParseTreeNodeName(), ",");
+      line(sb, indentLevel + 1, "children: {");
+      int i = 0;
+      for (ParseTreeNode child : children) {
+        toJson(sb, child, indentLevel + 2, i < children.size() - 1);
+        i++;
+      }
+      line(sb, indentLevel + 1, "}");
+    }
+
+    if (appendDot) {
+      line(sb, indentLevel, "},");
+    } else {
+      line(sb, indentLevel, "}");
+    }
+  }
+
+  private void line(StringBuilder sb, int indentLevel, String... parts) {
+    for (int i = 0; i < indentLevel; i++) {
+      sb.append("   ");
+    }
+    for (String part : parts) {
+      sb.append(part);
+    }
+    sb.append("\n");
+  }
+
 }
