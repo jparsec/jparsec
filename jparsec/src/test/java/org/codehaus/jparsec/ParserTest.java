@@ -5,6 +5,7 @@ import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Maps;
+import org.codehaus.jparsec.util.ResUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -56,17 +57,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> comma = Scanners.isChar(',').node("comma");
     Parser<?> parser = integer.next(comma);
     ParseTree parseTree = parser.tryParseTree("123,456");
-    String expected = "{\n" +
-        "   name: ROOT,\n" +
-        "   children: {\n" +
-        "      {\n" +
-        "         matched: 123\n" +
-        "      },\n" +
-        "      {\n" +
-        "         matched: ,\n" +
-        "      }\n" +
-        "   }\n" +
-        "}\n";
+    String expected = ResUtils.loadRes("/ExpectedParseTree.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
 
@@ -76,17 +67,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> comma = Scanners.isChar(',').node("comma");
     Parser<?> parser = integer.next(comma);
     ParseTree parseTree = parser.tryParseTree("123,456");
-    String expected = "{\n" +
-        "   name: ROOT,\n" +
-        "   children: {\n" +
-        "      {\n" +
-        "         matched: 123\n" +
-        "      },\n" +
-        "      {\n" +
-        "         matched: ,\n" +
-        "      }\n" +
-        "   }\n" +
-        "}\n";
+    String expected = ResUtils.loadRes("/ExpectedParseTree2.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
 
@@ -96,9 +77,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> comma = Scanners.isChar(',');
     Parser<?> parser = integer.next(comma);
     ParseTree parseTree = parser.tryParseTree("123,456");
-    String expected = "{\n" +
-        "   matched: 123,\n" +
-        "}\n";
+    String expected = ResUtils.loadRes("/ExpectedParseTree3.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
 
@@ -108,17 +87,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> comma = Scanners.isChar(',');
     Parser<?> parser = integer.next(comma);
     ParseTree parseTree = parser.tryParseTree("123,456");
-    String expected = "{\n" +
-        "   name: ROOT,\n" +
-        "   children: {\n" +
-        "      {\n" +
-        "         matched: 123\n" +
-        "      },\n" +
-        "      {\n" +
-        "         matched: ,\n" +
-        "      }\n" +
-        "   }\n" +
-        "}\n";
+    String expected = ResUtils.loadRes("/ExpectedParseTree4.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
 
@@ -128,17 +97,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> comma = Scanners.isChar(',');
     Parser<?> parser = integer.next(comma);
     ParseTree parseTree = parser.tryParseTree("123,");
-    String expected = "{\n" +
-        "   name: ROOT,\n" +
-        "   children: {\n" +
-        "      {\n" +
-        "         matched: 123\n" +
-        "      },\n" +
-        "      {\n" +
-        "         matched: ,\n" +
-        "      }\n" +
-        "   }\n" +
-        "}\n";
+    String expected = ResUtils.loadRes("/ExpectedParseTree4.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
 

@@ -15,6 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.List;
 
 /**
@@ -44,27 +46,48 @@ public class ParseTree {
   }
 
   private void toJson(StringBuilder sb, ParseTreeNode node, int indentLevel, boolean appendDot) {
-    line(sb, indentLevel, "{");
-
-    List<ParseTreeNode> children = node.getChildren();
-    if (node instanceof ParseTreeNodeStub || children.isEmpty()) {
-      line(sb, indentLevel + 1, "matched: " + node.getMatchedString());
+    if (node instanceof ParseTreeNodeStub) {
+      String dot = appendDot ? "," : "";
+      line(sb, indentLevel, "\"" + escapeJsonStr(node.getMatchedString()) + "\"" + dot);
     } else {
-      line(sb, indentLevel + 1, "name: ", node.getParseTreeNodeName(), ",");
-      line(sb, indentLevel + 1, "children: {");
-      int i = 0;
-      for (ParseTreeNode child : children) {
-        toJson(sb, child, indentLevel + 2, i < children.size() - 1);
-        i++;
+      line(sb, indentLevel, "{");
+
+      List<ParseTreeNode> children = node.getChildren();
+      if (children.isEmpty()) {
+        line(sb, indentLevel + 1, "name: \"" + escapeJsonStr(node.getParseTreeNodeName()) + "\",");
+        line(sb, indentLevel + 1, "matched: \"" + escapeJsonStr(node.getMatchedString()) + "\"");
+      } else {
+        line(sb, indentLevel + 1, "name: \"", escapeJsonStr(node.getParseTreeNodeName()), "\",");
+        line(sb, indentLevel + 1, "children: [");
+        int i = 0;
+        for (ParseTreeNode child : children) {
+          toJson(sb, child, indentLevel + 2, i < children.size() - 1);
+          i++;
+        }
+        line(sb, indentLevel + 1, "]");
       }
-      line(sb, indentLevel + 1, "}");
-    }
 
-    if (appendDot) {
-      line(sb, indentLevel, "},");
-    } else {
-      line(sb, indentLevel, "}");
+      if (appendDot) {
+        line(sb, indentLevel, "},");
+      } else {
+        line(sb, indentLevel, "}");
+      }
     }
+  }
+
+  private String escapeJsonStr(String str) {
+    // In order to deal with east-asian characters correctly,
+    // write the conversion code manually.
+    // Refer to http://www.json.org/ for the spec.
+    str = StringUtils.replace(str, "\"", "\\\"");
+    str = StringUtils.replace(str, "\\", "\\\\");
+    str = StringUtils.replace(str, "/", "\\/");
+    str = StringUtils.replace(str, "\b", "\\b");
+    str = StringUtils.replace(str, "\f", "\\f");
+    str = StringUtils.replace(str, "\n", "\\n");
+    str = StringUtils.replace(str, "\r", "\\r");
+    str = StringUtils.replace(str, "\t", "\\t");
+    return str;
   }
 
   private void line(StringBuilder sb, int indentLevel, String... parts) {
@@ -76,5 +99,4 @@ public class ParseTree {
     }
     sb.append("\n");
   }
-
 }

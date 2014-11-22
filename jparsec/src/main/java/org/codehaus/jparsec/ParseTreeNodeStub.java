@@ -75,4 +75,13 @@ public class ParseTreeNodeStub implements ParseTreeNode {
   public void setMatchedString(String matchedString) {
     this.matchedString = matchedString;
   }
+
+  @Override
+  public String toString() {
+    return "ParseTreeNodeStub{" +
+        "matchedStart=" + matchedStart +
+        ", matchedEnd=" + matchedEnd +
+        ", matchedString='" + matchedString + '\'' +
+        '}';
+  }
 }

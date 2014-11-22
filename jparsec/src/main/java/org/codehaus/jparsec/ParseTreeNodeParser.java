@@ -15,7 +15,6 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -115,5 +114,15 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
 
   Parser<T> getParser() {
     return parser;
+  }
+
+  @Override
+  public String toString() {
+    return "ParseTreeNodeParser{" +
+        "name='" + name + '\'' +
+        ", matchedStart=" + matchedStart +
+        ", matchedEnd=" + matchedEnd +
+        ", matchedString='" + matchedString + '\'' +
+        '}';
   }
 }
