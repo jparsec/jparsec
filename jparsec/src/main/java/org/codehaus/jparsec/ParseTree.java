@@ -15,7 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jparsec.util.Strings;
 
 import java.util.List;
 
@@ -79,14 +79,14 @@ public class ParseTree {
     // In order to deal with east-asian characters correctly,
     // write the conversion code manually.
     // Refer to http://www.json.org/ for the spec.
-    str = StringUtils.replace(str, "\"", "\\\"");
-    str = StringUtils.replace(str, "\\", "\\\\");
-    str = StringUtils.replace(str, "/", "\\/");
-    str = StringUtils.replace(str, "\b", "\\b");
-    str = StringUtils.replace(str, "\f", "\\f");
-    str = StringUtils.replace(str, "\n", "\\n");
-    str = StringUtils.replace(str, "\r", "\\r");
-    str = StringUtils.replace(str, "\t", "\\t");
+    str = Strings.replace(str, "\"", "\\\"");
+    str = Strings.replace(str, "\\", "\\\\");
+    str = Strings.replace(str, "/", "\\/");
+    str = Strings.replace(str, "\b", "\\b");
+    str = Strings.replace(str, "\f", "\\f");
+    str = Strings.replace(str, "\n", "\\n");
+    str = Strings.replace(str, "\r", "\\r");
+    str = Strings.replace(str, "\t", "\\t");
     return str;
   }
 
