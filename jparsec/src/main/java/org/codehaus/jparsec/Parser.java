@@ -128,6 +128,8 @@ public abstract class Parser<T> {
    * until the given parser succeeds. The input that matches the given parser
    * will not be consumed. The input that matches this parser will
    * be collected in a list that will be returned by this function.
+   * 
+   * @since 3.0
    */
   public final Parser<List<T>> until(Parser<?> parser) {
     return parser.not().next(this).many().followedBy(parser.peek());
@@ -507,6 +509,8 @@ public abstract class Parser<T> {
   /**
    * A {@link Parser} that marks this parser with the given name (implies {@link #label(String)}),
    * so that {@link #tryParseTree(CharSequence)} can treat this parser as a parse tree node.
+   *
+   * @since 3.0
    */
   public final Parser<T> node(String name) {
     return new ParseTreeNodeParser<T>(label(name), name);
@@ -567,6 +571,7 @@ public abstract class Parser<T> {
    * @param source     the source string
    * @param moduleName the name of the module, this name appears in error message
    * @return the result
+   * @since 3.0
    */
   public final ParseResult<T> tryParse(CharSequence source, String moduleName) {
     return tryParse(source, moduleName, new DefaultSourceLocator(source));
@@ -583,6 +588,8 @@ public abstract class Parser<T> {
    * Try to parse {@code source}. Different from the {@code parse()} counterpart, this method doesn't
    * throw a {@code ParserException} on a failed match, but returns a ParseException that
    * contains the {@code ParserException}.
+   *
+   * @since 3.0
    */
   public final ParseResult<T> tryParse(CharSequence source) {
     return tryParse(source, null);
@@ -594,6 +601,8 @@ public abstract class Parser<T> {
    * corresponds to the parsers that are decorated with {@link #node(String)}.
    * <p/>
    * The effect is similar to the parse tree view in ANTLRWorks.
+   *
+   * @since 3.0
    */
   public final ParseTree tryParseTree(CharSequence source) {
     return Parsers.tryParseTree(source, followedBy(Parsers.EOF).node("ROOT"), new DefaultSourceLocator(source), null);
@@ -610,6 +619,8 @@ public abstract class Parser<T> {
    * Parses source read from {@code readable}. Different from the {@code parse()} counterpart, this method doesn't
    * throw a {@code ParserException} on a failed match, but returns a ParseException that
    * contains the {@code ParserException}.
+   *
+   * @since 3.0
    */
   public final ParseResult<T> tryParse(Readable readable) throws IOException {
     return tryParse(readable, null);
@@ -636,6 +647,7 @@ public abstract class Parser<T> {
    * @param readable   where the source is read from
    * @param moduleName the name of the module, this name appears in error message
    * @return the result
+   * @since 3.0
    */
   public final ParseResult<T> tryParse(Readable readable, String moduleName) throws IOException {
     StringBuilder builder = new StringBuilder();

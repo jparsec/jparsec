@@ -48,14 +48,14 @@ public class ParseTree {
   private void toJson(StringBuilder sb, ParseTreeNode node, int indentLevel, boolean appendDot) {
     if (node instanceof ParseTreeNodeStub) {
       String dot = appendDot ? "," : "";
-      line(sb, indentLevel, "\"" + escapeJsonStr(node.getMatchedString()) + "\"" + dot);
+      line(sb, indentLevel, "\"", escapeJsonStr(node.getMatchedString()), "\"", dot);
     } else {
       line(sb, indentLevel, "{");
 
       List<ParseTreeNode> children = node.getChildren();
       if (children.isEmpty()) {
-        line(sb, indentLevel + 1, "name: \"" + escapeJsonStr(node.getParseTreeNodeName()) + "\",");
-        line(sb, indentLevel + 1, "matched: \"" + escapeJsonStr(node.getMatchedString()) + "\"");
+        line(sb, indentLevel + 1, "name: \"", escapeJsonStr(node.getParseTreeNodeName()), "\",");
+        line(sb, indentLevel + 1, "matched: \"", escapeJsonStr(node.getMatchedString()), "\"");
       } else {
         line(sb, indentLevel + 1, "name: \"", escapeJsonStr(node.getParseTreeNodeName()), "\",");
         line(sb, indentLevel + 1, "children: [");

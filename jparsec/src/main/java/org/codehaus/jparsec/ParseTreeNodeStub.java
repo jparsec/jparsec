@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * This stub is used when no some characters where found successfully matched, but no parser decorated with
+ * This stub is used when some characters were matched successfully, but no parser decorated with
  * {@code node()} method was found, then an instance of this class is created to fill the place where a node
  * is required.
  *

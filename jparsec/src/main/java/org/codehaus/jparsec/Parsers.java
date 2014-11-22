@@ -83,11 +83,11 @@ public final class Parsers {
    * error location.
    */
   static <T> T parse(
-          CharSequence src, Parser<T> parser, SourceLocator locator, String module) {
+      CharSequence src, Parser<T> parser, SourceLocator locator, String module) {
     ScannerState ctxt = new ScannerState(module, src, 0, locator);
     if (!parser.run(ctxt)) {
       throw new ParserException(
-              ctxt.renderError(), ctxt.module, locator.locate(ctxt.errorIndex()));
+          ctxt.renderError(), ctxt.module, locator.locate(ctxt.errorIndex()));
     }
     return parser.getReturn(ctxt);
   }
