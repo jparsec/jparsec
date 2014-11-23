@@ -34,7 +34,7 @@ final class ReturnSourceParser extends Parser<String> {
     if (!parser.apply(ctxt)) {
       return false;
     }
-    ctxt.result = ctxt.source.subSequence(begin, ctxt.getIndex()).toString();
+    ctxt.setResult(ctxt.source.subSequence(begin, ctxt.getIndex()).toString());
     return true;
   }
   

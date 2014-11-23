@@ -37,27 +37,27 @@ abstract class ParseContext {
   final SourceLocator locator;
   
   /** The current position of the input. Points to the token array for token level. */
-  int at;
+  private int at;
+
+  /** The current logical step. */
+  private int step;
+
+  /** The current parse result. */
+  private Object result;
 
   /**
    * On a failed match, this records the end of the previous successful match.
    * On a successful match, this records the end of the match.
    */
-  int partialMatchedEnd;
-  
-  /** The current logical step. */
-  int step;
-  
-  /** The current parse result. */
-  Object result;
+  private int partialMatchedEnd;
 
   /** The current parse tree node. */
-  ParseTreeNode parseTreeNode;
+  private ParseTreeNode parseTreeNode;
 
   public ParseTree createParseTree() {
-    bottomUpWalkParseTree(parseTreeNode);
-    topDownWalkParseTree(parseTreeNode, true);
-    return new ParseTree(parseTreeNode);
+    bottomUpWalkParseTree(getParseTreeNode());
+    topDownWalkParseTree(getParseTreeNode(), true);
+    return new ParseTree(getParseTreeNode());
   }
 
   private Integer bottomUpWalkParseTree(ParseTreeNode node) {
@@ -93,12 +93,12 @@ abstract class ParseContext {
 
   private void fillStubToRoot(ParseTreeNode node, List<ParseTreeNode> children) {
     Integer end = node.getMatchedEnd();
-    if (partialMatchedEnd > end) {
+    if (getPartialMatchedEnd() > end) {
       fillStubToRoot(node, end);
-    } else if (partialMatchedEnd == end && children.size() > 0) {
+    } else if (getPartialMatchedEnd() == end && children.size() > 0) {
       ParseTreeNode lastChild = children.get(children.size() - 1);
       end = lastChild.getMatchedEnd();
-      if (partialMatchedEnd > end) {
+      if (getPartialMatchedEnd() > end) {
         fillStubToRoot(node, end);
       }
     }
@@ -107,7 +107,7 @@ abstract class ParseContext {
   private void fillStubToRoot(ParseTreeNode node, Integer end) {
     ParseTreeNodeStub stub = new ParseTreeNodeStub();
     stub.setMatchedStart(end);
-    stub.setMatchedEnd(partialMatchedEnd);
+    stub.setMatchedEnd(getPartialMatchedEnd());
     node.addChild(stub);
   }
 
@@ -139,17 +139,57 @@ abstract class ParseContext {
       start = child.getMatchedEnd();
     }
 
-    if (partialMatchedEnd > start
-        && partialMatchedEnd < node.getMatchedEnd()
+    if (getPartialMatchedEnd() > start
+        && getPartialMatchedEnd() < node.getMatchedEnd()
         && !(node instanceof ParseTreeNodeStub)) {
       ParseTreeNodeStub stub = new ParseTreeNodeStub();
       stub.setMatchedStart(start);
-      stub.setMatchedEnd(partialMatchedEnd);
+      stub.setMatchedEnd(getPartialMatchedEnd());
       newChildren.add(stub);
     }
 
     children.clear();
     children.addAll(newChildren);
+  }
+
+  int getAt() {
+    return at;
+  }
+
+  void setAt(int at) {
+    this.at = at;
+  }
+
+  int getPartialMatchedEnd() {
+    return partialMatchedEnd;
+  }
+
+  void setPartialMatchedEnd(int partialMatchedEnd) {
+    this.partialMatchedEnd = partialMatchedEnd;
+  }
+
+  int getStep() {
+    return step;
+  }
+
+  void setStep(int step) {
+    this.step = step;
+  }
+
+  Object getResult() {
+    return result;
+  }
+
+  void setResult(Object result) {
+    this.result = result;
+  }
+
+  ParseTreeNode getParseTreeNode() {
+    return parseTreeNode;
+  }
+
+  void setParseTreeNode(ParseTreeNode parseTreeNode) {
+    this.parseTreeNode = parseTreeNode;
   }
 
   enum ErrorType {
@@ -264,7 +304,7 @@ abstract class ParseContext {
   
   /** Returns the current index in the original source. */
   final int getIndex() {
-    return toIndex(at);
+    return toIndex(getAt());
   }
   
   /** Returns the current token. Only applicable to token level parser. */
@@ -278,9 +318,9 @@ abstract class ParseContext {
   
   @Private final void raise(ErrorType type, Object subject) {
     if (errorSuppressed) return;
-    if (at < currentErrorAt) return;
-    if (at > currentErrorAt) {
-      setErrorState(at, getIndex(), type);
+    if (getAt() < currentErrorAt) return;
+    if (getAt() > currentErrorAt) {
+      setErrorState(getAt(), getIndex(), type);
       errors.add(subject);
       return;
     }
@@ -289,7 +329,7 @@ abstract class ParseContext {
       return;
     }
     if (type.ordinal() > currentErrorType.ordinal()) {
-      setErrorState(at, getIndex(), type);
+      setErrorState(getAt(), getIndex(), type);
       errors.add(subject);
       return;
     }
@@ -317,9 +357,9 @@ abstract class ParseContext {
   }
   
   final void set(int step, int at, Object ret) {
-    this.step = step;
-    this.at = at;
-    this.result = ret;
+    this.setStep(step);
+    this.setAt(at);
+    this.setResult(ret);
   }
 
   final void setErrorState(
@@ -337,18 +377,18 @@ abstract class ParseContext {
   }
   
   final void setAt(int step, int at) {
-    this.step = step;
-    this.at = at;
+    this.setStep(step);
+    this.setAt(at);
   }
   
   final void next() {
-    at ++;
-    step ++;
+    setAt(getAt() + 1);
+    setStep(getStep() + 1);
   }
   
   final void next(int n) {
-    at += n;
-    if (n > 0) step++;
+    setAt(getAt() + n);
+    if (n > 0) setStep(getStep() + 1);
   }
   
   //caller should not change input after it is passed in.
@@ -359,9 +399,9 @@ abstract class ParseContext {
   ParseContext(
       CharSequence source, Object ret, int at, String module, SourceLocator locator) {
     this.source = source;
-    this.result = ret;
-    this.step = 0;
-    this.at = at;
+    this.setResult(ret);
+    this.setStep(0);
+    this.setAt(at);
     this.module = module;
     this.locator = locator;
     this.currentErrorAt = at;

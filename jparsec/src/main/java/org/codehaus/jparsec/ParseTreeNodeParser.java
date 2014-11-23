@@ -39,30 +39,30 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
 
   @Override
   boolean apply(ParseContext ctxt) {
-    ParseTreeNode originalNode = ctxt.parseTreeNode;
+    ParseTreeNode originalNode = ctxt.getParseTreeNode();
     ParseTreeNode currentNode = createCleanCopy(this);
 
     if (originalNode != null) {
       originalNode.addChild(currentNode);
     }
-    ctxt.parseTreeNode = currentNode;
+    ctxt.setParseTreeNode(currentNode);
 
-    currentNode.setMatchedStart(ctxt.at);
+    currentNode.setMatchedStart(ctxt.getIndex());
     boolean ok = parser.run(ctxt);
     if (ok) {
-      currentNode.setMatchedEnd(ctxt.at);
+      currentNode.setMatchedEnd(ctxt.getIndex());
     } else if (currentNode.getChildren().isEmpty()) {
       Integer end = currentNode.getMatchedStart();
-      if (end == null || end < ctxt.partialMatchedEnd) {
-        end = ctxt.partialMatchedEnd;
+      if (end == null || end < ctxt.getPartialMatchedEnd()) {
+        end = ctxt.getPartialMatchedEnd();
       }
       currentNode.setMatchedEnd(end);
     }
 
     if (originalNode == null) {
-      ctxt.parseTreeNode = currentNode;
+      ctxt.setParseTreeNode(currentNode);
     } else {
-      ctxt.parseTreeNode = originalNode;
+      ctxt.setParseTreeNode(originalNode);
     }
     return ok;
   }

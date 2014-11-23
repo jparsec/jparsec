@@ -33,7 +33,7 @@ final class AnyCharScanner extends Parser<Void> {
       return false;
     }
     ctxt.next();
-    ctxt.result = null;
+    ctxt.setResult(null);
     return true;
   }
   

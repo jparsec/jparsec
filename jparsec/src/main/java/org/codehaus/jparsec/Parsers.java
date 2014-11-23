@@ -147,7 +147,7 @@ public final class Parsers {
   public static <T> Parser<T> constant(final T v) {
     return new Parser<T>() {
       @Override boolean apply(ParseContext ctxt) {
-        ctxt.result = v;
+        ctxt.setResult(v);
         return true;
       }
       @Override public String toString() {
@@ -550,7 +550,7 @@ public final class Parsers {
   
   @SuppressWarnings("unchecked")
   static <From> boolean runNext(ParseContext state, Map<? super From, ? extends Parser<?>> next) {
-    Parser<?> parser = next.map((From) state.result);
+    Parser<?> parser = next.map((From) state.getResult());
     return parser.run(state);
   }
 

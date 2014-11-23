@@ -29,7 +29,7 @@ final class ParserState extends ParseContext {
   private final int endIndex;
 
   @Override boolean isEof() {
-    return at >= input.length;
+    return getAt() >= input.length;
   }
   
   @Override int toIndex(int pos) {
@@ -38,7 +38,7 @@ final class ParserState extends ParseContext {
   }
 
   @Override Token getToken() {
-    return input[at];
+    return input[getAt()];
   }
   
   ParserState(String module, CharSequence source, Token[] input, int at,

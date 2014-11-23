@@ -22,7 +22,7 @@ package org.codehaus.jparsec;
  */
 final class GetIndexParser extends Parser<Integer> {
   @Override boolean apply(final ParseContext ctxt) {
-    ctxt.result = ctxt.getIndex();
+    ctxt.setResult(ctxt.getIndex());
     return true;
   }
   

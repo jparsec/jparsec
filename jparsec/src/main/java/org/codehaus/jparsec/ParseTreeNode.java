@@ -23,7 +23,7 @@ import java.util.List;
  * @author Winter Young
  * @since 3.0
  */
-public interface ParseTreeNode {
+interface ParseTreeNode {
   /**
    * Get the name.
    */

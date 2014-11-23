@@ -40,7 +40,7 @@ final class RepeatTimesParser<T> extends Parser<List<T>> {
     if (!ParserInternals.repeat(parser, min, result, ctxt))
       return false;
     if (ParserInternals.repeatAtMost(parser, max - min, result, ctxt)) {
-      ctxt.result = result;
+      ctxt.setResult(result);
       return true;
     }
     return false;

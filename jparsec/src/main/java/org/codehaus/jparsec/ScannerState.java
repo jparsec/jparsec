@@ -44,11 +44,11 @@ final class ScannerState extends ParseContext {
   }
   
   @Override char peekChar() {
-    return source.charAt(at);
+    return source.charAt(getAt());
   }
   
   @Override boolean isEof() {
-    return end == at;
+    return end == getAt();
   }
   
   @Override int toIndex(int pos) {

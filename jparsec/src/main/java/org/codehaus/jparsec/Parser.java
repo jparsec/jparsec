@@ -652,15 +652,15 @@ public abstract class Parser<T> {
 
   @SuppressWarnings("unchecked")
   final T getReturn(ParseContext ctxt) {
-    return (T) ctxt.result;
+    return (T) ctxt.getResult();
   }
 
   final boolean run(ParseContext ctxt) {
     try {
-      ctxt.partialMatchedEnd = ctxt.at;
+      ctxt.setPartialMatchedEnd(ctxt.getAt());
       boolean ok = apply(ctxt);
       if (ok) {
-        ctxt.partialMatchedEnd = ctxt.at;
+        ctxt.setPartialMatchedEnd(ctxt.getAt());
       }
       return ok;
     } catch (RuntimeException e) {

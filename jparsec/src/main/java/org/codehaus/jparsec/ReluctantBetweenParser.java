@@ -37,25 +37,25 @@ final class ReluctantBetweenParser<T> extends Parser<T> {
 	boolean apply(ParseContext ctxt) {
 		boolean r1 = start.run(ctxt);
 		if (!r1) return false;
-		int betweenAt = ctxt.at;
+		int betweenAt = ctxt.getAt();
 		
 		// try to match the end of the sequence beginning from the very end giving a chance to empty parser to be matched
 		// (see https://github.com/abailly/jparsec/issues/25)
-		ctxt.at = ctxt.source.length();
+		ctxt.setAt(ctxt.source.length());
 		boolean r2 = end.run(ctxt);
-		int endAt = ctxt.at;
-		while ( !r2 && ctxt.at >=betweenAt ) {
-      ctxt.at--;
-      endAt = ctxt.at;
+		int endAt = ctxt.getAt();
+		while ( !r2 && ctxt.getAt() >=betweenAt ) {
+      ctxt.setAt(ctxt.getAt() - 1);
+      endAt = ctxt.getAt();
 			r2 = end.run(ctxt);
 		}
 		if (!r2) return false;
-		ParseContext betweenCtxt = new ScannerState(ctxt.module, ctxt.source, betweenAt, endAt, ctxt.locator, ctxt.result );
+		ParseContext betweenCtxt = new ScannerState(ctxt.module, ctxt.source, betweenAt, endAt, ctxt.locator, ctxt.getResult());
 		boolean rb = between.run(betweenCtxt);
 		
 		if ( ! rb ) return false;
 		
-		ctxt.result = between.getReturn(betweenCtxt);
+		ctxt.setResult(between.getReturn(betweenCtxt));
 		return true;
 	}
 	

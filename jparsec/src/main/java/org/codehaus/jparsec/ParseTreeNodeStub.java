@@ -26,7 +26,7 @@ import java.util.List;
  * @author Winter Young
  * @since 3.0
  */
-public class ParseTreeNodeStub implements ParseTreeNode {
+class ParseTreeNodeStub implements ParseTreeNode {
   private Integer matchedStart;
   private Integer matchedEnd;
   private String matchedString;

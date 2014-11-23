@@ -28,19 +28,19 @@ final class ParserInternals {
       IntOrder order, Parser<?>[] parsers, int from,
       ParseContext state,
       Object originalResult, int originalStep, int originalAt) {
-    int bestAt = state.at;
-    int bestStep = state.step;
-    Object bestResult = state.result;
+    int bestAt = state.getAt();
+    int bestStep = state.getStep();
+    Object bestResult = state.getResult();
     for (int i = from; i < parsers.length; i++) {
       state.set(originalStep, originalAt, originalResult);
       Parser<?> parser = parsers[i];
       boolean ok = parser.run(state);
       if (!ok) continue;
-      int at2 = state.at;
+      int at2 = state.getAt();
       if (order.compare(at2, bestAt)) {
         bestAt = at2;
-        bestStep = state.step;
-        bestResult = state.result;
+        bestStep = state.getStep();
+        bestResult = state.getResult();
       }
     }
     state.set(bestStep, bestAt, bestResult);
@@ -54,9 +54,9 @@ final class ParserInternals {
   }
 
   static boolean many(final Parser<?> parser, final ParseContext ctxt) {
-    for (int at = ctxt.at, step = ctxt.step;;step = ctxt.step) {
+    for (int at = ctxt.getAt(), step = ctxt.getStep();;step = ctxt.getStep()) {
       if (!greedyRun(parser, ctxt)) return stillThere(ctxt, at, step);
-      int at2 = ctxt.at;
+      int at2 = ctxt.getAt();
       if (at == at2) return true;
       at = at2;
     }
@@ -64,8 +64,8 @@ final class ParserInternals {
 
   static boolean repeatAtMost(Parser<?> parser, int max, ParseContext ctxt) {
     for (int i = 0; i < max; i++) {
-      int at = ctxt.at;
-      int step = ctxt.step;
+      int at = ctxt.getAt();
+      int step = ctxt.getStep();
       if (!greedyRun(parser, ctxt)) return stillThere(ctxt, at, step);
     }
     return true;
@@ -83,8 +83,8 @@ final class ParserInternals {
   static <T> boolean repeatAtMost(
       Parser<? extends T> parser, int max, Collection<T> collection, ParseContext ctxt) {
     for (int i = 0; i < max; i++) {
-      int at = ctxt.at;
-      int step = ctxt.step;
+      int at = ctxt.getAt();
+      int step = ctxt.getStep();
       if (!greedyRun(parser, ctxt)) return stillThere(ctxt, at, step);
       collection.add(parser.getReturn(ctxt));
     }
@@ -93,9 +93,9 @@ final class ParserInternals {
 
   static <T> boolean many(
       Parser<? extends T> parser, Collection<T> collection, ParseContext ctxt) {
-    for (int at = ctxt.at, step = ctxt.step;;step = ctxt.step) {
+    for (int at = ctxt.getAt(), step = ctxt.getStep();;step = ctxt.getStep()) {
       if (!greedyRun(parser, ctxt)) return stillThere(ctxt, at, step);
-      int at2 = ctxt.at;
+      int at2 = ctxt.getAt();
       if (at == at2) return true;
       at = at2;
       collection.add(parser.getReturn(ctxt));
@@ -103,7 +103,7 @@ final class ParserInternals {
   }
 
   static boolean stillThere(ParseContext ctxt, int wasAt, int originalStep) {
-    if (ctxt.step == originalStep) {
+    if (ctxt.getStep() == originalStep) {
       // logical step didn't change, so logically we are still there, undo any physical offset
       ctxt.setAt(originalStep, wasAt);
       return true;
@@ -114,11 +114,11 @@ final class ParserInternals {
   static boolean runNestedParser(
       ParseContext ctxt, ParseContext freshInitState, Parser<?> parser) {
     if (parser.run(freshInitState))  {
-      ctxt.set(freshInitState.step, ctxt.at, freshInitState.result);
+      ctxt.set(freshInitState.getStep(), ctxt.getAt(), freshInitState.getResult());
       return true;
     }
     // index on token level is the "at" on character level
-    ctxt.set(ctxt.step, freshInitState.getIndex(), null);
+    ctxt.set(ctxt.getStep(), freshInitState.getIndex(), null);
     
     // always copy error because there could be false alarms in the character level.
     // For example, a "or" parser nested in a "many" failed in one of its branches.

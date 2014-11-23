@@ -39,7 +39,7 @@ final class IsCharScanner extends Parser<Void> {
     char c = ctxt.peekChar();
     if (predicate.isChar(c)) {
       ctxt.next();
-      ctxt.result = null;
+      ctxt.setResult(null);
       return true;
     }
     ctxt.expected(name);
@@ -66,7 +66,7 @@ final class IsCharScanner extends Parser<Void> {
       char c = context.peekChar();
       if (predicate.isChar(c)) {
         context.next();
-        context.result = null;
+        context.setResult(null);
         return new Done<Void>(null);
       } else {
         return new Failed<Void>();
