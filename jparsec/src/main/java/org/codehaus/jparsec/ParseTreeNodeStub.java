@@ -26,7 +26,7 @@ import java.util.List;
  * @author Winter Young
  * @since 3.0
  */
-public class ParseTreeNodeStub implements ParseTreeNode {
+class ParseTreeNodeStub implements ParseTreeNode {
   private Integer matchedStart;
   private Integer matchedEnd;
   private String matchedString;
@@ -43,6 +43,11 @@ public class ParseTreeNodeStub implements ParseTreeNode {
 
   @Override
   public void addChild(ParseTreeNode child) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void removeLastChild() {
     throw new UnsupportedOperationException();
   }
 
@@ -74,6 +79,16 @@ public class ParseTreeNodeStub implements ParseTreeNode {
   @Override
   public void setMatchedString(String matchedString) {
     this.matchedString = matchedString;
+  }
+
+  @Override
+  public void setParentParseTreeNode(ParseTreeNode parentParseTreeNode) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public ParseTreeNode getParent() {
+    throw new UnsupportedOperationException();
   }
 
   @Override

@@ -23,7 +23,7 @@ import java.util.List;
  * @author Winter Young
  * @since 3.0
  */
-public interface ParseTreeNode {
+interface ParseTreeNode {
   /**
    * Get the name.
    */
@@ -38,6 +38,11 @@ public interface ParseTreeNode {
    * Add a sub node.
    */
   void addChild(ParseTreeNode child);
+
+  /**
+   * Remove the last child.
+   */
+  void removeLastChild();
 
   /**
    * On a successful match, this is the start index (inclusive). Default is null, which means no match.
@@ -68,4 +73,18 @@ public interface ParseTreeNode {
    * On a successful match, this is the matched string. Default is null, which means no match.
    */
   void setMatchedString(String matchedString);
+
+  /**
+   * Set the parent parse tree node. null parent indicates this is a top level node.
+   * This method is used when {@link org.codehaus.jparsec.ParseTreeNodeParser} was constructing
+   * a parse tree.
+   */
+  void setParentParseTreeNode(ParseTreeNode parentParseTreeNode);
+
+  /**
+   * Get the parent parse tree node. null parent indicates this is a top level node.
+   * This method is used when {@link org.codehaus.jparsec.ParseTreeNodeParser} was constructing
+   * a parse tree.
+   */
+  ParseTreeNode getParent();
 }

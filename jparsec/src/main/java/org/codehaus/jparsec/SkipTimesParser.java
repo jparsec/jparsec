@@ -29,7 +29,7 @@ final class SkipTimesParser extends Parser<Void> {
   @Override boolean apply(ParseContext ctxt) {
     if (!ParserInternals.repeat(parser, min, ctxt)) return false;
     if (ParserInternals.repeatAtMost(parser, max - min, ctxt)) {
-      ctxt.result = null;
+      ctxt.setResult(null);
       return true;
     }
     return false;

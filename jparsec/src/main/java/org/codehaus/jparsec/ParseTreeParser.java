@@ -15,29 +15,23 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-/** 
- * Parses any one character.
- *  
- * @author Ben Yu
+/**
+ * A {@link org.codehaus.jparsec.Parser} that generates a {@link org.codehaus.jparsec.ParseTree}.
+ *
+ * @author Winter Young
  */
-final class AnyCharScanner extends Parser<Void> {
-  private final String name;
-  
-  AnyCharScanner(String name) {
-    this.name = name;
+class ParseTreeParser extends Parser<ParseTree> {
+  private Parser<?> parser;
+
+  public ParseTreeParser(Parser<?> parser) {
+    this.parser = parser.node("ROOT");
   }
 
-  @Override boolean apply(ParseContext ctxt) {
-    if (ctxt.isEof()) {
-      ctxt.expected(name);
-      return false;
-    }
-    ctxt.next();
-    ctxt.setResult(null);
+  @Override
+  boolean apply(ParseContext ctxt) {
+    ParseTreeContext parseTreeContext = new ParseTreeContext(ctxt);
+    parser.apply(parseTreeContext);
+    parseTreeContext.setResult(parseTreeContext.createParseTree());
     return true;
-  }
-  
-  @Override public String toString() {
-    return name;
   }
 }

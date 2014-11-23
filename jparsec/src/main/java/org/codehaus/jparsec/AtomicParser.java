@@ -23,10 +23,10 @@ final class AtomicParser<T> extends Parser<T> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    int at = ctxt.at;
-    int step = ctxt.step;
+    int at = ctxt.getAt();
+    int step = ctxt.getStep();
     boolean r = p.run(ctxt);
-    if (r) ctxt.step = step + 1;
+    if (r) ctxt.setStep(step + 1);
     else ctxt.setAt(step, at);
     return r;
   }

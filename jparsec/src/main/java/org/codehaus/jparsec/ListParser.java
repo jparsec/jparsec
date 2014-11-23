@@ -39,7 +39,7 @@ final class ListParser<T> extends Parser<List<T>> {
       if (!parser.run(ctxt)) return false;
       list.add(parser.getReturn(ctxt));
     }
-    ctxt.result = list;
+    ctxt.setResult(list);
     return true;
   }
   

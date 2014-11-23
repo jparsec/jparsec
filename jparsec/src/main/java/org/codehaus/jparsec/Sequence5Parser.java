@@ -51,7 +51,7 @@ final class Sequence5Parser<A, B, C, D, E, T> extends Parser<T> {
     boolean r5 = p5.run(ctxt);
     if (!r5) return false;
     E o5 = p5.getReturn(ctxt);
-    ctxt.result = m5.map(o1, o2, o3, o4, o5);
+    ctxt.setResult(m5.map(o1, o2, o3, o4, o5));
     return true;
   }
   

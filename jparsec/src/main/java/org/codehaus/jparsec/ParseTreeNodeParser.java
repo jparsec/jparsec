@@ -31,6 +31,7 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
   private Integer matchedStart;
   private Integer matchedEnd;
   private String matchedString;
+  private ParseTreeNode parentParseTreeNode;
 
   public ParseTreeNodeParser(Parser<T> parser, String name) {
     this.parser = parser;
@@ -39,30 +40,40 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
 
   @Override
   boolean apply(ParseContext ctxt) {
-    ParseTreeNode originalNode = ctxt.parseTreeNode;
+    if (ctxt instanceof ParseTreeContext) {
+      ParseTreeContext  parseTreeContext = (ParseTreeContext) ctxt;
+      return apply(parseTreeContext);
+    } else {
+      return parser.run(ctxt);
+    }
+  }
+
+  private boolean apply(ParseTreeContext ctxt) {
+    ParseTreeNode originalNode = ctxt.getParseTreeNode();
     ParseTreeNode currentNode = createCleanCopy(this);
 
     if (originalNode != null) {
       originalNode.addChild(currentNode);
+      currentNode.setParentParseTreeNode(originalNode);
     }
-    ctxt.parseTreeNode = currentNode;
+    ctxt.setParseTreeNode(currentNode);
 
-    currentNode.setMatchedStart(ctxt.at);
+    currentNode.setMatchedStart(ctxt.getIndex());
     boolean ok = parser.run(ctxt);
     if (ok) {
-      currentNode.setMatchedEnd(ctxt.at);
+      currentNode.setMatchedEnd(ctxt.getIndex());
     } else if (currentNode.getChildren().isEmpty()) {
       Integer end = currentNode.getMatchedStart();
-      if (end == null || end < ctxt.partialMatchedEnd) {
-        end = ctxt.partialMatchedEnd;
+      if (end == null || end < ctxt.getPartialMatchedEnd()) {
+        end = ctxt.getPartialMatchedEnd();
       }
       currentNode.setMatchedEnd(end);
     }
 
     if (originalNode == null) {
-      ctxt.parseTreeNode = currentNode;
+      ctxt.setParseTreeNode(currentNode);
     } else {
-      ctxt.parseTreeNode = originalNode;
+      ctxt.setParseTreeNode(originalNode);
     }
     return ok;
   }
@@ -80,6 +91,11 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
   @Override
   public void addChild(ParseTreeNode child) {
     children.add(child);
+  }
+
+  @Override
+  public void removeLastChild() {
+    children.remove(children.size() - 1);
   }
 
   @Override
@@ -110,6 +126,16 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
   @Override
   public void setMatchedString(String matchedString) {
     this.matchedString = matchedString;
+  }
+
+  @Override
+  public void setParentParseTreeNode(ParseTreeNode parentParseTreeNode) {
+    this.parentParseTreeNode = parentParseTreeNode;
+  }
+
+  @Override
+  public ParseTreeNode getParent() {
+    return parentParseTreeNode;
   }
 
   Parser<T> getParser() {

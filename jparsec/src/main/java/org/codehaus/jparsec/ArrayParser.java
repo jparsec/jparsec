@@ -34,7 +34,7 @@ final class ArrayParser extends Parser<Object[]> {
       if (!parser.run(ctxt)) return false;
       ret[i] = parser.getReturn(ctxt);
     }
-    ctxt.result = ret;
+    ctxt.setResult(ret);
     return true;
   }
   

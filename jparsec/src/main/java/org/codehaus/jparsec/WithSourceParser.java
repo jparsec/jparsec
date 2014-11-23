@@ -21,9 +21,9 @@ final class WithSourceParser<T> extends Parser<WithSource<T>> {
     if (!parser.apply(ctxt)) {
       return false;
     }
-    String source = ctxt.source.subSequence(begin, ctxt.getIndex()).toString();
-    WithSource<T> withSource = new WithSource<T>((T) ctxt.result, source);
-    ctxt.result = withSource;
+    String source = ctxt.getSource().subSequence(begin, ctxt.getIndex()).toString();
+    WithSource<T> withSource = new WithSource<T>((T) ctxt.getResult(), source);
+    ctxt.setResult(withSource);
     return true;
   }
   

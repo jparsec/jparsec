@@ -21,7 +21,7 @@ package org.codehaus.jparsec;
  * 
  * @author Ben Yu
  */
-final class ScannerState extends ParseContext {
+final class ScannerState extends AbstractParseContext {
   private final int end;
   
   ScannerState(String module, CharSequence source, int from, SourceLocator locator) {
@@ -43,28 +43,28 @@ final class ScannerState extends ParseContext {
     this.end = end;
   }
   
-  @Override char peekChar() {
-    return source.charAt(at);
+  @Override public char peekChar() {
+    return getSource().charAt(getAt());
   }
   
-  @Override boolean isEof() {
-    return end == at;
+  @Override public boolean isEof() {
+    return end == getAt();
   }
   
-  @Override int toIndex(int pos) {
+  @Override public int toIndex(int pos) {
     return pos;
   }
   
-  @Override String getInputName(int pos) {
+  @Override public String getInputName(int pos) {
     if (pos >= end) return EOF;
-    return Character.toString(source.charAt(pos));
+    return Character.toString(getSource().charAt(pos));
   }
   
-  @Override CharSequence characters() {
-    return source;
+  @Override public CharSequence characters() {
+    return getSource();
   }
 
-  @Override Token getToken() {
+  @Override public Token getToken() {
     throw new IllegalStateException("Parser not on token level");
   }
 }

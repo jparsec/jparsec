@@ -23,9 +23,9 @@ final class OrParser<T> extends Parser<T> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    final Object result = ctxt.result;
-    final int at = ctxt.at;
-    final int step = ctxt.step;
+    final Object result = ctxt.getResult();
+    final int at = ctxt.getAt();
+    final int step = ctxt.getStep();
     for(Parser<? extends T> p : alternatives) {
       if (p.run(ctxt)) {
         return true;

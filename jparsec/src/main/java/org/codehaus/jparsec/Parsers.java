@@ -87,24 +87,9 @@ public final class Parsers {
     ScannerState ctxt = new ScannerState(module, src, 0, locator);
     if (!parser.run(ctxt)) {
       throw new ParserException(
-          ctxt.renderError(), ctxt.module, locator.locate(ctxt.errorIndex()));
+          ctxt.renderError(), ctxt.getModule(), locator.locate(ctxt.errorIndex()));
     }
     return parser.getReturn(ctxt);
-  }
-
-  /**
-   * Try to parse {@code source} and return a parse tree. On a failed match, the returned
-   * parse tree contains the partial match.
-   */
-  static ParseTree tryParseTree(
-      CharSequence src, Parser<?> parser, SourceLocator locator, String module) {
-    if (parser instanceof ParseTreeNode) {
-      ScannerState ctxt = new ScannerState(module, src, 0, locator);
-      parser.run(ctxt);
-      return ctxt.createParseTree();
-    }
-
-    throw new IllegalArgumentException("parser is required to be decorated with node()");
   }
 
   /**
@@ -147,7 +132,7 @@ public final class Parsers {
   public static <T> Parser<T> constant(final T v) {
     return new Parser<T>() {
       @Override boolean apply(ParseContext ctxt) {
-        ctxt.result = v;
+        ctxt.setResult(v);
         return true;
       }
       @Override public String toString() {
@@ -550,7 +535,7 @@ public final class Parsers {
   
   @SuppressWarnings("unchecked")
   static <From> boolean runNext(ParseContext state, Map<? super From, ? extends Parser<?>> next) {
-    Parser<?> parser = next.map((From) state.result);
+    Parser<?> parser = next.map((From) state.getResult());
     return parser.run(state);
   }
 

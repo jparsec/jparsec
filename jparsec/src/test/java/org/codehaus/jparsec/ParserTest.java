@@ -56,7 +56,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> integer = INTEGER.node("int");
     Parser<?> comma = Scanners.isChar(',').node("comma");
     Parser<?> parser = integer.next(comma);
-    ParseTree parseTree = parser.tryParseTree("123,456");
+    ParseTree parseTree = parser.parseTree().parse("123,456");
     String expected = ResUtils.loadRes("/ExpectedParseTree.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
@@ -66,7 +66,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> integer = INTEGER;
     Parser<?> comma = Scanners.isChar(',').node("comma");
     Parser<?> parser = integer.next(comma);
-    ParseTree parseTree = parser.tryParseTree("123,456");
+    ParseTree parseTree = parser.parseTree().parse("123,456");
     String expected = ResUtils.loadRes("/ExpectedParseTree2.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
@@ -76,7 +76,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> integer = INTEGER;
     Parser<?> comma = Scanners.isChar(',');
     Parser<?> parser = integer.next(comma);
-    ParseTree parseTree = parser.tryParseTree("123,456");
+    ParseTree parseTree = parser.parseTree().parse("123,456");
     String expected = ResUtils.loadRes("/ExpectedParseTree3.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
@@ -86,7 +86,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> integer = INTEGER.node("int");
     Parser<?> comma = Scanners.isChar(',');
     Parser<?> parser = integer.next(comma);
-    ParseTree parseTree = parser.tryParseTree("123,456");
+    ParseTree parseTree = parser.parseTree().parse("123,456");
     String expected = ResUtils.loadRes("/ExpectedParseTree4.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
@@ -96,7 +96,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> integer = INTEGER.node("int");
     Parser<?> comma = Scanners.isChar(',');
     Parser<?> parser = integer.next(comma);
-    ParseTree parseTree = parser.tryParseTree("123,");
+    ParseTree parseTree = parser.parseTree().parse("123,");
     String expected = ResUtils.loadRes("/ExpectedParseTree4.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
@@ -108,7 +108,7 @@ public class ParserTest extends BaseMockTest {
     Parser<?> dot = Scanners.isChar('.');
     Parser<?> parser = integer.followedBy(comma).cast()
         .or(integer.followedBy(dot));
-    ParseTree parseTree = parser.tryParseTree("123.");
+    ParseTree parseTree = parser.parseTree().parse("123.");
     String expected = ResUtils.loadRes("/ExpectedParseTree6.txt");
     Assert.assertEquals(expected, parseTree.toJson());
   }
