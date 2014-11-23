@@ -564,35 +564,10 @@ public abstract class Parser<T> {
   }
 
   /**
-   * Parses {@code source}. Different from the {@code parse()} counterpart, this method doesn't
-   * throw a {@code ParserException} on a failed match, but returns a ParseException that
-   * contains the {@code ParserException}.
-   *
-   * @param source     the source string
-   * @param moduleName the name of the module, this name appears in error message
-   * @return the result
-   * @since 3.0
-   */
-  public final ParseResult<T> tryParse(CharSequence source, String moduleName) {
-    return tryParse(source, moduleName, new DefaultSourceLocator(source));
-  }
-
-  /**
    * Parses {@code source}.
    */
   public final T parse(CharSequence source) {
     return parse(source, null);
-  }
-
-  /**
-   * Try to parse {@code source}. Different from the {@code parse()} counterpart, this method doesn't
-   * throw a {@code ParserException} on a failed match, but returns a ParseException that
-   * contains the {@code ParserException}.
-   *
-   * @since 3.0
-   */
-  public final ParseResult<T> tryParse(CharSequence source) {
-    return tryParse(source, null);
   }
 
   /**
@@ -616,17 +591,6 @@ public abstract class Parser<T> {
   }
 
   /**
-   * Parses source read from {@code readable}. Different from the {@code parse()} counterpart, this method doesn't
-   * throw a {@code ParserException} on a failed match, but returns a ParseException that
-   * contains the {@code ParserException}.
-   *
-   * @since 3.0
-   */
-  public final ParseResult<T> tryParse(Readable readable) throws IOException {
-    return tryParse(readable, null);
-  }
-
-  /**
    * Parses source read from {@code readable}.
    *
    * @param readable   where the source is read from
@@ -637,22 +601,6 @@ public abstract class Parser<T> {
     StringBuilder builder = new StringBuilder();
     copy(readable, builder);
     return parse(builder, moduleName);
-  }
-
-  /**
-   * Parses source read from {@code readable}. Different from the {@code parse()} counterpart, this method doesn't
-   * throw a {@code ParserException} on a failed match, but returns a ParseException that
-   * contains the {@code ParserException}.
-   *
-   * @param readable   where the source is read from
-   * @param moduleName the name of the module, this name appears in error message
-   * @return the result
-   * @since 3.0
-   */
-  public final ParseResult<T> tryParse(Readable readable, String moduleName) throws IOException {
-    StringBuilder builder = new StringBuilder();
-    copy(readable, builder);
-    return tryParse(builder, moduleName);
   }
 
   /**
@@ -700,20 +648,6 @@ public abstract class Parser<T> {
    */
   final T parse(CharSequence source, String moduleName, SourceLocator sourceLocator) {
     return Parsers.parse(source, followedBy(Parsers.EOF), sourceLocator, moduleName);
-  }
-
-  /**
-   * Parses a source string. Different from the {@code parse()} counterpart, this method doesn't
-   * throw a {@code ParserException} on a failed match, but returns a ParseException that
-   * contains the {@code ParserException}.
-   *
-   * @param source        the source string
-   * @param moduleName    the name of the module, this name appears in error message
-   * @param sourceLocator maps an index of char into line and column numbers
-   * @return the result
-   */
-  final ParseResult<T> tryParse(CharSequence source, String moduleName, SourceLocator sourceLocator) {
-    return Parsers.tryParse(source, followedBy(Parsers.EOF), sourceLocator, moduleName);
   }
 
   @SuppressWarnings("unchecked")

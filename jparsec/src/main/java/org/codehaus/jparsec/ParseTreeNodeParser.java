@@ -40,7 +40,7 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
   @Override
   boolean apply(ParseContext ctxt) {
     ParseTreeNode originalNode = ctxt.parseTreeNode;
-    ParseTreeNode currentNode = ParseTreeNodeParsers.createCleanCopy(this);
+    ParseTreeNode currentNode = createCleanCopy(this);
 
     if (originalNode != null) {
       originalNode.addChild(currentNode);
@@ -124,5 +124,12 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
         ", matchedEnd=" + matchedEnd +
         ", matchedString='" + matchedString + '\'' +
         '}';
+  }
+
+  /**
+   * Creates a clean copy with only the underlying parser and name.
+   */
+  private static <T> ParseTreeNodeParser<T> createCleanCopy(ParseTreeNodeParser<T> nodeParser) {
+    return new ParseTreeNodeParser<T>(nodeParser.getParser(), nodeParser.getParseTreeNodeName());
   }
 }
