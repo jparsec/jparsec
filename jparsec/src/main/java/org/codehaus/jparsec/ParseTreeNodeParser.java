@@ -15,8 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import java.util.LinkedList;
-import java.util.List;
+import org.codehaus.jparsec.util.ImmutableList;
 
 /**
  * A parser that implements {@link org.codehaus.jparsec.ParseTreeNode}.
@@ -27,11 +26,10 @@ import java.util.List;
 class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
   private Parser<T> parser;
   private String name;
-  private List<ParseTreeNode> children = new LinkedList<ParseTreeNode>();
+  private ImmutableList<ParseTreeNode> reverseChildren = ImmutableList.empty();
   private Integer matchedStart;
   private Integer matchedEnd;
   private String matchedString;
-  private ParseTreeNode parentParseTreeNode;
 
   public ParseTreeNodeParser(Parser<T> parser, String name) {
     this.parser = parser;
@@ -41,7 +39,7 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
   @Override
   boolean apply(ParseContext ctxt) {
     if (ctxt instanceof ParseTreeContext) {
-      ParseTreeContext  parseTreeContext = (ParseTreeContext) ctxt;
+      ParseTreeContext parseTreeContext = (ParseTreeContext) ctxt;
       return apply(parseTreeContext);
     } else {
       return parser.run(ctxt);
@@ -54,7 +52,6 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
 
     if (originalNode != null) {
       originalNode.addChild(currentNode);
-      currentNode.setParentParseTreeNode(originalNode);
     }
     ctxt.setParseTreeNode(currentNode);
 
@@ -62,7 +59,7 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
     boolean ok = parser.run(ctxt);
     if (ok) {
       currentNode.setMatchedEnd(ctxt.getIndex());
-    } else if (currentNode.getChildren().isEmpty()) {
+    } else if (currentNode.getReverseChildren().isEmpty()) {
       Integer end = currentNode.getMatchedStart();
       if (end == null || end < ctxt.getPartialMatchedEnd()) {
         end = ctxt.getPartialMatchedEnd();
@@ -84,18 +81,33 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
   }
 
   @Override
-  public List<ParseTreeNode> getChildren() {
-    return children;
+  public ImmutableList<ParseTreeNode> getChildren() {
+    return reverseChildren.reverse();
+  }
+
+  @Override
+  public ImmutableList<ParseTreeNode> getReverseChildren() {
+    return reverseChildren;
+  }
+
+  @Override
+  public boolean hasChildren() {
+    return reverseChildren.isEmpty();
   }
 
   @Override
   public void addChild(ParseTreeNode child) {
-    children.add(child);
+    reverseChildren = reverseChildren.insert(child);
   }
 
   @Override
   public void removeLastChild() {
-    children.remove(children.size() - 1);
+    reverseChildren = reverseChildren.tail();
+  }
+
+  @Override
+  public void resetChildren(ImmutableList<ParseTreeNode> children) {
+    this.reverseChildren = children;
   }
 
   @Override
@@ -126,16 +138,6 @@ class ParseTreeNodeParser<T> extends Parser<T> implements ParseTreeNode {
   @Override
   public void setMatchedString(String matchedString) {
     this.matchedString = matchedString;
-  }
-
-  @Override
-  public void setParentParseTreeNode(ParseTreeNode parentParseTreeNode) {
-    this.parentParseTreeNode = parentParseTreeNode;
-  }
-
-  @Override
-  public ParseTreeNode getParent() {
-    return parentParseTreeNode;
   }
 
   Parser<T> getParser() {

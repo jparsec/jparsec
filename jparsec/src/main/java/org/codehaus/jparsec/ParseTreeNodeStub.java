@@ -15,8 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import java.util.Collections;
-import java.util.List;
+import org.codehaus.jparsec.util.ImmutableList;
 
 /**
  * This stub is used when some characters were matched successfully, but no parser decorated with
@@ -37,8 +36,18 @@ class ParseTreeNodeStub implements ParseTreeNode {
   }
 
   @Override
-  public List<ParseTreeNode> getChildren() {
-    return Collections.emptyList();
+  public ImmutableList<ParseTreeNode> getChildren() {
+    return ImmutableList.empty();
+  }
+
+  @Override
+  public ImmutableList<ParseTreeNode> getReverseChildren() {
+    return ImmutableList.empty();
+  }
+
+  @Override
+  public boolean hasChildren() {
+    return false;
   }
 
   @Override
@@ -49,6 +58,13 @@ class ParseTreeNodeStub implements ParseTreeNode {
   @Override
   public void removeLastChild() {
     throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void resetChildren(ImmutableList<ParseTreeNode> children) {
+    if (!children.isEmpty()) {
+      throw new IllegalArgumentException();
+    }
   }
 
   @Override
@@ -79,16 +95,6 @@ class ParseTreeNodeStub implements ParseTreeNode {
   @Override
   public void setMatchedString(String matchedString) {
     this.matchedString = matchedString;
-  }
-
-  @Override
-  public void setParentParseTreeNode(ParseTreeNode parentParseTreeNode) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public ParseTreeNode getParent() {
-    throw new UnsupportedOperationException();
   }
 
   @Override

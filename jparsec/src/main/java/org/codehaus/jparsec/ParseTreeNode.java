@@ -15,7 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import java.util.List;
+import org.codehaus.jparsec.util.ImmutableList;
 
 /**
  * Represents a parse tree node.
@@ -32,7 +32,17 @@ interface ParseTreeNode {
   /**
    * Get sub nodes.
    */
-  List<ParseTreeNode> getChildren();
+  ImmutableList<ParseTreeNode> getChildren();
+
+  /**
+   * Get the sub nodes in reverse order.
+   */
+  ImmutableList<ParseTreeNode> getReverseChildren();
+
+  /**
+   * Whether the children is not empty.
+   */
+  boolean hasChildren();
 
   /**
    * Add a sub node.
@@ -43,6 +53,11 @@ interface ParseTreeNode {
    * Remove the last child.
    */
   void removeLastChild();
+
+  /**
+   * Reset the children.
+   */
+  void resetChildren(ImmutableList<ParseTreeNode> children);
 
   /**
    * On a successful match, this is the start index (inclusive). Default is null, which means no match.
@@ -73,18 +88,4 @@ interface ParseTreeNode {
    * On a successful match, this is the matched string. Default is null, which means no match.
    */
   void setMatchedString(String matchedString);
-
-  /**
-   * Set the parent parse tree node. null parent indicates this is a top level node.
-   * This method is used when {@link org.codehaus.jparsec.ParseTreeNodeParser} was constructing
-   * a parse tree.
-   */
-  void setParentParseTreeNode(ParseTreeNode parentParseTreeNode);
-
-  /**
-   * Get the parent parse tree node. null parent indicates this is a top level node.
-   * This method is used when {@link org.codehaus.jparsec.ParseTreeNodeParser} was constructing
-   * a parse tree.
-   */
-  ParseTreeNode getParent();
 }

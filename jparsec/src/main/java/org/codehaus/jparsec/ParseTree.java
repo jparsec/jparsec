@@ -15,6 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import org.codehaus.jparsec.util.ImmutableList;
 import org.codehaus.jparsec.util.Strings;
 
 import java.util.List;
@@ -52,7 +53,7 @@ public class ParseTree {
     } else {
       line(sb, indentLevel, "{");
 
-      List<ParseTreeNode> children = node.getChildren();
+      ImmutableList<ParseTreeNode> children = node.getChildren();
       if (children.isEmpty()) {
         line(sb, indentLevel + 1, "name: \"", escapeJsonStr(node.getParseTreeNodeName()), "\",");
         line(sb, indentLevel + 1, "matched: \"", escapeJsonStr(node.getMatchedString()), "\"");

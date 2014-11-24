@@ -16,7 +16,7 @@
 package org.codehaus.jparsec;
 
 import org.codehaus.jparsec.error.ParseErrorDetails;
-import org.codehaus.jparsec.util.Lists;
+import org.codehaus.jparsec.util.ImmutableList;
 
 import java.util.List;
 
@@ -54,7 +54,7 @@ class ParseTreeContext implements ParseContext {
   }
 
   private Integer bottomUpWalkParseTree(ParseTreeNode node) {
-    List<ParseTreeNode> children = node.getChildren();
+    ImmutableList<ParseTreeNode> children = node.getReverseChildren();
     Integer end = node.getMatchedEnd();
     if (!children.isEmpty()) {
       for (ParseTreeNode child : children) {
@@ -69,12 +69,12 @@ class ParseTreeContext implements ParseContext {
   }
 
   private void topDownWalkParseTree(ParseTreeNode node, boolean root) {
-    List<ParseTreeNode> children = node.getChildren();
-    fillStubsToChildren(node, children);
+    fillStubsToChildren(node);
     if (root) {
-      fillStubToRoot(node, children);
+      fillStubToRoot(node);
     }
 
+    ImmutableList<ParseTreeNode> children = node.getReverseChildren();
     if (children.isEmpty()) {
       fillNodeString(node);
     } else {
@@ -84,12 +84,13 @@ class ParseTreeContext implements ParseContext {
     }
   }
 
-  private void fillStubToRoot(ParseTreeNode node, List<ParseTreeNode> children) {
+  private void fillStubToRoot(ParseTreeNode node) {
+    ImmutableList<ParseTreeNode> reverseChildren = node.getReverseChildren();
     Integer end = node.getMatchedEnd();
     if (getPartialMatchedEnd() > end) {
       fillStubToRoot(node, end);
-    } else if (getPartialMatchedEnd() == end && children.size() > 0) {
-      ParseTreeNode lastChild = children.get(children.size() - 1);
+    } else if (getPartialMatchedEnd() == end && !reverseChildren.isEmpty()) {
+      ParseTreeNode lastChild = reverseChildren.head();
       end = lastChild.getMatchedEnd();
       if (getPartialMatchedEnd() > end) {
         fillStubToRoot(node, end);
@@ -114,8 +115,9 @@ class ParseTreeContext implements ParseContext {
     }
   }
 
-  private void fillStubsToChildren(ParseTreeNode node, List<ParseTreeNode> children) {
-    List<ParseTreeNode> newChildren = Lists.arrayList();
+  private void fillStubsToChildren(ParseTreeNode node) {
+    ImmutableList<ParseTreeNode> newChildren = ImmutableList.empty();
+    ImmutableList<ParseTreeNode> children = node.getChildren();
 
     Integer start = node.getMatchedStart();
     for (ParseTreeNode child : children) {
@@ -125,9 +127,9 @@ class ParseTreeContext implements ParseContext {
         ParseTreeNodeStub stub = new ParseTreeNodeStub();
         stub.setMatchedStart(start);
         stub.setMatchedEnd(childStart);
-        newChildren.add(stub);
+        newChildren = newChildren.insert(stub);
       }
-      newChildren.add(child);
+      newChildren = newChildren.insert(child);
 
       start = child.getMatchedEnd();
     }
@@ -138,11 +140,10 @@ class ParseTreeContext implements ParseContext {
       ParseTreeNodeStub stub = new ParseTreeNodeStub();
       stub.setMatchedStart(start);
       stub.setMatchedEnd(getPartialMatchedEnd());
-      newChildren.add(stub);
+      newChildren = newChildren.insert(stub);
     }
 
-    children.clear();
-    children.addAll(newChildren);
+    node.resetChildren(newChildren);
   }
 
   @Override
@@ -154,12 +155,6 @@ class ParseTreeContext implements ParseContext {
     }
 
     ctxt.setAt(at);
-  }
-
-  private boolean between(int index, Integer start, Integer end) {
-    return start != null
-        && start <= index
-        && (end == null || end > index);
   }
 
   @Override
