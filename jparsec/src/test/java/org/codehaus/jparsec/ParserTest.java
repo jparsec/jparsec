@@ -114,6 +114,20 @@ public class ParserTest extends BaseMockTest {
   }
 
   @Test
+  public void testTryParseTree_backtrack_multipleLevels() throws Exception {
+    Parser<?> integer = INTEGER.node("int");
+    Parser<?> comma = Scanners.isChar(',');
+    Parser<?> semicolon = Scanners.isChar(';');
+    Parser<?> dot = Scanners.isChar('.');
+    Parser<?> parser = integer.followedBy(comma).cast()
+        .or(integer.followedBy(semicolon).cast()
+            .or(integer.followedBy(dot)));
+    ParseTree parseTree = parser.parseTree().parse("123.");
+    String expected = ResUtils.loadRes("/ExpectedParseTree6.txt");
+    Assert.assertEquals(expected, parseTree.toJson());
+  }
+
+  @Test
   public void testSource() {
     assertEquals("source", FOO.source().toString());
     assertParser(FOO.source(), "", "");

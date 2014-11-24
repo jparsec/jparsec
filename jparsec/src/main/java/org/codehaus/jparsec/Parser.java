@@ -510,7 +510,7 @@ public abstract class Parser<T> {
 
   /**
    * A {@link Parser} that marks this parser with the given name (implies {@link #label(String)}),
-   * so that {@link #tryParseTree(CharSequence)} can treat this parser as a parse tree node.
+   * so that {@link #parseTree()} can treat this parser as a parse tree node.
    *
    * @since 3.0
    */
