@@ -25,10 +25,22 @@ final class NestedParser<T> extends Parser<T> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
+    ParseTreeContext parseTreeContext = null;
+    if (ctxt instanceof ParseTreeContext) {
+      parseTreeContext = (ParseTreeContext) ctxt;
+      ctxt = parseTreeContext.getCtxt();
+    }
+
     if (!lexer.run(ctxt)) return false;
     Token[] tokens = lexer.getReturn(ctxt);
     ParserState parserState = new ParserState(
-        ctxt.module, ctxt.source, tokens, 0, ctxt.locator, ctxt.getIndex(), tokens);
+        ctxt.getModule(), ctxt.getSource(), tokens, 0, ctxt.getLocator(), ctxt.getIndex(), tokens);
+
+    if (parseTreeContext != null) {
+      parseTreeContext.setCtxt(ctxt);
+      ctxt = parseTreeContext;
+    }
+
     return ParserInternals.runNestedParser(ctxt, parserState, parser);
   }
   

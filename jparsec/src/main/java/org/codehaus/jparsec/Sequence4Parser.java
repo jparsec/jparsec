@@ -46,7 +46,7 @@ final class Sequence4Parser<A, B, C, D, T> extends Parser<T> {
     boolean r4 = p4.run(ctxt);
     if (!r4) return false;
     D o4 = p4.getReturn(ctxt);
-    ctxt.result = m4.map(o1, o2, o3, o4);
+    ctxt.setResult(m4.map(o1, o2, o3, o4));
     return true;
   }
   

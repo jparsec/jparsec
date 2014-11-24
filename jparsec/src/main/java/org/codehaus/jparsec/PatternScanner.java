@@ -34,7 +34,7 @@ final class PatternScanner extends Parser<Void> {
 
   @Override
   boolean apply(final ParseContext ctxt) {
-    int at = ctxt.at;
+    int at = ctxt.getAt();
     CharSequence src = ctxt.characters();
     int matchLength = pattern.match(src, at, src.length());
     if (matchLength < 0) {
@@ -42,7 +42,7 @@ final class PatternScanner extends Parser<Void> {
       return false;
     }
     ctxt.next(matchLength);
-    ctxt.result = null;
+    ctxt.setResult(null);
     return true;
   }
 
@@ -74,7 +74,7 @@ final class PatternScanner extends Parser<Void> {
         derived = derived.derive(src.charAt(i));
         if (derived == Patterns.ALWAYS) {
           ctxt.next(i);
-          ctxt.result = null;
+          ctxt.setResult(null);
           return new Done<Void>(null);
         } else if (derived == Patterns.NEVER) {
           return new Failed<Void>();

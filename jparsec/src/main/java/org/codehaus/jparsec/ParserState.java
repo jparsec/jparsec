@@ -17,28 +17,28 @@ package org.codehaus.jparsec;
 
 
 /**
- * Represents {@link ParseContext} for token level parsing.
+ * Represents {@link AbstractParseContext} for token level parsing.
  * 
  * @author Ben Yu
  */
-final class ParserState extends ParseContext {
+final class ParserState extends AbstractParseContext {
   
   private final Token[] input;
   
   // in case a terminating eof token is not explicitly created, the implicit one is used.
   private final int endIndex;
 
-  @Override boolean isEof() {
-    return at >= input.length;
+  @Override public boolean isEof() {
+    return getAt() >= input.length;
   }
   
-  @Override int toIndex(int pos) {
+  @Override public int toIndex(int pos) {
     if (pos >= input.length) return endIndex;
     return input[pos].index();
   }
 
-  @Override Token getToken() {
-    return input[at];
+  @Override public Token getToken() {
+    return input[getAt()];
   }
   
   ParserState(String module, CharSequence source, Token[] input, int at,
@@ -48,15 +48,15 @@ final class ParserState extends ParseContext {
     this.endIndex = endIndex;
   }
   
-  @Override char peekChar() {
+  @Override public char peekChar() {
     throw new IllegalStateException("Cannot scan characters on tokens.");
   }
   
-  @Override CharSequence characters() {
+  @Override public CharSequence characters() {
     throw new IllegalStateException("Cannot scan characters on tokens.");
   }
 
-  @Override String getInputName(int pos) {
+  @Override public String getInputName(int pos) {
     if (pos >= input.length) return EOF;
     return input[pos].toString();
   }

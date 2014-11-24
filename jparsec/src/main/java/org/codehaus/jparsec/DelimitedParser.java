@@ -33,24 +33,24 @@ class DelimitedParser<T, R> extends Parser<R> {
   @Override boolean apply(final ParseContext ctxt) {
     final R result = begin();
     for (;;) {
-      final int step0 = ctxt.step;
-      final int at0 = ctxt.at;
+      final int step0 = ctxt.getStep();
+      final int at0 = ctxt.getAt();
       boolean r = ParserInternals.greedyRun(delim, ctxt);
       if (!r) {
         if (!ParserInternals.stillThere(ctxt, at0, step0)) return false;
-        ctxt.result = result;
+        ctxt.setResult(result);
         return true;
       }
-      final int step1 = ctxt.step;
-      final int at1 = ctxt.at;
+      final int step1 = ctxt.getStep();
+      final int at1 = ctxt.getAt();
       r = ParserInternals.greedyRun(parser, ctxt);
       if (!r) {
         if (!ParserInternals.stillThere(ctxt, at1, step1)) return false;
-        ctxt.result = result;
+        ctxt.setResult(result);
         return true;
       }
-      if (at0 == ctxt.at) { // infinite loop
-        ctxt.result = result;
+      if (at0 == ctxt.getAt()) { // infinite loop
+        ctxt.setResult(result);
         return true;
       }
       element(ctxt, result);

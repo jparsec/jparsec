@@ -20,8 +20,8 @@ final class ToTokenParser extends Parser<Token> {
       return false;
     }
     int len = ctxt.getIndex() - begin;
-    Token token = new Token(begin, len, ctxt.result);
-    ctxt.result = token;
+    Token token = new Token(begin, len, ctxt.getResult());
+    ctxt.setResult(token);
     return true;
   }
   

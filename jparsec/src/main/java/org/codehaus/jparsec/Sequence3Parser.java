@@ -41,7 +41,7 @@ final class Sequence3Parser<A, B, C, T> extends Parser<T> {
     boolean r3 = p3.run(ctxt);
     if (!r3) return false;
     C o3 = p3.getReturn(ctxt);
-    ctxt.result = m3.map(o1, o2, o3);
+    ctxt.setResult(m3.map(o1, o2, o3));
     return true;
   }
   

@@ -35,10 +35,10 @@ final class NestableBlockCommentScanner extends Parser<Void> {
   @Override boolean apply(final ParseContext ctxt) {
     if (!openQuote.run(ctxt)) return false;
     for(int level = 1; level > 0;) {
-      final int step = ctxt.step;
-      final int at = ctxt.at;
+      final int step = ctxt.getStep();
+      final int at = ctxt.getAt();
       if (closeQuote.run(ctxt)) {
-        if (at == ctxt.at) {
+        if (at == ctxt.getAt()) {
           throw new IllegalStateException("closing comment scanner not consuming input.");
         }
         level--;
@@ -46,7 +46,7 @@ final class NestableBlockCommentScanner extends Parser<Void> {
       }
       if (!ParserInternals.stillThere(ctxt, at, step)) return false;
       if (openQuote.run(ctxt)) {
-        if (at == ctxt.at) {
+        if (at == ctxt.getAt()) {
           throw new IllegalStateException("opening comment scanner not consuming input.");
         }
         level++;
@@ -54,14 +54,14 @@ final class NestableBlockCommentScanner extends Parser<Void> {
       }
       if (!ParserInternals.stillThere(ctxt, at, step)) return false;
       if (commented.run(ctxt)) {
-        if (at == ctxt.at) {
+        if (at == ctxt.getAt()) {
           throw new IllegalStateException("commented scanner not consuming input.");
         }
         continue;
       }
       return false;
     }
-    ctxt.result = null;
+    ctxt.setResult(null);
     return true;
   }
   

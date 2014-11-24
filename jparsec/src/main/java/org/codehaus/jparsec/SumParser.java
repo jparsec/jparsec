@@ -23,14 +23,14 @@ final class SumParser<T> extends Parser<T> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    Object result = ctxt.result;
-    int at = ctxt.at;
-    int step = ctxt.step;
+    Object result = ctxt.getResult();
+    int at = ctxt.getAt();
+    int step = ctxt.getStep();
     for (Parser<? extends T> p : alternatives) {
       if (p.run(ctxt)) {
         return true;
       }
-      if (ctxt.at != at && ctxt.step - step >= 1) return false;
+      if (ctxt.getAt() != at && ctxt.getStep() - step >= 1) return false;
       ctxt.set(step, at, result);
     }
     return false;

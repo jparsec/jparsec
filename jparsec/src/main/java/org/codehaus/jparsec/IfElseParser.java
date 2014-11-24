@@ -30,9 +30,9 @@ final class IfElseParser<T, C> extends Parser<T> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    final Object ret = ctxt.result;
-    final int step = ctxt.step;
-    final int at = ctxt.at;
+    final Object ret = ctxt.getResult();
+    final int step = ctxt.getStep();
+    final int at = ctxt.getAt();
     if (ParserInternals.runWithoutRecordingError(cond, ctxt)) {
       Parser<? extends T> parser = consequence.map(cond.getReturn(ctxt));
       return parser.run(ctxt);

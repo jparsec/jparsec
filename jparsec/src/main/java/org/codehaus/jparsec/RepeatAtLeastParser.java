@@ -37,7 +37,7 @@ final class RepeatAtLeastParser<T> extends Parser<List<T>> {
     if (!ParserInternals.repeat(parser, min, result, ctxt))
       return false;
     if (ParserInternals.many(parser, result, ctxt)) {
-      ctxt.result = result;
+      ctxt.setResult(result);
       return true;
     }
     return false;

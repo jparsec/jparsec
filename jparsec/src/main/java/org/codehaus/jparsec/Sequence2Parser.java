@@ -35,7 +35,7 @@ final class Sequence2Parser<A, B, T> extends Parser<T> {
     boolean r2 = p2.run(ctxt);
     if (!r2) return false;
     B o2 = p2.getReturn(ctxt);
-    ctxt.result = m2.map(o1, o2);
+    ctxt.setResult(m2.map(o1, o2));
     return true;
   }
   

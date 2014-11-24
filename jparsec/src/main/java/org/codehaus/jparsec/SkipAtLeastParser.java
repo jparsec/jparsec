@@ -27,7 +27,7 @@ final class SkipAtLeastParser extends Parser<Void> {
   @Override boolean apply(ParseContext ctxt) {
     if (!ParserInternals.repeat(parser, min, ctxt)) return false;
     if (ParserInternals.many(parser, ctxt)) {
-      ctxt.result = null;
+      ctxt.setResult(null);
       return true;
     }
     return false;

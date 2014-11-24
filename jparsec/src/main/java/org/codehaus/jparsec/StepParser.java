@@ -26,9 +26,9 @@ final class StepParser<T> extends Parser<T> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    int step = ctxt.step;
+    int step = ctxt.getStep();
     if (!parser.run(ctxt)) return false;
-    ctxt.step = step + n;
+    ctxt.setStep(step + n);
     return true;
   }
   

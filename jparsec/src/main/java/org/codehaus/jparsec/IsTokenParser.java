@@ -33,7 +33,7 @@ final class IsTokenParser<T> extends Parser<T> {
       ctxt.expected(fromToken);
       return false;
     }
-    ctxt.result = v;
+    ctxt.setResult(v);
     ctxt.next();
     return true;
   }

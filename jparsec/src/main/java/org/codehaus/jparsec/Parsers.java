@@ -15,23 +15,14 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import org.codehaus.jparsec.annotations.Private;
+import org.codehaus.jparsec.error.ParserException;
+import org.codehaus.jparsec.functors.*;
+import org.codehaus.jparsec.util.Lists;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import org.codehaus.jparsec.annotations.Private;
-import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
-import org.codehaus.jparsec.functors.Map3;
-import org.codehaus.jparsec.functors.Map4;
-import org.codehaus.jparsec.functors.Map5;
-import org.codehaus.jparsec.functors.Maps;
-import org.codehaus.jparsec.functors.Pair;
-import org.codehaus.jparsec.functors.Tuple3;
-import org.codehaus.jparsec.functors.Tuple4;
-import org.codehaus.jparsec.functors.Tuple5;
-import org.codehaus.jparsec.util.Lists;
 
 /**
  * Provides common {@link Parser} implementations.
@@ -96,7 +87,7 @@ public final class Parsers {
     ScannerState ctxt = new ScannerState(module, src, 0, locator);
     if (!parser.run(ctxt)) {
       throw new ParserException(
-          ctxt.renderError(), ctxt.module, locator.locate(ctxt.errorIndex()));
+          ctxt.renderError(), ctxt.getModule(), locator.locate(ctxt.errorIndex()));
     }
     return parser.getReturn(ctxt);
   }
@@ -141,7 +132,7 @@ public final class Parsers {
   public static <T> Parser<T> constant(final T v) {
     return new Parser<T>() {
       @Override boolean apply(ParseContext ctxt) {
-        ctxt.result = v;
+        ctxt.setResult(v);
         return true;
       }
       @Override public String toString() {
@@ -544,7 +535,7 @@ public final class Parsers {
   
   @SuppressWarnings("unchecked")
   static <From> boolean runNext(ParseContext state, Map<? super From, ? extends Parser<?>> next) {
-    Parser<?> parser = next.map((From) state.result);
+    Parser<?> parser = next.map((From) state.getResult());
     return parser.run(state);
   }
 

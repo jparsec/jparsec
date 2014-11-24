@@ -5,6 +5,8 @@ import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Maps;
+import org.codehaus.jparsec.util.ResUtils;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.StringReader;
@@ -47,6 +49,82 @@ public class ParserTest extends BaseMockTest {
       assertTrue(e.getMessage(), e.getMessage().contains("test module"));
       assertTrue(e.getMessage(), e.getMessage().contains("integer expected, x encountered."));
     }
+  }
+
+  @Test
+  public void testTryParseTree_allChildrenAsNode() throws Exception {
+    Parser<?> integer = INTEGER.node("int");
+    Parser<?> comma = Scanners.isChar(',').node("comma");
+    Parser<?> parser = integer.next(comma);
+    ParseTree parseTree = parser.parseTree().parse("123,456");
+    String expected = ResUtils.loadRes("/ExpectedParseTree.txt");
+    Assert.assertEquals(expected, parseTree.toJson());
+  }
+
+  @Test
+  public void testTryParseTree_secondChildAsNode() throws Exception {
+    Parser<?> integer = INTEGER;
+    Parser<?> comma = Scanners.isChar(',').node("comma");
+    Parser<?> parser = integer.next(comma);
+    ParseTree parseTree = parser.parseTree().parse("123,456");
+    String expected = ResUtils.loadRes("/ExpectedParseTree2.txt");
+    Assert.assertEquals(expected, parseTree.toJson());
+  }
+
+  @Test
+  public void testTryParseTree_noChildAsNode() throws Exception {
+    Parser<?> integer = INTEGER;
+    Parser<?> comma = Scanners.isChar(',');
+    Parser<?> parser = integer.next(comma);
+    ParseTree parseTree = parser.parseTree().parse("123,456");
+    String expected = ResUtils.loadRes("/ExpectedParseTree3.txt");
+    Assert.assertEquals(expected, parseTree.toJson());
+  }
+
+  @Test
+  public void testTryParseTree_firstChildAsNode_partialMatch() throws Exception {
+    Parser<?> integer = INTEGER.node("int");
+    Parser<?> comma = Scanners.isChar(',');
+    Parser<?> parser = integer.next(comma);
+    ParseTree parseTree = parser.parseTree().parse("123,456");
+    String expected = ResUtils.loadRes("/ExpectedParseTree4.txt");
+    Assert.assertEquals(expected, parseTree.toJson());
+  }
+
+  @Test
+  public void testTryParseTree_firstChildAsNode_fullMatch() throws Exception {
+    Parser<?> integer = INTEGER.node("int");
+    Parser<?> comma = Scanners.isChar(',');
+    Parser<?> parser = integer.next(comma);
+    ParseTree parseTree = parser.parseTree().parse("123,");
+    String expected = ResUtils.loadRes("/ExpectedParseTree4.txt");
+    Assert.assertEquals(expected, parseTree.toJson());
+  }
+
+  @Test
+  public void testTryParseTree_backtrack() throws Exception {
+    Parser<?> integer = INTEGER.node("int");
+    Parser<?> comma = Scanners.isChar(',');
+    Parser<?> dot = Scanners.isChar('.');
+    Parser<?> parser = integer.followedBy(comma).cast()
+        .or(integer.followedBy(dot));
+    ParseTree parseTree = parser.parseTree().parse("123.");
+    String expected = ResUtils.loadRes("/ExpectedParseTree6.txt");
+    Assert.assertEquals(expected, parseTree.toJson());
+  }
+
+  @Test
+  public void testTryParseTree_backtrack_multipleLevels() throws Exception {
+    Parser<?> integer = INTEGER.node("int");
+    Parser<?> comma = Scanners.isChar(',');
+    Parser<?> semicolon = Scanners.isChar(';');
+    Parser<?> dot = Scanners.isChar('.');
+    Parser<?> parser = integer.followedBy(comma).cast()
+        .or(integer.followedBy(semicolon).cast()
+            .or(integer.followedBy(dot)));
+    ParseTree parseTree = parser.parseTree().parse("123.");
+    String expected = ResUtils.loadRes("/ExpectedParseTree6.txt");
+    Assert.assertEquals(expected, parseTree.toJson());
   }
 
   @Test

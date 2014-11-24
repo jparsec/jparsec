@@ -128,6 +128,8 @@ public abstract class Parser<T> {
    * until the given parser succeeds. The input that matches the given parser
    * will not be consumed. The input that matches this parser will
    * be collected in a list that will be returned by this function.
+   * 
+   * @since 3.0
    */
   public final Parser<List<T>> until(Parser<?> parser) {
     return parser.not().next(this).many().followedBy(parser.peek());
@@ -351,6 +353,8 @@ public abstract class Parser<T> {
    * In effect, {@code this} behaves reluctantly, giving
    * {@code after} a chance to grab input that would have been consumed by {@code this}
    * otherwise.
+   *
+   * @since 3.0
    */
   public final Parser<T> reluctantBetween( Parser<?> before, Parser<?> after ) {
 	  return new ReluctantBetweenParser<T>(before, this, after);
@@ -505,6 +509,29 @@ public abstract class Parser<T> {
   }
 
   /**
+   * A {@link Parser} that marks this parser with the given name (implies {@link #label(String)}),
+   * so that {@link #parseTree()} can treat this parser as a parse tree node.
+   *
+   * @since 3.0
+   */
+  public final Parser<T> node(String name) {
+    return new ParseTreeNodeParser<T>(label(name), name);
+  }
+
+  /**
+   * A {@link Parser} that constructs a parse tree. On a failed match, the returned
+   * parse tree contains the partial match. A parse tree contains the nodes which
+   * corresponds to the parsers that are decorated with {@link #node(String)}.
+   * <p/>
+   * The effect is similar to the parse tree view in ANTLRWorks.
+   *
+   * @since 3.0
+   */
+  public final Parser<ParseTree> parseTree() {
+    return new ParseTreeParser(this.followedBy(Parsers.EOF));
+  }
+
+  /**
    * A {@link Parser} that takes as input the {@link Token} collection returned by {@code lexer}, and runs {@code
    * this} to parse the tokens.
    * <p/>
@@ -622,17 +649,23 @@ public abstract class Parser<T> {
    * @return the result
    */
   final T parse(CharSequence source, String moduleName, SourceLocator sourceLocator) {
-    return Parsers.parse(source, followedBy(Parsers.EOF), sourceLocator, moduleName);
+    Parser<T> parser = this instanceof ParseTreeParser ? this : followedBy(Parsers.EOF);
+    return Parsers.parse(source, parser, sourceLocator, moduleName);
   }
 
   @SuppressWarnings("unchecked")
   final T getReturn(ParseContext ctxt) {
-    return (T) ctxt.result;
+    return (T) ctxt.getResult();
   }
 
   final boolean run(ParseContext ctxt) {
     try {
-      return apply(ctxt);
+      ctxt.setPartialMatchedEnd(ctxt.getAt());
+      boolean ok = apply(ctxt);
+      if (ok) {
+        ctxt.setPartialMatchedEnd(ctxt.getAt());
+      }
+      return ok;
     } catch (RuntimeException e) {
       throw asParserException(e, ctxt);
     }
@@ -641,7 +674,7 @@ public abstract class Parser<T> {
   private ParserException asParserException(Throwable e, ParseContext ctxt) {
     if (e instanceof ParserException)
       return (ParserException) e;
-    return new ParserException(e, null, ctxt.module, ctxt.locator.locate(ctxt.getIndex()));
+    return new ParserException(e, null, ctxt.getModule(), ctxt.getLocator().locate(ctxt.getIndex()));
   }
 
   /**
