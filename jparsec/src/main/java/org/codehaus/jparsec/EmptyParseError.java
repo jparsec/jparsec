@@ -36,23 +36,23 @@ class EmptyParseError implements ParseErrorDetails {
     this.encountered = encountered;
   }
   
-  public final String getEncountered() {
+  @Override public final String getEncountered() {
     return encountered;
   }
 
-  public List<String> getExpected() {
+  @Override public List<String> getExpected() {
     return Collections.emptyList();
   }
 
-  public String getFailureMessage() {
+  @Override public String getFailureMessage() {
     return null;
   }
 
-  public final int getIndex() {
+  @Override public final int getIndex() {
     return index;
   }
 
-  public String getUnexpected() {
+  @Override public String getUnexpected() {
     return null;
   }
 }

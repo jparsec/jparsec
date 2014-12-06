@@ -56,7 +56,7 @@ final class Operators {
   }
   
   private static final Comparator<String> LONGER_STRING_FIRST = new Comparator<String>() {
-    public int compare(String a, String b) {
+    @Override public int compare(String a, String b) {
       return b.length() - a.length();
     }
   };

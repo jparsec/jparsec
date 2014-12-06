@@ -39,16 +39,16 @@ final class ListFactories {
    */
   public static <T> ListFactory<T> arrayListFactoryWithFirstElement(final T first) {
     return new ListFactory<T>() {
-      public List<T> newList() {
+      @Override public List<T> newList() {
         ArrayList<T> list = Lists.arrayList();
         list.add(first);
         return list;
       }
     };
   }
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final ListFactory ARRAY_LIST_FACTORY = new ListFactory<Object>() {
-    public List<Object> newList() {
+    @Override public List<Object> newList() {
       return Lists.arrayList();
     }
   };

@@ -28,7 +28,7 @@ class NotStringCaseInsensitivePattern extends Pattern {
       return MISMATCH;
   }
 
-  public String toString(){
+  @Override public String toString(){
     return "!(" + string.toUpperCase() + ")";
   }
 }

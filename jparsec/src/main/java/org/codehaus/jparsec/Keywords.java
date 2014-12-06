@@ -42,43 +42,44 @@ final class Keywords {
   
   private static class CaseSensitive implements StringCase {
     private static Comparator<String> COMPARATOR = new Comparator<String>() {
-      public int compare(String a, String b) {
+      @Override public int compare(String a, String b) {
         if (a == b) return 0;
         else if (a == null) return -1;
         else if (b == null) return 1;
         else return a.compareTo(b);
       }
     };
-    public Comparator<String> comparator() {
+    @Override public Comparator<String> comparator() {
       return COMPARATOR;
     }
-    public String toKey(String k) {
+    @Override public String toKey(String k) {
       return k;
     }
-    public <T> org.codehaus.jparsec.functors.Map<String, T> toMap(java.util.Map<String, T> m) {
+    @Override public <T> org.codehaus.jparsec.functors.Map<String, T> toMap(
+        java.util.Map<String, T> m) {
       return Maps.map(m);
     }
   }
   
   private static class CaseInsensitive implements StringCase {
     private static Comparator<String> COMPARATOR = new Comparator<String>() {
-      public int compare(String a, String b) {
+      @Override public int compare(String a, String b) {
         if (a == b) return 0;
         else if (a == null) return -1;
         else if (b == null) return 1;
         else return a.compareToIgnoreCase(b);
       }
     };
-    public Comparator<String> comparator() {
+    @Override public Comparator<String> comparator() {
       return COMPARATOR;
     }
-    public String toKey(String k) {
+    @Override public String toKey(String k) {
       return k.toLowerCase();
     }
-    public <T> org.codehaus.jparsec.functors.Map<String, T> toMap(
+    @Override public <T> org.codehaus.jparsec.functors.Map<String, T> toMap(
         final java.util.Map<String, T> m) {
       return new org.codehaus.jparsec.functors.Map<String,T>() {
-        public T map(String key) {
+        @Override public T map(String key) {
           return m.get(key.toLowerCase());
         }
       };
@@ -94,8 +95,7 @@ final class Keywords {
     set.addAll(Arrays.asList(names));
     return set.toArray(new String[set.size()]);
   }
-  
-  @SuppressWarnings("unchecked")
+
   static <T> Lexicon lexicon(
       Parser<String> wordScanner, String[] keywordNames,
       boolean caseSensitive, final Map<String, ?> defaultMap) {
@@ -107,7 +107,7 @@ final class Keywords {
     }
     final Map<String, Object> fmap = scase.toMap(map);
     Map<String, Object> tokenizerMap = new Map<String, Object>() {
-      public Object map(String text) {
+      @Override public Object map(String text) {
         Object val = fmap.map(text);
         if (val != null) return val;
         else return defaultMap.map(text);

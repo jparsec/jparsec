@@ -308,6 +308,21 @@ public final class Terminals extends Lexicon {
   public static Terminals operators(String... ops) {
     return new Terminals(Operators.lexicon(ops));
   }
+
+  /** Returns a {@link Parser} that recognizes identifiers (a.k.a words, variable names etc. */
+  public static Parser<String> identifier() {
+    return fragment(Tag.IDENTIFIER);
+  }
+
+  /** Returns a {@link Parser} that recognizes natural integer literals. */
+  public static Parser<String> integer() {
+    return fragment(Tag.INTEGER);
+  }
+
+  /** Returns a {@link Parser} that recognizes decimal point integer literals. */
+  public static Parser<String> decimal() {
+    return fragment(Tag.DECIMAL);
+  }
   
   /**
    * Returns a {@link Parser} that recognizes {@link Tokens.Fragment} token values

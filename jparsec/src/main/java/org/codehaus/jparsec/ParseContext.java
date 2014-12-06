@@ -131,8 +131,9 @@ abstract class ParseContext {
           return errorStrings;
         }
       };
+    default:
+      return new EmptyParseError(errorIndex, encounteredName);
     }
-    return new EmptyParseError(errorIndex, encounteredName);
   }
 
   final String getEncountered() {

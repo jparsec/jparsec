@@ -30,7 +30,7 @@ final class InternalFunctors {
   
   static <T> TokenMap<T> isTokenType(final Class<T> targetType, final String name) {
     return new TokenMap<T>() {
-      public T map(Token token) {
+      @Override public T map(Token token) {
         if (targetType.isInstance(token.value())) {
           return targetType.cast(token.value());
         }
@@ -44,7 +44,7 @@ final class InternalFunctors {
   
   static TokenMap<Token> tokenWithSameValue(final Object value) {
     return new TokenMap<Token>() {
-      public Token map(Token token) {
+      @Override public Token map(Token token) {
         return (value == token.value()) ? token : null;
       }
       @Override public String toString() {
@@ -53,9 +53,9 @@ final class InternalFunctors {
     };
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map2 FIRST_OF_TWO = new Map2() {
-    public Object map(Object first, Object b) {
+    @Override public Object map(Object first, Object b) {
       return first;
     }
     @Override public String toString() {
@@ -63,9 +63,9 @@ final class InternalFunctors {
     }
   };
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map2 LAST_OF_TWO = new Map2() {
-    public Object map(Object a, Object last) {
+    @Override public Object map(Object a, Object last) {
       return last;
     }
     @Override public String toString() {
@@ -73,9 +73,9 @@ final class InternalFunctors {
     }
   };
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map3 LAST_OF_THREE = new Map3() {
-    public Object map(Object a, Object b, Object last) {
+    @Override public Object map(Object a, Object b, Object last) {
       return last;
     }
     @Override public String toString() {
@@ -83,9 +83,9 @@ final class InternalFunctors {
     }
   };
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map4 LAST_OF_FOUR = new Map4() {
-    public Object map(Object a, Object b, Object c, Object last) {
+    @Override public Object map(Object a, Object b, Object c, Object last) {
       return last;
     }
     @Override public String toString() {
@@ -93,9 +93,9 @@ final class InternalFunctors {
     }
   };
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map5 LAST_OF_FIVE = new Map5() {
-    public Object map(Object a, Object b, Object c, Object d, Object last) {
+    @Override public Object map(Object a, Object b, Object c, Object d, Object last) {
       return last;
     }
     @Override public String toString() {
@@ -132,10 +132,10 @@ final class InternalFunctors {
    * Returns a {@link Map} that delegates to {@code map} and falls back to {@code defaultMap} for
    * null return values.
    */
-  public static <F, T> Map<F, T> fallback(
+  static <F, T> Map<F, T> fallback(
       final Map<F, T> map, final Map<? super F, ? extends T> defaultMap) {
     return new Map<F, T>() {
-      public T map(F v) {
+      @Override public T map(F v) {
         T result = map.map(v);
         return (result == null) ? defaultMap.map(v) : result;
       }

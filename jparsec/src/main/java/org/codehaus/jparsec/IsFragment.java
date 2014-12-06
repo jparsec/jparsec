@@ -24,7 +24,7 @@ import org.codehaus.jparsec.Tokens.Fragment;
  */
 abstract class IsFragment implements TokenMap<String> {
   
-  public String map(final Token token) {
+  @Override public String map(final Token token) {
     final Object val = token.value();
     if (val instanceof Fragment) {
       Fragment c = (Fragment) val;

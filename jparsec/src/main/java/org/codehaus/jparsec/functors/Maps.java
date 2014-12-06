@@ -29,7 +29,7 @@ public final class Maps {
    * {@link Integer#valueOf(String)}.
    */
   public static final Map<String, Integer> TO_INTEGER = new Map<String, Integer>() {
-    public Integer map(String v) {
+    @Override public Integer map(String v) {
       return Integer.valueOf(v);
     }
     @Override public String toString() {
@@ -43,7 +43,7 @@ public final class Maps {
   /** Returns a {@link Unary} that maps a {@link String} to lower case using {@code locale}. */
   public static Unary<String> toLowerCase(final Locale locale) {
     return  new Unary<String>() {
-      public String map(String s) {
+      @Override public String map(String s) {
         return s.toLowerCase(locale);
       }
       @Override public String toString() {
@@ -58,7 +58,7 @@ public final class Maps {
   /** Returns a {@link Unary} that maps a {@link String} to upper case using {@code locale}. */
   public static Unary<String> toUpperCase(final Locale locale) {
     return  new Unary<String>() {
-      public String map(String s) {
+      @Override public String map(String s) {
         return s.toUpperCase(locale);
       }
       @Override public String toString() {
@@ -82,7 +82,7 @@ public final class Maps {
    */
   public static <E extends Enum<E>> Map<String, E> toEnum(final Class<E> enumType) {
     return new Map<String, E>() {
-      public E map(String name) {
+      @Override public E map(String name) {
         return Enum.valueOf(enumType, name);
       }
       @Override public String toString() {
@@ -100,7 +100,7 @@ public final class Maps {
   /** Returns a {@link Map} that always maps any object to {@code v}. */
   public static <F, T> Map <F, T> constant(final T v) {
     return new Map <F, T>() {
-      public T map(F from) { return v; }
+      @Override public T map(F from) { return v; }
       @Override public String toString() {
         return String.valueOf(v);
       }
@@ -110,7 +110,7 @@ public final class Maps {
   /** Adapts a {@link java.util.Map} to {@link Map}. */
   public static <K, V> Map<K, V> map(final java.util.Map<K, V> m) {
     return new Map<K, V>() {
-      public V map(K k) {
+      @Override public V map(K k) {
         return m.get(k);
       }
       @Override public String toString() {
@@ -119,9 +119,9 @@ public final class Maps {
     };
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map2 ID2 = new Map2() {
-    public Pair map(Object a, Object b) {
+    @Override public Pair map(Object a, Object b) {
       return Tuples.pair(a, b);
     }
     @Override public String toString() {
@@ -129,9 +129,9 @@ public final class Maps {
     }
   };
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map3 ID3 = new Map3() {
-    public Tuple3 map(Object a, Object b, Object c) {
+    @Override public Tuple3 map(Object a, Object b, Object c) {
       return Tuples.tuple(a, b, c);
     }
     @Override public String toString() {
@@ -139,9 +139,9 @@ public final class Maps {
     }
   };
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map4 ID4 = new Map4() {
-    public Tuple4 map(Object a, Object b, Object c, Object d) {
+    @Override public Tuple4 map(Object a, Object b, Object c, Object d) {
       return Tuples.tuple(a, b, c, d);
     }
     @Override public String toString() {
@@ -149,9 +149,9 @@ public final class Maps {
     }
   };
       
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map5 ID5 = new Map5() {
-    public Tuple5 map(Object a, Object b, Object c, Object d, Object e) {
+    @Override public Tuple5 map(Object a, Object b, Object c, Object d, Object e) {
       return Tuples.tuple(a, b, c, d, e);
     }
     @Override public String toString() {
@@ -184,15 +184,15 @@ public final class Maps {
   }
   
   private static final Unary<Object> ID = new Unary<Object>() {
-    public Object map(Object v) {
+    @Override public Object map(Object v) {
       return v;
     }
     @Override public String toString() {return "identity";}
   };
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map TO_STRING = new Map<Object, String>() {
-    public String map(Object obj) {
+    @Override public String map(Object obj) {
       return String.valueOf(obj);
     }
     @Override public String toString() {

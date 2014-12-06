@@ -45,7 +45,7 @@ class SequencePattern extends Pattern {
     return current;
   }
 
-  private ArrayList<Pattern> reverse(Pattern[] patterns1) {
+  private static ArrayList<Pattern> reverse(Pattern[] patterns1) {
     ArrayList<Pattern> reversed = Lists.arrayList();
     reversed.addAll(asList(patterns1));
     Collections.reverse(reversed);

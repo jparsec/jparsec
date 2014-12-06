@@ -29,7 +29,7 @@ public class WithSource<T> {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    WithSource that = (WithSource) o;
+    WithSource<?> that = (WithSource<?>) o;
 
     if (value != null ? !value.equals(that.value) : that.value != null) return false;
     if (source != null ? !source.equals(that.source) : that.source != null) return false;

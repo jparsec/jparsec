@@ -53,7 +53,7 @@ public final class OperatorTable<T> {
     }
     
     /** Higher precedence first. For tie, compares associativity. */
-    public int compareTo(Operator that) {
+    @Override public int compareTo(Operator that) {
       if (precedence > that.precedence) return -1;
       if (precedence < that.precedence) return 1;
       return associativity.compareTo(that.associativity);
@@ -186,7 +186,7 @@ public final class OperatorTable<T> {
     return Parsers.or(ps);
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"rawtypes", "unchecked"})
   private static <T> Parser<T> build(
       Parser op, Associativity associativity, Parser<T> operand) {
     switch (associativity) {

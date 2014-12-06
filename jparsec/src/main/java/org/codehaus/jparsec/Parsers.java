@@ -45,7 +45,7 @@ public final class Parsers {
 
   /** A {@link Parser} that consumes a token. The token value is returned from the parser. */
   public static final Parser<Object> ANY_TOKEN = token(new TokenMap<Object>() {
-      public Object map(Token tok) {
+      @Override public Object map(Token tok) {
         return tok.value();
       }
       @Override public String toString() {
@@ -56,10 +56,10 @@ public final class Parsers {
   /** A {@link Parser} that retrieves the current index in the source. */
   public static final Parser<Integer> INDEX = new GetIndexParser();
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Parser ALWAYS = constant(null);
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Parser NEVER = new NeverParser<Object>();
   
   static final Parser<Boolean> TRUE = constant(true);
@@ -112,7 +112,7 @@ public final class Parsers {
   /** Converts a parser of a collection of {@link Token} to a parser of an array of {@code Token}.*/
   static Parser<Token[]> tokens(final Parser<? extends Collection<Token>> parser) {
     return parser.map(new Map<Collection<Token>, Token[]>() {
-      public Token[] map(Collection<Token> list) {
+      @Override public Token[] map(Collection<Token> list) {
         return list.toArray(new Token[list.size()]);
       }
       @Override public String toString() {
@@ -520,7 +520,7 @@ public final class Parsers {
    * We always convert {@link Iterable} to an array to avoid the cost of creating
    * a new {@Link java.util.Iterator} object each time the parser runs.
    */
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings({"unchecked", "rawtypes"})
   static <T> Parser<T>[] toArray(Iterable<? extends Parser<? extends T>> parsers) {
     if (parsers instanceof Collection<?>) {
       return toArray((Collection) parsers);
@@ -548,10 +548,10 @@ public final class Parsers {
     return parser.run(state);
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   static final Map2 PREFIX_OPERATOR_MAP2 = prefixOperatorMap2("prefix");
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   static final Map2 POSTFIX_OPERATOR_MAP2 = postfixOperatorMap2("postfix");
 
   /**
@@ -567,10 +567,10 @@ public final class Parsers {
   static <T> Parser<T> infixn(
       final Parser<T> p, final Parser<? extends Map2<? super T, ? super T, ? extends T>> op) {
     return p.next(new Map<T, Parser<T>>() {
-      public Parser<T> map(final T a) {
+      @Override public Parser<T> map(final T a) {
         final Parser<T> shift = sequence(op, p,
             new Map2<Map2<? super T, ? super T, ? extends T>, T, T>() {
-              public T map(Map2<? super T, ? super T, ? extends T> m2, T b) {
+              @Override public T map(Map2<? super T, ? super T, ? extends T> m2, T b) {
                 return m2.map(a, b);
               }
               @Override public String toString() {
@@ -603,9 +603,9 @@ public final class Parsers {
     Parser<Map<T, T>> opAndRhs = sequence(op, p, MAP_OPERATOR_AND_RHS_TO_CLOSURE);
     final Parser<List<Map<T, T>>> afterFirstOperand = opAndRhs.many();
     Map<T, Parser<T>> next = new Map<T, Parser<T>>() {
-      public Parser<T> map(final T first) {
+      @Override public Parser<T> map(final T first) {
         return afterFirstOperand.map(new Map<List<Map<T, T>>, T>() {
-          public T map(List<Map<T, T>> maps) {
+          @Override public T map(List<Map<T, T>> maps) {
             return applyInfixOperators(first, maps);
           }
           @Override public String toString() {
@@ -643,7 +643,7 @@ public final class Parsers {
   private static <T> Map2<List<? extends Map<? super T, ? extends T>>, T, T> prefixOperatorMap2(
       final String name) {
     return new Map2<List<? extends Map<? super T, ? extends T>>, T, T>() {
-      public T map(List<? extends Map<? super T, ? extends T>> ops, T a) {
+      @Override public T map(List<? extends Map<? super T, ? extends T>> ops, T a) {
         return applyPrefixOperators(a, ops);
       }
       @Override public String toString() {
@@ -672,7 +672,7 @@ public final class Parsers {
   private static <T> Map2<T, List<? extends Map<? super T, ? extends T>>, T> postfixOperatorMap2(
       final String name) {
     return new Map2<T, List<? extends Map<? super T, ? extends T>>, T>() {
-      public T map(T a, List<? extends Map<? super T, ? extends T>> ops) {
+      @Override public T map(T a, List<? extends Map<? super T, ? extends T>> ops) {
         return applyPostfixOperators(a, ops);
       }
       @Override public String toString() {
@@ -704,12 +704,12 @@ public final class Parsers {
     }
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map2 INFIXR_OPERATOR_MAP2 = toInfixRhs();
 
   private static <T> Map2<Map2<? super T, ? super T, ? extends T>, T, Rhs<T>> toInfixRhs() {
     return new Map2<Map2<? super T, ? super T, ? extends T>, T, Rhs<T>>() {
-      public Rhs<T> map(Map2<? super T, ? super T, ? extends T> m2, T b) {
+      @Override public Rhs<T> map(Map2<? super T, ? super T, ? extends T> m2, T b) {
         return new Rhs<T>(m2, b);
       }
       @Override public String toString() {
@@ -718,12 +718,12 @@ public final class Parsers {
     };
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map2 APPLY_INFIXR_OPERATORS = applyInfixrOperators();
 
   private static final <T> Map2<T, List<Rhs<T>>, T> applyInfixrOperators() {
     return new Map2<T, List<Rhs<T>>, T>() {
-      public T map(final T first, final List<Rhs<T>> rhss) {
+      @Override public T map(final T first, final List<Rhs<T>> rhss) {
         if (rhss.isEmpty())
           return first;
         int lastIndex = rhss.size() - 1;
@@ -740,14 +740,14 @@ public final class Parsers {
     };
   }
 
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   static final Map2 MAP_OPERATOR_AND_RHS_TO_CLOSURE = fromOperatorAndRhsToClosure();
 
   private static <A, B, R> Map2<Map2<A, B, R>, B, Map<A, R>> fromOperatorAndRhsToClosure() {
     return new Map2<Map2<A, B, R>, B, Map<A, R>>() {
-      public Map<A, R> map(final Map2<A, B, R> op, final B b) {
+      @Override public Map<A, R> map(final Map2<A, B, R> op, final B b) {
         return new Map<A, R>() {
-          public R map(A a) {
+          @Override public R map(A a) {
             return op.map(a, b);
           }
           @Override public String toString() {

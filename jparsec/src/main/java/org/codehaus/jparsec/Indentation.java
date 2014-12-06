@@ -40,7 +40,7 @@ public final class Indentation {
    * and {@link Character#isWhitespace(char)} returns true.
    */
   static final CharPredicate INLINE_WHITESPACE = new CharPredicate() {
-    public boolean isChar(char c) {
+    @Override public boolean isChar(char c) {
       return c != '\n' && Character.isWhitespace(c);
     }
     @Override public String toString() {
@@ -111,7 +111,7 @@ public final class Indentation {
   public Parser<List<Token>> lexer(Parser<?> tokenizer, Parser<?> delim) {
     Parser<?> lf = Scanners.isChar('\n').retn(Punctuation.LF);
     return Parsers.plus(tokenizer, lf).lexer(delim).map(new Unary<List<Token>>() {
-      public List<Token> map(List<Token> tokens) {
+      @Override public List<Token> map(List<Token> tokens) {
         return analyzeIndentations(tokens, Punctuation.LF);
       }
       @Override public String toString() {

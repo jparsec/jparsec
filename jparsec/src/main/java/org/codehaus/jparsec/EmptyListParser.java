@@ -24,12 +24,12 @@ import java.util.List;
  * @author Ben Yu
  */
 final class EmptyListParser<T> extends Parser<List<T>> {
-  @SuppressWarnings("unchecked")
-  private static final EmptyListParser singleton = new EmptyListParser();
+  @SuppressWarnings("rawtypes")
+  private static final EmptyListParser INSTANCE = new EmptyListParser();
   
   @SuppressWarnings("unchecked")
   static <T> Parser<List<T>> instance() {
-    return singleton;
+    return INSTANCE;
   }
   
   private EmptyListParser() {}

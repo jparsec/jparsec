@@ -15,7 +15,7 @@ final class Reflection {
     return (obj == null) ? "null" : obj.getClass().getName();
   }
   
-  @SuppressWarnings("unchecked")
+  @SuppressWarnings("rawtypes")
   private static final Map<Class, Class> WRAPPERS = new HashMap<Class, Class>();
   
   private static <T> void primitive(Class<T> primitive, Class<T> wrapper) {

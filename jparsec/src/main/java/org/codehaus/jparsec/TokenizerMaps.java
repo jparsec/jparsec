@@ -45,7 +45,7 @@ final class TokenizerMaps {
    */
   static final Map<String, ScientificNotation> SCIENTIFIC_NOTATION =
       new Map<String, ScientificNotation>() {
-        public ScientificNotation map(String text) {
+        @Override public ScientificNotation map(String text) {
           int e = text.indexOf('e');
           if (e < 0) {
             e = text.indexOf('E');
@@ -66,7 +66,7 @@ final class TokenizerMaps {
    * interpreted as escape.
    */
   static final Map<String, String> DOUBLE_QUOTE_STRING = new Map<String, String>() {
-    public String map(String text) {
+    @Override public String map(String text) {
       return StringLiteralsTranslator.tokenizeDoubleQuote(text);
     }
     @Override public String toString() {
@@ -80,7 +80,7 @@ final class TokenizerMaps {
    * ({@code ''}) are escaped as one single quote character.
    */
   static final Map<String, String> SINGLE_QUOTE_STRING = new Map<String, String>() {
-    public String map(String text) {      
+    @Override public String map(String text) {      
       return StringLiteralsTranslator.tokenizeSingleQuote(text);
     }
     @Override public String toString() {
@@ -94,7 +94,7 @@ final class TokenizerMaps {
    * interpreted as escape. 
    */
   static final Map<String, Character> SINGLE_QUOTE_CHAR = new Map<String, Character>() {
-    public Character map(String text) {
+    @Override public Character map(String text) {
       int len = text.length();
       if (len == 3) return text.charAt(1);
       else if (len == 4) return text.charAt(2);
@@ -110,7 +110,7 @@ final class TokenizerMaps {
    * as a decimal integer and tokenizes to a {@link Long}.
    */
   static final Map<String, Long> DEC_AS_LONG = new Map<String, Long>() {
-    public Long map(String text) {
+    @Override public Long map(String text) {
       return NumberLiteralsTranslator.tokenizeDecimalAsLong(text);
     }
     @Override public String toString() {
@@ -123,7 +123,7 @@ final class TokenizerMaps {
    * as a octal integer and tokenizes to a {@link Long}.
    */
   static final Map<String, Long> OCT_AS_LONG = new Map<String, Long>() {
-    public Long map(String text) {
+    @Override public Long map(String text) {
       return NumberLiteralsTranslator.tokenizeOctalAsLong(text);
     }
     @Override public String toString() {
@@ -136,7 +136,7 @@ final class TokenizerMaps {
    * as a hexadecimal integer and tokenizes to a {@link Long}.
    */
   static final Map<String, Long> HEX_AS_LONG = new Map<String, Long>() {
-    public Long map(String text) {
+    @Override public Long map(String text) {
       return NumberLiteralsTranslator.tokenizeHexAsLong(text);
     }
     @Override public String toString() {
@@ -150,7 +150,7 @@ final class TokenizerMaps {
    */
   static Map<String, Fragment> fragment(final Object tag) {
     return new Map<String, Fragment>() {
-      public Fragment map(String text) {
+      @Override public Fragment map(String text) {
         return Tokens.fragment(text, tag);
       }
       @Override public String toString() {

@@ -35,22 +35,22 @@ import static org.codehaus.jparsec.util.Checks.checkArgument;
  * Defines grammar and encapsulates parsing logic. A {@link Parser} takes as input a {@link CharSequence} source and
  * parses it when the {@link #parse(CharSequence)} method is called. A value of type {@code T} will be returned if
  * parsing succeeds, or a {@link ParserException} is thrown to indicate parsing error. For example:
- * <p/>
+ *
  * <pre>
  * Parser&lt;String> scanner = Scanners.IDENTIFIER;
  * assertEquals("foo", scanner.parse("foo"));
  * </pre>
- * <p/>
+ *
  * <p> {@code Parser}s are immutable and inherently covariant on the type parameter {@code T}. Because Java generics has
  * no native support for covariant type parameter, a workaround is to use the {@link Parser#cast()} method to explicitly
  * force covariance whenever needed.
- * <p/>
+ *
  * <p> {@code Parser}s run either on character level to scan the source, or on token level to parse a list of {@link
  * Token} objects returned from another parser. This other parser that returns the list of tokens for token level
  * parsing is hooked up via the {@link #from(Parser)} or {@link #from(Parser, Parser)} method.
- * <p/>
+ *
  * <p>The following are important naming conventions used throughout the library:
- * <p/>
+ *
  * <ul>
  * <li>A character level parser object that recognizes a single lexical word is called a scanner.
  * <li>A scanner that translates the recognized lexical word into a token is called a tokenizer.
@@ -66,9 +66,9 @@ public abstract class Parser<T> {
   /**
    * An atomic mutable reference to {@link Parser}. Is useful to work around circular dependency between parser
    * objects.
-   * <p/>
+   *
    * <p>Example usage:
-   * <p/>
+   *
    * <pre>
    * Parser.Reference&lt;Foo> ref = Parser.newReference();
    * ...
@@ -238,7 +238,6 @@ public abstract class Parser<T> {
    *
    * @param alternative the alternative parser to run if this fails.
    */
-  @SuppressWarnings("unchecked")
   public final Parser<T> or(Parser<? extends T> alternative) {
     return Parsers.or(this, alternative);
   }
@@ -336,7 +335,7 @@ public abstract class Parser<T> {
   /**
    * A {@link Parser} that runs {@code this} between {@code before} and {@code after}. The return value of {@code
    * this} is preserved.
-   * <p/>
+   *
    * <p>Equivalent to {@link Parsers#between(Parser, Parser, Parser)}, which preserves the natural order of the
    * parsers in the argument list, but is a bit more verbose.
    */
@@ -358,13 +357,13 @@ public abstract class Parser<T> {
 
   /**
    * A {@link Parser} that runs {@code this} 1 or more times separated by {@code delim}.
-   * <p/>
+   *
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> sepBy1(Parser<?> delim) {
     final Parser<T> afterFirst = delim.step(0).next(this);
     Map<T, Parser<List<T>>> binder = new Map<T, Parser<List<T>>>() {
-      public Parser<List<T>> map(T firstValue) {
+      @Override public Parser<List<T>> map(T firstValue) {
         return new RepeatAtLeastParser<T>(afterFirst, 0, ListFactories.arrayListFactoryWithFirstElement(firstValue));
       }
     };
@@ -373,7 +372,7 @@ public abstract class Parser<T> {
 
   /**
    * A {@link Parser} that runs {@code this} 0 or more times separated by {@code delim}.
-   * <p/>
+   *
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> sepBy(Parser<?> delim) {
@@ -382,7 +381,7 @@ public abstract class Parser<T> {
 
   /**
    * A {@link Parser} that runs {@code this} for 0 or more times delimited and terminated by {@code delim}.
-   * <p/>
+   *
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> endBy(Parser<?> delim) {
@@ -391,7 +390,7 @@ public abstract class Parser<T> {
 
   /**
    * A {@link Parser} that runs {@code this} for 1 or more times delimited and terminated by {@code delim}.
-   * <p/>
+   *
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> endBy1(Parser<?> delim) {
@@ -401,12 +400,12 @@ public abstract class Parser<T> {
   /**
    * A {@link Parser} that runs {@code this} for 1 ore more times separated and optionally terminated by {@code
    * delim}. For example: {@code "foo;foo;foo"} and {@code "foo;foo;"} both matches {@code foo.sepEndBy1(semicolon)}.
-   * <p/>
+   *
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> sepEndBy1(final Parser<?> delim) {
     return next(new Map<T, Parser<List<T>>>() {
-      public Parser<List<T>> map(T first) {
+      @Override public Parser<List<T>> map(T first) {
         return new DelimitedListParser<T>(Parser.this, delim, ListFactories.arrayListFactoryWithFirstElement(first));
       }
     });
@@ -415,7 +414,7 @@ public abstract class Parser<T> {
   /**
    * A {@link Parser} that runs {@code this} for 0 ore more times separated and optionally terminated by {@code
    * delim}. For example: {@code "foo;foo;foo"} and {@code "foo;foo;"} both matches {@code foo.sepEndBy(semicolon)}.
-   * <p/>
+   *
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> sepEndBy(Parser<?> delim) {
@@ -425,7 +424,7 @@ public abstract class Parser<T> {
   /**
    * A {@link Parser} that runs {@code op} for 0 or more times greedily, then runs {@code this}. The {@link Map}
    * objects returned from {@code op} are applied from right to left to the return value of {@code p}.
-   * <p/>
+   *
    * <p> {@code p.prefix(op)} is equivalent to {@code op* p} in EBNF.
    */
   @SuppressWarnings("unchecked")
@@ -436,7 +435,7 @@ public abstract class Parser<T> {
   /**
    * A {@link Parser} that runs {@code this} and then runs {@code op} for 0 or more times greedily. The {@link Map}
    * objects returned from {@code op} are applied from left to right to the return value of p.
-   * <p/>
+   *
    * <p> {@code p.postfix(op)} is equivalent to {@code p op*} in EBNF.
    */
   @SuppressWarnings("unchecked")
@@ -448,7 +447,7 @@ public abstract class Parser<T> {
    * A {@link Parser} that parses non-associative infix operator. Runs {@code this} for the left operand, and then
    * runs {@code op} and {@code this} for the operator and the right operand optionally. The {@link Map2} objects
    * returned from {@code op} are applied to the return values of the two operands, if any.
-   * <p/>
+   *
    * <p> {@code p.infixn(op)} is equivalent to {@code p (op p)?} in EBNF.
    */
   public final Parser<T> infixn(Parser<? extends Map2<? super T, ? super T, ? extends T>> op) {
@@ -460,7 +459,7 @@ public abstract class Parser<T> {
    * {@code op} and {@code this} for the operator and the right operand for 0 or more times greedily. The {@link Map2}
    * objects returned from {@code op} are applied from left to right to the return values of {@code this}, if any. For
    * example: {@code a + b + c + d} is evaluated as {@code (((a + b)+c)+d)}.
-   * <p/>
+   *
    * <p> {@code p.infixl(op)} is equivalent to {@code p (op p)*} in EBNF.
    */
   public final Parser<T> infixl(Parser<? extends Map2<? super T, ? super T, ? extends T>> op) {
@@ -473,7 +472,7 @@ public abstract class Parser<T> {
    * {@code op} and {@code this} for the operator and the right operand for 0 or more times greedily. The {@link Map2}
    * objects returned from {@code op} are applied from right to left to the return values of {@code this}, if any. For
    * example: {@code a + b + c + d} is evaluated as {@code a + (b + (c + d))}.
-   * <p/>
+   *
    * <p> {@code p.infixr(op)} is equivalent to {@code p (op p)*} in EBNF.
    */
   public final Parser<T> infixr(Parser<? extends Map2<? super T, ? super T, ? extends T>> op) {
@@ -482,7 +481,7 @@ public abstract class Parser<T> {
 
   /**
    * A {@link Parser} that runs {@code this} and wraps the return value in a {@link Token}.
-   * <p/>
+   *
    * <p>It is normally not necessary to call this method explicitly. {@link #lexer(Parser)} and {@link #from(Parser,
    * Parser)} both do the conversion automatically.
    */
@@ -505,9 +504,9 @@ public abstract class Parser<T> {
   }
 
   /**
-   * A {@link Parser} that takes as input the {@link Token} collection returned by {@code lexer}, and runs {@code
-   * this} to parse the tokens.
-   * <p/>
+   * A {@link Parser} that takes as input the {@link Token} collection returned by {@code lexer},
+   * and runs {@code this} to parse the tokens.
+   *
    * <p> {@code this} must be a token level parser.
    */
   public final Parser<T> from(Parser<? extends Collection<Token>> lexer) {
@@ -517,7 +516,18 @@ public abstract class Parser<T> {
   /**
    * A {@link Parser} that takes as input the tokens returned by {@code tokenizer} delimited by {@code delim}, and
    * runs {@code this} to parse the tokens.
-   * <p/>
+   *
+   * <p>For example: <pre class="code">
+   * Terminals terminals = ...;
+   * return parser.from(terminals.tokenizer(), Scanners.WHITESPACES).parse(str);
+   * </pre>
+   *
+   * In the above example, tokens are delimited by whitespaces. Optionally, you can also skip
+   * comments using an alternative scanner than {@code WHITESPACES}. In some mini parsers where
+   * operator characters can be adjacent without risk of being mixed and mangled (such a calculator),
+   * you want to use {@code whateverDelim.optional()} to make sure adjacent operator characters like
+   * "((" or "))" are properly recognized.
+   *
    * <p> {@code this} must be a token level parser.
    */
   public final Parser<T> from(Parser<?> tokenizer, Parser<Void> delim) {
@@ -528,12 +538,12 @@ public abstract class Parser<T> {
    * A {@link Parser} that greedily runs {@code this} repeatedly, and ignores the pattern recognized by {@code delim}
    * before and after each occurrence. The result tokens are wrapped in {@link Token} and are collected and returned
    * in a {@link List}.
-   * <p/>
+   *
    * <p>It is normally not necessary to call this method explicitly. {@link #from(Parser, Parser)} is more convenient
    * for simple uses that just need to connect a token level parser with a lexer that produces the tokens. When more
    * flexible control over the token list is needed, for example, to parse indentation sensitive language, a
    * pre-processor of the token list may be needed.
-   * <p/>
+   *
    * <p> {@code this} must be a tokenizer that returns a token value.
    */
   public Parser<List<Token>> lexer(Parser<?> delim) {
@@ -638,7 +648,7 @@ public abstract class Parser<T> {
     }
   }
 
-  private ParserException asParserException(Throwable e, ParseContext ctxt) {
+  private static ParserException asParserException(Throwable e, ParseContext ctxt) {
     if (e instanceof ParserException)
       return (ParserException) e;
     return new ParserException(e, null, ctxt.module, ctxt.locator.locate(ctxt.getIndex()));

@@ -28,7 +28,7 @@ public final class CharPredicates {
   
   /** A {@link CharPredicate} that always returns false. */
   public static final CharPredicate NEVER = new CharPredicate() {
-    public boolean isChar(char c) {return false;}
+    @Override public boolean isChar(char c) {return false;}
     @Override public String toString() {
       return "none";
     }
@@ -36,7 +36,7 @@ public final class CharPredicates {
   
   /** A {@link CharPredicate} that always returns true. */
   public static final CharPredicate ALWAYS = new CharPredicate() {
-    public boolean isChar(char c) {return true;}
+    @Override public boolean isChar(char c) {return true;}
     @Override public String toString() {
       return "any character";
     }
@@ -47,7 +47,7 @@ public final class CharPredicates {
    * of {@code [a-f]} or {@code [A-F]}.
    */
   public static final CharPredicate IS_HEX_DIGIT = new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return c>='0' && c <= '9' || c >='a' && c <='f' || c>='A' && c <= 'F';
       }
       @Override public String toString() {
@@ -60,7 +60,7 @@ public final class CharPredicates {
    * true.
    */
   public static final CharPredicate IS_UPPER_CASE = new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return Character.isUpperCase(c);
       }
       @Override public String toString() {
@@ -73,7 +73,7 @@ public final class CharPredicates {
    * true.
    */
   public static final CharPredicate IS_LOWER_CASE = new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return Character.isLowerCase(c);
       }
       @Override public String toString() {
@@ -86,7 +86,7 @@ public final class CharPredicates {
    * returns true.
    */
   public static final CharPredicate IS_WHITESPACE = new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return Character.isWhitespace(c);
       }
       @Override public String toString() {
@@ -96,7 +96,7 @@ public final class CharPredicates {
   
   /** A {@link CharPredicate} that returns true if the character is an alpha character. */
   public static final CharPredicate IS_ALPHA = new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return c <='z' && c>='a' || c <='Z' && c >= 'A';
       }
       @Override public String toString() {
@@ -109,7 +109,7 @@ public final class CharPredicates {
    * character {@code _}.
    */
   public static final CharPredicate IS_ALPHA_ = new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return c == '_' || c <='z' && c>='a' || c <='Z' && c >= 'A';
       }
       @Override public String toString() {
@@ -122,7 +122,7 @@ public final class CharPredicates {
    * true.
    */
   public static final CharPredicate IS_LETTER = new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return Character.isLetter(c);
       }
       @Override public String toString() {
@@ -135,7 +135,7 @@ public final class CharPredicates {
    * underscore character.
    */
   public static final CharPredicate IS_ALPHA_NUMERIC = new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return c>='A' && c <= 'Z' || c>='a' && c<='z' || c>='0' && c<='9';
       }
       @Override public String toString() {
@@ -148,7 +148,7 @@ public final class CharPredicates {
    * underscore character.
    */
   public static final CharPredicate IS_ALPHA_NUMERIC_ = new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return c == '_' || c>='A' && c <= 'Z' || c>='a' && c<='z' || c>='0' && c<='9';
       }
       @Override public String toString() {
@@ -159,7 +159,7 @@ public final class CharPredicates {
   /** A {@link CharPredicate} that returns true if the character is equal to {@code c}. */
   public static CharPredicate isChar(final char c) {
     return new CharPredicate() {
-      public boolean isChar(char x) {
+      @Override public boolean isChar(char x) {
         return x == c;
       }
       @Override public String toString() {
@@ -171,7 +171,7 @@ public final class CharPredicates {
   /** A {@link CharPredicate} that returns true if the character is not equal to {@code c}. */
   public static CharPredicate notChar(final char c) {
     return new CharPredicate() {
-      public boolean isChar(char x) {
+      @Override public boolean isChar(char x) {
         return x != c;
       }
       @Override public String toString() {
@@ -186,7 +186,7 @@ public final class CharPredicates {
    */
   public static CharPredicate range(final char a, final char b) {
     return new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return c >= a && c <= b;
       }
       @Override public String toString() {
@@ -204,7 +204,7 @@ public final class CharPredicates {
    */
   public static CharPredicate notRange(final char a, final char b) {
     return new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return !(c >= a && c <= b);
       }
       @Override public String toString() {
@@ -219,7 +219,7 @@ public final class CharPredicates {
    */
   public static CharPredicate among(final String chars) {
     return new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return chars.indexOf(c) >= 0;
       }
       @Override public String toString() {
@@ -234,7 +234,7 @@ public final class CharPredicates {
    */
   public static CharPredicate notAmong(final String chars) {
     return new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return chars.indexOf(c) < 0;
       }
       @Override public String toString() {
@@ -246,7 +246,7 @@ public final class CharPredicates {
   /** A {@link CharPredicate} that returns true if {@code predicate} evaluates to false. */
   public static CharPredicate not(final CharPredicate predicate) {
     return new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return !predicate.isChar(c);
       }
       @Override public String toString() {
@@ -261,7 +261,7 @@ public final class CharPredicates {
    */
   public static CharPredicate and(final CharPredicate predicate1, final CharPredicate predicate2) {
     return new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return predicate1.isChar(c) && predicate2.isChar(c);
       }
       @Override public String toString() {
@@ -276,7 +276,7 @@ public final class CharPredicates {
    */
   public static CharPredicate or(final CharPredicate predicate1, final CharPredicate predicate2) {
     return new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         return predicate1.isChar(c) || predicate2.isChar(c);
       }
       @Override public String toString() {
@@ -294,7 +294,7 @@ public final class CharPredicates {
       return ALWAYS;
     else if (predicates.length == 1) return predicates[0];
     return new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         for(int i = 0;i < predicates.length;i++) {
           if (!predicates[i].isChar(c)) return false;
         }
@@ -315,7 +315,7 @@ public final class CharPredicates {
       return NEVER;
     else if (predicates.length == 1) return predicates[0];
     return new CharPredicate() {
-      public boolean isChar(char c) {
+      @Override public boolean isChar(char c) {
         for(int i = 0;i < predicates.length;i++) {
           if (predicates[i].isChar(c)) return true;
         }

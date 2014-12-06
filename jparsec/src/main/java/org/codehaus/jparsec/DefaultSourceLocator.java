@@ -129,7 +129,7 @@ final class DefaultSourceLocator implements SourceLocator {
     return new Location(startLineNumber + l, (l == 0 ? startColumnNumber : 1) + c);
   }
   
-  public Location locate(int index) {
+  @Override public Location locate(int index) {
     return (index < nextIndex) ? lookup(index) : scanTo(index);
   }
   

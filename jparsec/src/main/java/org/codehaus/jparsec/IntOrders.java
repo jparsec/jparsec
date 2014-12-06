@@ -28,7 +28,7 @@ final class IntOrders {
    * <p> {@code LT.compare(1, 2) == true}.
    */
   static final IntOrder LT = new IntOrder() {
-    public boolean compare(int a, int b) { return a < b; }
+    @Override public boolean compare(int a, int b) { return a < b; }
     @Override public String toString() {
       return "shortest";
     }
@@ -41,7 +41,7 @@ final class IntOrders {
    * <p> {@code GT.compare(2, 1) == true}.
    */
   static final IntOrder GT = new IntOrder() {
-    public boolean compare(int a, int b) {return a > b;}
+    @Override public boolean compare(int a, int b) {return a > b;}
     @Override public String toString() {
       return "longest";
     }
