@@ -198,12 +198,18 @@ public final class Terminals extends Lexicon {
   private Terminals(Lexicon lexicon) {
     super(lexicon.words, lexicon.tokenizer);
   }
+
   /**
    * Returns a {@link Terminals} object for lexing and parsing the operators with names specified in
-   * {@code ops}, and for lexing and parsing the keywords case insensitively. Keywords and operators
-   * are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag. Words that are not among
-   * {@code keywords} are lexed as {@code Fragment} with {@link Tag#IDENTIFIER} tag.
-   * A word is defined as an alphanumeric  string that starts with {@code [_a - zA - Z]},
+   * {@code ops}, and for lexing and parsing the keywords case insensitively. Parsers for operators
+   * and keywords can be obtained through {@link #token}; parsers for identifiers through
+   * {@link #identifier} and parsers for integers through {@link #integer()} etc.
+   * 
+   * <p>In detail, keywords and operators are lexed as {@link Tokens.Fragment} with
+   * {@link Tag#RESERVED} tag. Words that are not among {@code keywords} are lexed as
+   * {@code Fragment} with {@link Tag#IDENTIFIER} tag.
+   *
+   * <p>A word is defined as an alphanumeric  string that starts with {@code [_a - zA - Z]},
    * with 0 or more {@code [0 - 9_a - zA - Z]} following.
    * 
    * @param ops the operator names.
@@ -216,10 +222,15 @@ public final class Terminals extends Lexicon {
   
   /**
    * Returns a {@link Terminals} object for lexing and parsing the operators with names specified in
-   * {@code ops}, and for lexing and parsing the keywords case sensitively. Keywords and operators
-   * are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag. Words that are not among
-   * {@code keywords} are lexed as {@code Fragment} with {@link Tag#IDENTIFIER} tag.
-   * A word is defined as an alphanumeric string that starts with {@code [_a - zA - Z]},
+   * {@code ops}, and for lexing and parsing the keywords case sensitively. Parsers for operators
+   * and keywords can be obtained through {@link #token}; parsers for identifiers through
+   * {@link #identifier} and parsers for integers through {@link #integer()} etc.
+   * 
+   * <p>In detail, keywords and operators are lexed as {@link Tokens.Fragment} with
+   * {@link Tag#RESERVED} tag. Words that are not among {@code keywords} are lexed as
+   * {@code Fragment} with {@link Tag#IDENTIFIER} tag.
+   *
+   * <p>A word is defined as an alphanumeric string that starts with {@code [_a - zA - Z]},
    * with 0 or more {@code [0 - 9_a - zA - Z]} following.
    * 
    * @param ops the operator names.
@@ -232,9 +243,13 @@ public final class Terminals extends Lexicon {
   
   /**
    * Returns a {@link Terminals} object for lexing and parsing the operators with names specified in
-   * {@code ops}, and for lexing and parsing the keywords case insensitively. Keywords and operators
-   * are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag. Words that are not among
-   * {@code keywords} are lexed as {@code Fragment} with {@link Tag#IDENTIFIER} tag.
+   * {@code ops}, and for lexing and parsing the keywords case insensitively. Parsers for operators
+   * and keywords can be obtained through {@link #token}; parsers for identifiers through
+   * {@link #identifier} and parsers for integers through {@link #integer()} etc.
+   * 
+   * <p>In detail, keywords and operators are lexed as {@link Tokens.Fragment} with
+   * {@link Tag#RESERVED} tag. Words that are not among {@code keywords} are lexed as
+   * {@code Fragment} with {@link Tag#IDENTIFIER} tag.
    *  
    * @param wordScanner the scanner that returns a word in the language.
    * @param ops the operator names.
@@ -248,9 +263,13 @@ public final class Terminals extends Lexicon {
   
   /**
    * Returns a {@link Terminals} object for lexing and parsing the operators with names specified in
-   * {@code ops}, and for lexing and parsing the keywords case sensitively. Keywords and operators
-   * are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag. Words that are not among
-   * {@code keywords} are lexed as {@code Fragment} with {@link Tag#IDENTIFIER} tag.
+   * {@code ops}, and for lexing and parsing the keywords case sensitively. Parsers for operators
+   * and keywords can be obtained through {@link #token}; parsers for identifiers through
+   * {@link #identifier} and parsers for integers through {@link #integer()} etc.
+   * 
+   * <p>In detail, keywords and operators are lexed as {@link Tokens.Fragment} with
+   * {@link Tag#RESERVED} tag. Words that are not among {@code keywords} are lexed as
+   * {@code Fragment} with {@link Tag#IDENTIFIER} tag.
    *  
    * @param wordScanner the scanner that returns a word in the language.
    * @param ops the operator names.
@@ -264,9 +283,13 @@ public final class Terminals extends Lexicon {
   
   /**
    * Returns a {@link Terminals} object for lexing and parsing the operators with names specified in
-   * {@code ops}, and for lexing and parsing the keywords case insensitively. Keywords and operators
-   * are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag. Words that are not among
-   * {@code keywords} are lexed as {@code Fragment} with {@link Tag#IDENTIFIER} tag.
+   * {@code ops}, and for lexing and parsing the keywords case insensitively. Parsers for operators
+   * and keywords can be obtained through {@link #token}; parsers for identifiers through
+   * {@link #identifier} and parsers for integers through {@link #integer()} etc.
+   * 
+   * <p>In detail, keywords and operators are lexed as {@link Tokens.Fragment} with
+   * {@link Tag#RESERVED} tag. Words that are not among {@code keywords} are lexed as
+   * {@code Fragment} with {@link Tag#IDENTIFIER} tag.
    *  
    * @param wordScanner the scanner that returns a word in the language.
    * @param ops the operator names.
@@ -282,9 +305,13 @@ public final class Terminals extends Lexicon {
   
   /**
    * Returns a {@link Terminals} object for lexing and parsing the operators with names specified in
-   * {@code ops}, and for lexing and parsing the keywords case sensitively. Keywords and operators
-   * are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag. Words that are not among
-   * {@code keywords} are lexed as {@code Fragment} with {@link Tag#IDENTIFIER} tag.
+   * {@code ops}, and for lexing and parsing the keywords case sensitively. Parsers for operators
+   * and keywords can be obtained through {@link #token}; parsers for identifiers through
+   * {@link #identifier} and parsers for integers through {@link #integer()} etc.
+   * 
+   * <p>In detail, keywords and operators are lexed as {@link Tokens.Fragment} with
+   * {@link Tag#RESERVED} tag. Words that are not among {@code keywords} are lexed as
+   * {@code Fragment} with {@link Tag#IDENTIFIER} tag.
    *  
    * @param wordScanner the scanner that returns a word in the language.
    * @param ops the operator names.
@@ -301,6 +328,7 @@ public final class Terminals extends Lexicon {
   /**
    * Returns a {@link Terminals} object for lexing the operators with names specified in
    * {@code ops}. Operators are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag.
+   * For example, to get the parser for operator "?", simply call {@link #token("?")}.
    * 
    * @param ops the operator names.
    * @return the Terminals instance.
@@ -311,17 +339,17 @@ public final class Terminals extends Lexicon {
 
   /** Returns a {@link Parser} that recognizes identifiers (a.k.a words, variable names etc. */
   public static Parser<String> identifier() {
-    return fragment(Tag.IDENTIFIER);
+    return Identifier.PARSER;
   }
 
   /** Returns a {@link Parser} that recognizes natural integer literals. */
   public static Parser<String> integer() {
-    return fragment(Tag.INTEGER);
+    return IntegerLiteral.PARSER;
   }
 
   /** Returns a {@link Parser} that recognizes decimal point integer literals. */
   public static Parser<String> decimal() {
-    return fragment(Tag.DECIMAL);
+    return DecimalLiteral.PARSER;
   }
   
   /**
