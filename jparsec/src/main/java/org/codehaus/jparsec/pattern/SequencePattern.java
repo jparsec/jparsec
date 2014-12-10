@@ -29,22 +29,6 @@ class SequencePattern extends Pattern {
     this.patterns = patterns;
   }
 
-  @Override
-  public Pattern derive(char c) {
-    Pattern current = null;
-    for (Pattern pattern : reverse(patterns)) {
-      if (current == null)
-        current = pattern;
-      else {
-        Pattern derivedPrefix = pattern.derive(c);
-        Pattern derivedSuffix = current.derive(c);
-        current = Patterns.orWithoutEmpty(Patterns.nextWithEmpty(derivedPrefix, current), //
-          Patterns.nextWithEmpty(Patterns.nullable(pattern), derivedSuffix));
-      }
-    }
-    return current;
-  }
-
   private static ArrayList<Pattern> reverse(Pattern[] patterns1) {
     ArrayList<Pattern> reversed = Lists.arrayList();
     reversed.addAll(asList(patterns1));

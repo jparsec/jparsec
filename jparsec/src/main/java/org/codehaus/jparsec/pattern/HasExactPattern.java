@@ -24,11 +24,6 @@ class HasExactPattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    return (n <= 0) ? Patterns.NEVER : Patterns.hasExact(n - 1);
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     if ((begin + n) != end)
       return Pattern.MISMATCH;

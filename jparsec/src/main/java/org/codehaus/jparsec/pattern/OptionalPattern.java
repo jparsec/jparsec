@@ -23,11 +23,6 @@ class OptionalPattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    return pattern.derive(c).or(Patterns.EOF);
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     final int l = pattern.match(src, begin, end);
     return (l == Pattern.MISMATCH) ? 0 : l;

@@ -31,14 +31,6 @@ class ManyCharPredicatePattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    if (predicate.isChar(c))
-      return this;
-    else
-      return Patterns.NEVER;
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     return matchMany(predicate, src, end, begin, 0);
   }

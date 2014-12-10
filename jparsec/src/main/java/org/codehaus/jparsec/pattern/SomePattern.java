@@ -41,11 +41,6 @@ class SomePattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    return Patterns.orWithoutEmpty(Patterns.nextWithEmpty(pattern.derive(c), pattern.some(max - 1)), Patterns.ALWAYS);
-  }
-
-  @Override
   public String toString() {
     return pattern.toString() + "{0," + max + '}';
   }

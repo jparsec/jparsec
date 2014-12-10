@@ -36,14 +36,6 @@ class RepeatPattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    if (n == 0)
-      return Patterns.NEVER;
-
-    return Patterns.nextWithEmpty(pattern.derive(c), pattern.repeat(n - 1));
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     return matchRepeat(n, pattern, src, end, begin, 0);
   }
