@@ -27,8 +27,26 @@ import org.codehaus.jparsec.internal.util.Lists;
  * Builds {@link Parser} to parse expressions with operator-precedence grammar. The operators
  * and precedences are declared in this table.
  * 
- * <p> Operators have precedences. The higher the precedence number, the higher the precedence. For
+ * <p>Operators have precedences. The higher the precedence number, the higher the precedence. For
  * the same precedence, prefix > postfix > left-associative > non-associative > right-asscociative.
+ *
+ * <p>For example: <pre class="code">   {@code
+ *   Unary<Integer> negate = new Unary<Integer>() {... return -n; }};
+ *   Binary<Integer> plus = new Binary<Integer>() {... return a + b; }};
+ *   Binary<Integer> minus = new Binary<Integer() {... return a - b; }};
+ *   ...
+ *   Terminals terms = Terminals.operators("+", "-", "*", "/");
+ *   Parser<Integer> calculator = new OperatorTable()
+ *       .prefix(terms.token("-").retn(negate), 100)
+ *       .infixl(terms.token("+").retn(plus), 10)
+ *       .infixl(terms.token("-").retn(minus), 10)
+ *       .infixl(terms.token("*").retn(multiply), 20)
+ *       .infixl(terms.token("/").retn(divide), 20)
+ *       .build(Terminals.IntegerLiteral.PARSER.map(stringToInteger));
+ *   Parser<Integer> parser = calculator.from(
+ *       terms.tokenizer().or(Terminals.IntegerLiteral.TOKENIZER), Scanners.WHITESPACES.optional());
+ *   return parser.parse(text);
+ * }</pre>
  * 
  * @author Ben Yu
  */
@@ -149,13 +167,12 @@ public final class OperatorTable<T> {
    */
   static <T> Parser<T> buildExpressionParser(
       final Parser<? extends T> term, final Operator... ops) {
-    if (ops.length == 0)
-      return term.<T>cast();
+    if (ops.length == 0) return term.cast();
     int begin = 0;
     int precedence = ops[0].precedence;
     Associativity associativity = ops[0].associativity;
     int end = 0;
-    Parser<T> ret = term.<T>cast();
+    Parser<T> ret = term.cast();
     for (int i = 1; i < ops.length; i++) {
       Operator op = ops[i];
       end = i;
@@ -175,7 +192,7 @@ public final class OperatorTable<T> {
       Parser<?> p = slice(ops, begin, end);
       ret = build(p, associativity, ret);
     }
-    return ret.<T>cast();
+    return ret;
   }
   
   private static Parser<?> slice(Operator[] ops, int begin, int end) {

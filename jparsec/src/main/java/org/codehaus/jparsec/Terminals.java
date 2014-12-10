@@ -33,7 +33,7 @@ import org.codehaus.jparsec.internal.util.Strings;
 /**
  * Provides convenient API to build lexer and parsers for terminals.
  * The following example is a parser snippet for Java generic type expression such as
- * {@code List<String>} : <pre>   {@code
+ * {@code List<String>}: <pre>   {@code
  *   Terminals terms = Terminals
  *       .operators("?", "<", ">", ",")
  *       .words(Scanners.IDENTIFIER)
@@ -435,6 +435,20 @@ public final class Terminals extends Lexicon {
 
   /**
    * Builds {@link Terminals} instance by defining the words and keywords recognized.
+   * The following example implements a calculator with logical operators: <pre>   {@code
+ *   Terminals terms = Terminals
+ *       .operators("<", ">", "=", ">=", "<=")
+ *       .words(Scanners.IDENTIFIER)
+ *       .caseInsensitiveKeywords("and", "or")
+ *       .build();
+ *   Parser<String> var = Terminals.identifier();
+ *   Parser<Integer> integer = Terminals.IntegerLiteral.PARSER.map(...);
+ *   Parser<?> and = terms.token("and");
+ *   Parser<?> lessThan = terms.token("<");
+ *   ...
+ *   Parser<?> parser = grammar.from(
+ *       terms.tokenizer().or(IntegerLiteral.TOKENIZER), Scanners.WHITSPACES.optional());
+ * }</pre>
    *
    * @since 2.2
    */
@@ -518,26 +532,6 @@ public final class Terminals extends Lexicon {
    */
   public static Parser<String> identifier() {
     return Identifier.PARSER;
-  }
-
-  /**
-   * Returns a {@link Parser} that recognizes natural integer literals.
-   * Equivalent to {@link IntegerLiteral#PARSER}.
-   *
-   * @since 2.2
-   */
-  public static Parser<String> integer() {
-    return IntegerLiteral.PARSER;
-  }
-
-  /**
-   * Returns a {@link Parser} that recognizes decimal point integer literals.
-   * Equivalent to {@link DecimalLiteral#PARSER}.
-   *
-   * @since 2.2
-   */
-  public static Parser<String> decimal() {
-    return DecimalLiteral.PARSER;
   }
   
   /**
