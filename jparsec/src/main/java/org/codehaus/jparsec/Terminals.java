@@ -380,7 +380,7 @@ public final class Terminals extends Lexicon {
   /**
    * Returns a {@link Terminals} object for lexing the operators with names specified in
    * {@code ops}. Operators are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag.
-   * For example, to get the parser for operator "?", simply call {@link #token("?")}.
+   * For example, to get the parser for operator "?", simply call {@code token("?")}.
    *
    * <p>If words and keywords need to be parsed, they can be configured via {@link #words},
    * {@link #keywords} or {@link #caseInsensitiveKeywords}.
@@ -395,7 +395,7 @@ public final class Terminals extends Lexicon {
   /**
    * Returns a {@link Terminals} object for lexing the operators with names specified in
    * {@code ops}. Operators are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag.
-   * For example, to get the parser for operator "?", simply call {@link #token("?")}.
+   * For example, to get the parser for operator "?", simply call {@code #token("?")}.
    *
    * <p>If words and keywords need to be parsed, they can be configured via {@link #words},
    * {@link #keywords} or {@link #caseInsensitiveKeywords}.
