@@ -2,6 +2,6 @@ org.codehaus.jparsec
 org.codehaus.jparsec.annotations
 org.codehaus.jparsec.error
 org.codehaus.jparsec.functors
+org.codehaus.jparsec.internal.util
 org.codehaus.jparsec.misc
 org.codehaus.jparsec.pattern
-org.codehaus.jparsec.util
