@@ -21,7 +21,6 @@ import static org.codehaus.jparsec.util.Checks.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.codehaus.jparsec.Tokens.Fragment;
 import org.codehaus.jparsec.Tokens.ScientificNotation;
