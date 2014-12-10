@@ -151,6 +151,8 @@ public abstract class Pattern {
    *
    * @since 2.2
    */
+  // ideally we want to move Pattern/Patterns into the main package. Too late for that.
+  @SuppressWarnings("deprecation")
   public final Parser<Void> toScanner(String name) {
     return Scanners.pattern(this, name);
   }

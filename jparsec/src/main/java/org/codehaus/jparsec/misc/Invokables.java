@@ -14,13 +14,13 @@ final class Invokables {
     final Class<?> ownerType = constructor.getDeclaringClass();
     final Class<?>[] parameterTypes = constructor.getParameterTypes();
     return new ValueInvokable(ownerType) {
-      public Object invoke(Object[] args) throws Throwable {
+      @Override public Object invoke(Object[] args) throws Throwable {
         return constructor.newInstance(args);
       }
-      public Class<?>[] parameterTypes() {
+      @Override public Class<?>[] parameterTypes() {
         return parameterTypes;
       }
-      public Class<?> returnType() {
+      @Override public Class<?> returnType() {
         return ownerType;
       }
     };
@@ -30,13 +30,13 @@ final class Invokables {
     final Class<?> returnType = method.getReturnType();
     final Class<?>[] parameterTypes = method.getParameterTypes();
     return new ValueInvokable(self) {
-      public Object invoke(Object[] args) throws Throwable {
+      @Override public Object invoke(Object[] args) throws Throwable {
         return method.invoke(self, args);
       }
-      public Class<?>[] parameterTypes() {
+      @Override public Class<?>[] parameterTypes() {
         return parameterTypes;
       }
-      public Class<?> returnType() {
+      @Override public Class<?> returnType() {
         return returnType;
       }
     };

@@ -1,7 +1,5 @@
 package org.codehaus.jparsec.pattern;
 
-import static org.codehaus.jparsec.pattern.StringCaseInsensitivePattern.compareIgnoreCase;
-
 class NotStringCaseInsensitivePattern extends Pattern {
 
   private final String string;

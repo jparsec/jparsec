@@ -15,27 +15,11 @@
  *****************************************************************************/
 package org.codehaus.jparsec.pattern;
 
-import java.util.ArrayList;
-
-import static java.util.Arrays.asList;
-
-import java.util.Collections;
-
-import org.codehaus.jparsec.internal.util.Lists;
-
-
 class SequencePattern extends Pattern {
   private final Pattern[] patterns;
 
   public SequencePattern(Pattern... patterns) {
     this.patterns = patterns;
-  }
-
-  private static ArrayList<Pattern> reverse(Pattern[] patterns1) {
-    ArrayList<Pattern> reversed = Lists.arrayList();
-    reversed.addAll(asList(patterns1));
-    Collections.reverse(reversed);
-    return reversed;
   }
 
   @Override
