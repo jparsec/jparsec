@@ -249,7 +249,7 @@ public final class Scanners {
    * @return the scanner.
    */
   public static Parser<Void> isChar(CharPredicate predicate) {
-    return isChar(predicate, predicate.toString());
+    return new IsCharScanner(predicate);
   }
   
   /**
@@ -259,9 +259,12 @@ public final class Scanners {
    * @param predicate the predicate.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Implement {@link Object#toString} in the {@code CharPredicate},
+   *             or use {@code Patterns.isChar(predicate).toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> isChar(CharPredicate predicate, String name) {
-    return new IsCharScanner(name, predicate);
+    return Patterns.isChar(predicate).toScanner(name);
   }
   
   /**
@@ -270,7 +273,10 @@ public final class Scanners {
    * @param ch the expected character.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Use {@link #isChar(char)} instead
+   *             or use {@code Patterns.isChar(ch).toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> isChar(char ch, String name) {
     return isChar(CharPredicates.isChar(ch), name);
   }
@@ -282,7 +288,7 @@ public final class Scanners {
    * @return the scanner.
    */
   public static Parser<Void> isChar(char ch) {
-    return isChar(ch, Character.toString(ch));
+    return isChar(CharPredicates.isChar(ch));
   }
   
   /**
@@ -291,7 +297,9 @@ public final class Scanners {
    * @param ch the expected character.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Use {@link #notChar(char)}.
    */
+  @Deprecated
   public static Parser<Void> notChar(char ch, String name) {
     return isChar(CharPredicates.notChar(ch), name);
   }
@@ -303,7 +311,7 @@ public final class Scanners {
    * @return the scanner.
    */
   public static Parser<Void> notChar(char ch) {
-    return notChar(ch, "^"+ch);
+    return isChar(CharPredicates.notChar(ch));
   }
   
   /**
@@ -313,7 +321,9 @@ public final class Scanners {
    * @param chars the characters.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Use {@code Patterns.among(chars).toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> among(String chars, String name) {
     return isChar(CharPredicates.among(chars), name);
   }
@@ -335,7 +345,10 @@ public final class Scanners {
    * @param chars the characters.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Use {@code Patterns.among(chars).not().toScanner(name)},
+   *             or {@code isChar(CharPredicates.notAmong(chars), name)}.
    */
+  @Deprecated
   public static Parser<Void> notAmong(String chars, String name) {
     return isChar(CharPredicates.notAmong(chars), name);
   }
@@ -453,7 +466,9 @@ public final class Scanners {
    * @param end ends a quote
    * @param quoted the parser that recognizes the quoted pattern.
    * @return the scanner.
+   * @deprecated Use {@code Parsers.sequence(begin, quoted.skipMany(), end).source()}.
    */
+  @Deprecated
   public static Parser<String> quoted(Parser<Void> begin, Parser<Void> end, Parser<?> quoted) {
     return Parsers.sequence(begin, quoted.skipMany(), end).source();
   }

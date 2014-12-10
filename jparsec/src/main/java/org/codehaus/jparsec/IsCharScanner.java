@@ -26,8 +26,8 @@ final class IsCharScanner extends Parser<Void> {
   private final String name;
   private final CharPredicate predicate;
   
-  IsCharScanner(String name, CharPredicate predicate) {
-    this.name = name;
+  IsCharScanner(CharPredicate predicate) {
+    this.name = predicate.toString();
     this.predicate = predicate;
   }
 
