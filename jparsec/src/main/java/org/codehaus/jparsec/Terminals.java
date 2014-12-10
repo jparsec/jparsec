@@ -36,8 +36,7 @@ import org.codehaus.jparsec.util.Strings;
  * {@code List<String>} : <pre>   {@code
  *   Terminals terms = Terminals
  *       .operators("?", "<", ">", ",")
- *       .keywords("super", "extends")
- *       .build();
+ *       .keywords("super", "extends");
  *   Parser<String> typeName = Terminals.identifier();
  *   Parser<?> wildcardWithUpperBound = terms.phrase("?", "extends");
  *   ...
