@@ -30,7 +30,7 @@ abstract class DelimitedParser<T, R> extends Parser<R> {
     this.delim = delim;
   }
 
-  @Override boolean apply(final ParseContext ctxt) {
+  @Override final boolean apply(final ParseContext ctxt) {
     final R result = begin();
     for (;;) {
       final int step0 = ctxt.step;
@@ -57,10 +57,7 @@ abstract class DelimitedParser<T, R> extends Parser<R> {
     }
   }
 
-  R begin() {
-    return null;
-  }
-
+  abstract R begin();
   abstract void element(ParseContext ctxt, R result);
   
   @Override public String toString() {
