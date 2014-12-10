@@ -15,7 +15,8 @@ public class KeywordsTest {
   @Test
   public void testLexicon_caseSensitive() {
     String[] keywords = {"foo", "Bar"};
-    Lexicon lexicon = Keywords.lexicon(Scanners.IDENTIFIER, keywords, true, TokenizerMaps.IDENTIFIER_FRAGMENT);
+    Lexicon lexicon = Keywords.lexicon(
+        Scanners.IDENTIFIER, keywords, StringCase.CASE_SENSITIVE, TokenizerMaps.IDENTIFIER_FRAGMENT);
     for (String keyword : keywords) {
       assertEquals(Tokens.reserved(keyword), lexicon.word(keyword));
     }
@@ -29,7 +30,8 @@ public class KeywordsTest {
   @Test
   public void testLexicon_caseInsensitive() {
     String[] keywords = {"foo", "Bar"};
-    Lexicon lexicon = Keywords.lexicon(Scanners.IDENTIFIER, keywords, false, TokenizerMaps.IDENTIFIER_FRAGMENT);
+    Lexicon lexicon = Keywords.lexicon(
+        Scanners.IDENTIFIER, keywords, StringCase.CASE_INSENSITIVE, TokenizerMaps.IDENTIFIER_FRAGMENT);
     for (String keyword : keywords) {
       assertEquals(Tokens.reserved(keyword), lexicon.word(keyword));
       assertEquals(Tokens.reserved(keyword), lexicon.word(keyword.toUpperCase()));

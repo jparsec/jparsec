@@ -217,7 +217,9 @@ public final class Terminals extends Lexicon {
    * @return the Terminals instance.
    */
   public static Terminals caseInsensitive(String[] ops, String[] keywords) {
-    return instance(Scanners.IDENTIFIER, ops, keywords, false, TokenizerMaps.IDENTIFIER_FRAGMENT);
+    return instance(
+        Scanners.IDENTIFIER, ops, keywords,
+        StringCase.CASE_INSENSITIVE, TokenizerMaps.IDENTIFIER_FRAGMENT);
   }
   
   /**
@@ -238,7 +240,9 @@ public final class Terminals extends Lexicon {
    * @return the Terminals instance.
    */
   public static Terminals caseSensitive(String[] ops, String[] keywords) {
-    return instance(Scanners.IDENTIFIER, ops, keywords, true, TokenizerMaps.IDENTIFIER_FRAGMENT);
+    return instance(
+        Scanners.IDENTIFIER, ops, keywords,
+        StringCase.CASE_SENSITIVE, TokenizerMaps.IDENTIFIER_FRAGMENT);
   }
   
   /**
@@ -300,7 +304,8 @@ public final class Terminals extends Lexicon {
    */
   public static Terminals caseInsensitive(
       Parser<String> wordScanner, String[] ops, String[] keywords, Map<String, ?> wordMap) {
-    return instance(wordScanner, ops, keywords, false, wordMap);
+    return instance(
+        wordScanner, ops, keywords, StringCase.CASE_INSENSITIVE, wordMap);
   }
   
   /**
@@ -322,7 +327,7 @@ public final class Terminals extends Lexicon {
    */
   public static Terminals caseSensitive(
       Parser<String> wordScanner, String[] ops, String[] keywords, Map<String, ?> wordMap) {
-    return instance(wordScanner, ops, keywords, true, wordMap);
+    return instance(wordScanner, ops, keywords, StringCase.CASE_SENSITIVE, wordMap);
   }
   
   /**
@@ -379,10 +384,10 @@ public final class Terminals extends Lexicon {
   
   private static Terminals instance(
       Parser<String> wordScanner, String[] ops, String[] keywords,
-      boolean caseSensitive, Map<String, ?> wordMap) {
+      StringCase stringCase, Map<String, ?> wordMap) {
     checkDup(ops, keywords, true);
     Lexicon operators = Operators.lexicon(ops);
-    Lexicon keywordsOrWords = Keywords.lexicon(wordScanner, keywords, caseSensitive, wordMap);
+    Lexicon keywordsOrWords = Keywords.lexicon(wordScanner, keywords, stringCase, wordMap);
     return new Terminals(operators.union(keywordsOrWords));
   }
   
