@@ -20,8 +20,8 @@ package org.codehaus.jparsec.error;
  * 
  * @author Ben Yu
  */
+@SuppressWarnings("serial")
 public class ParserException extends RuntimeException {
-  private static final long serialVersionUID = 2600007839521501281L;
   
   private final ParseErrorDetails error;
   private final Location location;

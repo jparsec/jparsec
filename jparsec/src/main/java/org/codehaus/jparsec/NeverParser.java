@@ -18,7 +18,6 @@ package org.codehaus.jparsec;
 final class NeverParser<T> extends Parser<T> {
   
   @Override boolean apply(ParseContext ctxt) {
-    ctxt.trap();
     return false;
   }
   

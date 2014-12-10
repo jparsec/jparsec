@@ -102,9 +102,9 @@ public final class Parsers {
   }
 
   /**
-   * A {@link Parser} that always succeeds and invokes {@link Runnable#run()} against
-   * {@code runnable}.
+   * A {@link Parser} that always succeeds and invokes {@code runnable}.
    */
+  @Deprecated
   public static Parser<?> runnable(Runnable runnable) {
     return new ActionParser(runnable);
   }
