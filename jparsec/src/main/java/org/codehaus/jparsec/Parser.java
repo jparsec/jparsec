@@ -30,7 +30,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
 
-
 /**
  * Defines grammar and encapsulates parsing logic. A {@link Parser} takes as input a {@link CharSequence} source and
  * parses it when the {@link #parse(CharSequence)} method is called. A value of type {@code T} will be returned if
@@ -64,18 +63,58 @@ import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
 public abstract class Parser<T> {
 
   /**
-   * An atomic mutable reference to {@link Parser}. Is useful to work around circular dependency between parser
-   * objects.
+   * An atomic mutable reference to {@link Parser} used in recursive grammars.
    *
-   * <p>Example usage:
-   *
-   * <pre>
-   * Parser.Reference&lt;Foo> ref = Parser.newReference();
-   * ...
-   * Parser&lt;Bar> barParser = barParser(ref.lazy());
-   * Parser&lt;Foo> fooParser = fooParser(barParser);
-   * ref.set(fooParser);
-   * </pre>
+   * <p>For example, the following is a recursive grammar for a simple calculator: <pre>   {@code
+   *   Terminals terms = Terminals.operators("(", ")", "+", "-");
+   *   Parser.Reference<Integer> ref = Parser.newReference();
+   *   Parser<Integer> literal = Terminals.IntegerLiteral.PARSER.map(new Map<String, Integer>() {
+   *      ...
+   *      return Integer.parseInt(s);
+   *   });
+   *   Parser.Reference<Integer> parenthesized =  // recursion in rule E = (E)
+   *       Parsers.between(terms.token("("), ref.lazy(), terms.token(")"));
+   *   ref.set(new OperatorTable()
+   *       .infixl(terms.token("+").retn(plus), 10)
+   *       .infixl(terms.token("-").retn(minus), 10)
+   *       .build(literal.or(parenthesized)));
+   *   return ref.get();
+   * }</pre>
+   * Note that a left recursive grammar will result in {@code StackOverflowError}.
+   * Use appropriate parser built-in parser combinators to avoid left-recursion.
+   * For instance, many left recursive grammar rules can be thought as logically equivalent to
+   * postfix operator rules. In such case, either {@link OperatorTable} or {@link Parser#postfix}
+   * can be used to work around left recursion.
+   * The following is a left recursive parser for array types in the form of "T[]" or "T[][]":
+   * <pre>   {@code
+   *   Terminals terms = Terminals.operators("[", "]");
+   *   Parser.Reference<Type> ref = Parser.newReference();
+   *   ref.set(Parsers.or(leafTypeParser,
+   *       Parsers.sequence(ref.lazy(), terms.phrase("[", "]"), new Unary<Type>() {...})));
+   *   return ref.get();
+   * }</pre>
+   * And it will fail. A correct implementation is:  <pre>   {@code
+   *   Terminals terms = Terminals.operators("[", "]");
+   *   return leafTypeParer.postfix(terms.phrase("[", "]").retn(new Unary<Type>() {...}));
+   * }</pre>
+   * A not-so-obvious example, is to parse the {@code expr ? a : b} ternary operator. It too is a
+   * left recursive grammar. And un-intuitively it can also be thought as a postfix operator.
+   * Basically, we can parse "? a : b" as a whole into a unary operator that accepts the condition
+   * expression as input and outputs the full ternary expression: <pre>   {@code
+   *   Parser<Expr> ternary(Parser<Expr> expr) {
+   *     return expr.postfix(
+   *       Parsers.sequence(terms.token("?"), expr, terms.token(":"), expr,
+   *       new Map4<...>() {
+   *         public Unary<Expr> map(unused, consequence, unused, alternative) {
+   *           // (condition) -> Ternary(condition, consequence, alternative)
+   *           return new Unary<Expr>() {
+   *             ...
+   *             return new TernaryExpr(condition, consequence, alternative);
+   *           }
+   *         }
+   *       }));
+   *   }
+   * }</pre>
    */
   public static final class Reference<T> extends AtomicReference<Parser<T>> {
     private static final long serialVersionUID = -8778697271614979497L;
@@ -90,11 +129,11 @@ public abstract class Parser<T> {
     }
   }
 
-  Parser() {
-  }
+  Parser() {}
 
   /**
    * Creates a new instance of {@link Reference}.
+   * Used when your grammar is recursive (many grammars are).
    */
   public static <T> Reference<T> newReference() {
     return new Reference<T>();
@@ -433,8 +472,42 @@ public abstract class Parser<T> {
   }
 
   /**
-   * A {@link Parser} that runs {@code this} and then runs {@code op} for 0 or more times greedily. The {@link Map}
-   * objects returned from {@code op} are applied from left to right to the return value of p.
+   * A {@link Parser} that runs {@code this} and then runs {@code op} for 0 or more times greedily.
+   * The {@link Map} objects returned from {@code op} are applied from left to right to the return
+   * value of p.
+   *
+   * <p>This is the preferred API to avoid {@code StackOverflowError} in left-recursive parsers.
+   * For example, to parse array types in the form of "T[]" or "T[][]", the following
+   * left recursive grammar will fail: <pre>   {@code
+   *   Terminals terms = Terminals.operators("[", "]");
+   *   Parser.Reference<Type> ref = Parser.newReference();
+   *   ref.set(Parsers.or(leafTypeParser,
+   *       Parsers.sequence(ref.lazy(), terms.phrase("[", "]"), new Unary<Type>() {...})));
+   *   return ref.get();
+   * }</pre>
+   * A correct implementation is:  <pre>   {@code
+   *   Terminals terms = Terminals.operators("[", "]");
+   *   return leafTypeParer.postfix(terms.phrase("[", "]").retn(new Unary<Type>() {...}));
+   * }</pre>
+   * A not-so-obvious example, is to parse the {@code expr ? a : b} ternary operator. It too is a
+   * left recursive grammar. And un-intuitively it can also be thought as a postfix operator.
+   * Basically, we can parse "? a : b" as a whole into a unary operator that accepts the condition
+   * expression as input and outputs the full ternary expression: <pre>   {@code
+   *   Parser<Expr> ternary(Parser<Expr> expr) {
+   *     return expr.postfix(
+   *       Parsers.sequence(terms.token("?"), expr, terms.token(":"), expr,
+   *       new Map4<...>() {
+   *         public Unary<Expr> map(unused, consequence, unused, alternative) {
+   *           // (condition) -> Ternary(condition, consequence, alternative)
+   *           return new Unary<Expr>() {
+   *             ...
+   *             return new TernaryExpr(condition, consequence, alternative);
+   *           }
+   *         }
+   *       }));
+   *   }
+   * }</pre>
+   * {@link OperatorTable} also handles left recursion transparently.
    *
    * <p> {@code p.postfix(op)} is equivalent to {@code p op*} in EBNF.
    */
@@ -514,19 +587,28 @@ public abstract class Parser<T> {
   }
 
   /**
-   * A {@link Parser} that takes as input the tokens returned by {@code tokenizer} delimited by {@code delim}, and
-   * runs {@code this} to parse the tokens.
+   * A {@link Parser} that takes as input the tokens returned by {@code tokenizer} delimited by
+   * {@code delim}, and runs {@code this} to parse the tokens.
    *
    * <p>For example: <pre class="code">
    * Terminals terminals = ...;
-   * return parser.from(terminals.tokenizer(), Scanners.WHITESPACES).parse(str);
+   * return parser.from(terminals.tokenizer(), Scanners.WHITESPACES.optional()).parse(str);
    * </pre>
    *
-   * In the above example, tokens are delimited by whitespaces. Optionally, you can also skip
-   * comments using an alternative scanner than {@code WHITESPACES}. In some mini parsers where
-   * operator characters can be adjacent without risk of being mixed and mangled (such a calculator),
-   * you want to use {@code whateverDelim.optional()} to make sure adjacent operator characters like
-   * "((" or "))" are properly recognized.
+   * In the above example, tokens are optionally delimited by whitespaces. Optionally, you can also skip
+   * comments using an alternative scanner than {@code WHITESPACES}: <pre class="code">
+   * Terminals terminals = ...;
+   * Parser<?> delim = Parsers.or(
+   *     Scanners.WHITESPACE,
+   *     Scanners.JAVA_LINE_COMMENT,
+   *     Scanners.JAVA_BLOCK_COMMENT).skipMany();
+   * return parser.from(terminals.tokenizer(), delim).parse(str);
+   * </pre>
+   *
+   * In both examples, it's important to make sure the delimiter scanner can accept empty string
+   * (either through {@code optional()} or {@ode skipMany()}), unless adjacent operator
+   * characters shouldn't be parsed as separate operators.
+   * i.e. "((" as two left parenthesis operators.
    *
    * <p> {@code this} must be a token level parser.
    */
