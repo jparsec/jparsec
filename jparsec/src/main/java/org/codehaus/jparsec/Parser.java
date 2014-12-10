@@ -588,25 +588,29 @@ public abstract class Parser<T> {
 
   /**
    * A {@link Parser} that takes as input the tokens returned by {@code tokenizer} delimited by
-   * {@code delim}, and runs {@code this} to parse the tokens.
+   * {@code delim}, and runs {@code this} to parse the tokens. A common misunderstanding is that
+   * {@code tokenizer} has to be a parser of {@link Token}. It doesn't need to be because
+   * {@code Terminals} already takes care of wrapping your logical token objects into physical
+   * {@code Token} with correct source location information tacked on for free. Your token object
+   * can literally be anything, as long as your token level parser can recognize it later.
    *
-   * <p>For example: <pre class="code">
+   * <p>The following example uses {@link Terminals#tokenizer()}: <pre class="code">
    * Terminals terminals = ...;
    * return parser.from(terminals.tokenizer(), Scanners.WHITESPACES.optional()).parse(str);
    * </pre>
+   * And tokens are optionally delimited by whitespaces.
+   * <p>Optionally, you can skip comments using an alternative scanner than {@code WHITESPACES}:
+   * <pre class="code">   {@code
+   *   Terminals terminals = ...;
+   *   Parser<?> delim = Parsers.or(
+   *       Scanners.WHITESPACE,
+   *       Scanners.JAVA_LINE_COMMENT,
+   *       Scanners.JAVA_BLOCK_COMMENT).skipMany();
+   *   return parser.from(terminals.tokenizer(), delim).parse(str);
+   * }</pre>
    *
-   * In the above example, tokens are optionally delimited by whitespaces. Optionally, you can also skip
-   * comments using an alternative scanner than {@code WHITESPACES}: <pre class="code">
-   * Terminals terminals = ...;
-   * Parser<?> delim = Parsers.or(
-   *     Scanners.WHITESPACE,
-   *     Scanners.JAVA_LINE_COMMENT,
-   *     Scanners.JAVA_BLOCK_COMMENT).skipMany();
-   * return parser.from(terminals.tokenizer(), delim).parse(str);
-   * </pre>
-   *
-   * In both examples, it's important to make sure the delimiter scanner can accept empty string
-   * (either through {@code optional()} or {@ode skipMany()}), unless adjacent operator
+   * <p>In both examples, it's important to make sure the delimiter scanner can accept empty string
+   * (either through {@link #optional} or {@link #skipMany}), unless adjacent operator
    * characters shouldn't be parsed as separate operators.
    * i.e. "((" as two left parenthesis operators.
    *
