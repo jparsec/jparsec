@@ -31,7 +31,7 @@ import org.codehaus.jparsec.functors.Pair;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
-import org.codehaus.jparsec.util.Lists;
+import org.codehaus.jparsec.internal.util.Lists;
 
 /**
  * Provides common {@link Parser} implementations.

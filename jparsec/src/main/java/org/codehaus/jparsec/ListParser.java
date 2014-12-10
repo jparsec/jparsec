@@ -18,7 +18,7 @@ package org.codehaus.jparsec;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jparsec.util.Lists;
+import org.codehaus.jparsec.internal.util.Lists;
 
 /**
  * Sequentially runs a list of {@link Parser} objects and collects the return values in a

@@ -1,7 +1,7 @@
 package org.codehaus.jparsec;
 
 import org.codehaus.jparsec.error.Location;
-import org.codehaus.jparsec.util.IntList;
+import org.codehaus.jparsec.internal.util.IntList;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

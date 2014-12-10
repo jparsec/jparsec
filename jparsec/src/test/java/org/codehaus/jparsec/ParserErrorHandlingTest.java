@@ -24,7 +24,7 @@ import static org.codehaus.jparsec.TestParsers.areChars;
 import java.util.List;
 
 import org.codehaus.jparsec.functors.Unary;
-import org.codehaus.jparsec.util.Lists;
+import org.codehaus.jparsec.internal.util.Lists;
 import org.junit.Test;
 
 /**

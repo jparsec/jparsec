@@ -1,45 +1,48 @@
 package org.codehaus.jparsec;
 
+import static org.codehaus.jparsec.internal.util.Checks.checkNotNull;
+
+import org.codehaus.jparsec.internal.util.Objects;
+
 /**
+ * Parsed result with the matched source text.
+ *
  * @author Stepan Koltsov
  */
-public class WithSource<T> {
+public final class WithSource<T> {
   private final T value;
   private final String source;
 
   public WithSource(T value, String source) {
     this.value = value;
-    this.source = source;
+    this.source = checkNotNull(source);
   }
 
+  /** Returns the parsed result. */
   public T getValue() {
     return value;
   }
 
+  /** Returns the underlying source text. Never null. */
   public String getSource() {
     return source;
   }
 
-  /** Returns the string representation of the token value. */
+  /** Returns the underlying source text. */
   @Override public String toString() {
-    return String.valueOf(value);
+    return source;
   }
 
   @Override public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-
-    WithSource<?> that = (WithSource<?>) o;
-
-    if (value != null ? !value.equals(that.value) : that.value != null) return false;
-    if (source != null ? !source.equals(that.source) : that.source != null) return false;
-
-    return true;
+    if (o instanceof WithSource<?>) {
+      WithSource<?> that = (WithSource<?>) o;
+      return Objects.equals(value, that.value)
+          && source.equals(that.source);
+    }
+    return false;
   }
 
   @Override public int hashCode() {
-    int result = value != null ? value.hashCode() : 0;
-    result = 31 * result + (source != null ? source.hashCode() : 0);
-    return result;
+    return Objects.hashCode(value) * 31 + source.hashCode();
   }
 }

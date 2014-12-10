@@ -17,7 +17,7 @@ package org.codehaus.jparsec;
 
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.error.Location;
-import org.codehaus.jparsec.util.IntList;
+import org.codehaus.jparsec.internal.util.IntList;
 
 /**
  * Default implementation of {@link SourceLocator}.

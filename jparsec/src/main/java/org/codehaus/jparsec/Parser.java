@@ -20,7 +20,7 @@ import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Maps;
-import org.codehaus.jparsec.util.Checks;
+import org.codehaus.jparsec.internal.util.Checks;
 
 import java.io.IOException;
 import java.nio.CharBuffer;
@@ -28,7 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.codehaus.jparsec.util.Checks.checkArgument;
+import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
 
 
 /**

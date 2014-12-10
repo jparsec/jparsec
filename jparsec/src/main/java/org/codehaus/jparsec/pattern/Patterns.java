@@ -15,7 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec.pattern;
 
-import org.codehaus.jparsec.util.Checks;
+import org.codehaus.jparsec.internal.util.Checks;
 
 import java.util.regex.Matcher;
 

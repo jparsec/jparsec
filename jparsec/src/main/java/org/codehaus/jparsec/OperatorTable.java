@@ -21,7 +21,7 @@ import java.util.List;
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
-import org.codehaus.jparsec.util.Lists;
+import org.codehaus.jparsec.internal.util.Lists;
 
 /**
  * Builds {@link Parser} to parse expressions with operator-precedence grammar. The operators

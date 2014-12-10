@@ -21,11 +21,11 @@ import java.util.Stack;
 
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Unary;
+import org.codehaus.jparsec.internal.util.Lists;
+import org.codehaus.jparsec.internal.util.Objects;
 import org.codehaus.jparsec.pattern.CharPredicate;
 import org.codehaus.jparsec.pattern.Pattern;
 import org.codehaus.jparsec.pattern.Patterns;
-import org.codehaus.jparsec.util.Lists;
-import org.codehaus.jparsec.util.Objects;
 
 /**
  * Processes indentation based lexical structure according to the

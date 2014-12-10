@@ -24,7 +24,7 @@ import java.util.Map;
 
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Maps;
-import org.codehaus.jparsec.util.Lists;
+import org.codehaus.jparsec.internal.util.Lists;
 
 /**
  * Helper class for creating parsers and lexers for operators.

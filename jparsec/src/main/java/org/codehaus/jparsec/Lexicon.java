@@ -15,11 +15,11 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import static org.codehaus.jparsec.util.Checks.checkArgument;
+import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
 
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.util.Strings;
+import org.codehaus.jparsec.internal.util.Strings;
 
 /**
  * A {@link Lexicon} is a group of lexical words that can be tokenized by a single tokenizer.

@@ -21,7 +21,7 @@ import java.util.List;
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.error.ParseErrorDetails;
 import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.util.Lists;
+import org.codehaus.jparsec.internal.util.Lists;
 
 /**
  * Represents the context state during parsing.

@@ -17,7 +17,7 @@ package org.codehaus.jparsec;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.codehaus.jparsec.util.Checks;
+import org.codehaus.jparsec.internal.util.Checks;
 
 /**
  * Delegates to the {@link Parser} object stored in a {@link AtomicReference}
