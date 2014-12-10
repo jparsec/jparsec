@@ -133,7 +133,7 @@ public final class Terminals extends Lexicon {
      * {@code Long} value.
      */
     public static final Parser<Long> TOKENIZER =
-        Parsers.plus(HEX_TOKENIZER, DEC_TOKENIZER, OCT_TOKENIZER);
+        Parsers.or(HEX_TOKENIZER, DEC_TOKENIZER, OCT_TOKENIZER);
   }
   
   /** Entry point for any arbitrary integer literal represented as a {@link String}. */
@@ -276,8 +276,10 @@ public final class Terminals extends Lexicon {
    * @param ops the operator names.
    * @param keywords the keyword names.
    * @return the Terminals instance.
-   * @deprecated Use {@code operators(ops).words(wordScasnner).caseInsensitiveKeywords(keywords).build()}
-   *             instead.
+   * @deprecated Use {@code operators(ops)
+   *                 .words(wordScasnner)
+   *                 .caseInsensitiveKeywords(keywords)
+   *                 .build()} instead.
    */
   @Deprecated
   public static Terminals caseInsensitive(
@@ -302,7 +304,10 @@ public final class Terminals extends Lexicon {
    * @param ops the operator names.
    * @param keywords the keyword names.
    * @return the Terminals instance.
-   * @deprecated Use {@code operators(ops).words(wordScanner).keywords(keywords).build()} instead.
+   * @deprecated Use {@code operators(ops)
+   *                 .words(wordScanner)
+   *                 .keywords(keywords)
+   *                 .build()} instead.
    */
   @Deprecated
   public static Terminals caseSensitive(
@@ -395,7 +400,7 @@ public final class Terminals extends Lexicon {
   /**
    * Returns a {@link Terminals} object for lexing the operators with names specified in
    * {@code ops}. Operators are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag.
-   * For example, to get the parser for operator "?", simply call {@code #token("?")}.
+   * For example, to get the parser for operator "?", simply call {@code token("?")}.
    *
    * <p>If words and keywords need to be parsed, they can be configured via {@link #words},
    * {@link #keywords} or {@link #caseInsensitiveKeywords}.
@@ -427,7 +432,7 @@ public final class Terminals extends Lexicon {
    * Returns new {@code Terminals} instance that recognizes identifiers that
    * aren't already recognized by {@code this} {@code Terminals} instance
    * (typically operators). {@code keywords} are special identifiers with their own grammar rules.
-   * To get the parser for a keyword, call {@link Terminals#token}.
+   * To get the parser for a keyword, call {@code token(keyword)}.
    *
    * <p>Identifiers are defined by {@link Scanners#IDENTIFIER} and are recognized through
    * {@link #identifier} during token-level parsing phase.
@@ -442,7 +447,7 @@ public final class Terminals extends Lexicon {
    * Returns new {@code Terminals} instance that recognizes identifiers that
    * aren't already recognized by {@code this} {@code Terminals} instance
    * (typically operators). {@code keywords} are special identifiers with their own grammar rules.
-   * To get the parser for a keyword, call {@link Terminals#token}.
+   * To get the parser for a keyword, call {@code token(keyword)}.
    *
    * <p>Identifiers are defined by {@link Scanners#IDENTIFIER} and are recognized through
    * {@link #identifier} during token-level parsing phase.
@@ -457,7 +462,7 @@ public final class Terminals extends Lexicon {
    * Returns a new {@code Terminals} instance that recognizes identifiers that
    * aren't already recognized by {@code this} {@code Terminals} instance
    * (typically operators). {@code keywords} are case insensitive special identifiers with their own
-   * grammar rules. To get the parser for a keyword, call {@link Terminals#token}.
+   * grammar rules. To get the parser for a keyword, call {@code token(keyword)}.
    *
    * <p>Identifiers are defined by {@link Scanners#IDENTIFIER} and are recognized through
    * {@link #identifier} during token-level parsing phase.
@@ -472,7 +477,7 @@ public final class Terminals extends Lexicon {
    * Returns a new {@code Terminals} instance that recognizes identifiers that
    * aren't already recognized by {@code this} {@code Terminals} instance
    * (typically operators). {@code keywords} are case insensitive special identifiers with their own
-   * grammar rules. To get the parser for a keyword, call {@link Terminals#token}.
+   * grammar rules. To get the parser for a keyword, call {@code token(keyword)}.
    *
    * <p>Identifiers are defined by {@link Scanners#IDENTIFIER} and are recognized through
    * {@link #identifier} during token-level parsing phase.
@@ -501,7 +506,7 @@ public final class Terminals extends Lexicon {
 
     /**
      * Defines keywords. Keywords are special words with their own grammar rules.
-     * To get the parser for a keyword, call {@link Terminals#token}.
+     * To get the parser for a keyword, call {@code token(keyword)}.
      *
      * <p>Note that if you call {@link #keywords} or {@link #caseInsensitiveKeywords} multiple
      * times on the same {@link Builder} instance, the last call overwrites previous calls.
@@ -512,7 +517,7 @@ public final class Terminals extends Lexicon {
 
     /**
      * Defines keywords. Keywords are special words with their own grammar rules.
-     * To get the parser for a keyword, call {@link Terminals#token}.
+     * To get the parser for a keyword, call {@code token(keyword)}.
      *
      * <p>Note that if you call {@link #keywords} or {@link #caseInsensitiveKeywords} multiple
      * times on the same {@link Builder} instance, the last call overwrites previous calls.
@@ -525,7 +530,7 @@ public final class Terminals extends Lexicon {
 
     /**
      * Defines case insensitive keywords. Keywords are special words with their own grammar
-     * rules. To get the parser for a keyword, call {@link Terminals#token}.
+     * rules. To get the parser for a keyword, call {@code token(keyword)}.
      *
      * <p>Note that if you call {@link #keywords} or {@link #caseInsensitiveKeywords} multiple
      * times on the same {@link Builder} instance, the last call overwrites previous calls.
@@ -536,7 +541,7 @@ public final class Terminals extends Lexicon {
 
     /**
      * Defines case insensitive keywords. Keywords are special words with their own grammar
-     * rules. To get the parser for a keyword, call {@link Terminals#token}.
+     * rules. To get the parser for a keyword, call {@code token(keyword)}.
      *
      * <p>Note that if you call {@link #keywords} or {@link #caseInsensitiveKeywords} multiple
      * times on the same {@link Builder} instance, the last call overwrites previous calls.

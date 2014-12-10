@@ -594,7 +594,7 @@ public abstract class Parser<T> {
    * 
    * @return an incremental version of this parser.
    */
-  public Incremental<T> incrementally() {
+  Incremental<T> incrementally() {
     throw new UnsupportedOperationException("incremental parsing is work-in-progress. Only supported by some Parser" +
         "implementations");
   }

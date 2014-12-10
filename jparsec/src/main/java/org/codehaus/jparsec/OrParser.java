@@ -32,8 +32,6 @@ final class OrParser<T> extends Parser<T> {
       }
       ctxt.set(step, at, result);
     }
-    // set the index to the most relevant error so far.
-    ctxt.setAt(step, at);
     return false;
   }
   

@@ -93,21 +93,21 @@ public final class Scanners {
    * whitespaces, line comment and block comment.
    */
   public static final Parser<Void> JAVA_DELIMITER =
-      Parsers.plus(WHITESPACES, JAVA_LINE_COMMENT, JAVA_BLOCK_COMMENT).skipMany();
+      Parsers.or(WHITESPACES, JAVA_LINE_COMMENT, JAVA_BLOCK_COMMENT).skipMany();
   
   /**
    * Scanner for the haskell style delimiter of tokens. For example,
    * whitespaces, line comment and block comment.
    */
   public static final Parser<Void> HASKELL_DELIMITER = 
-      Parsers.plus(WHITESPACES, HASKELL_LINE_COMMENT, HASKELL_BLOCK_COMMENT).skipMany();
+      Parsers.or(WHITESPACES, HASKELL_LINE_COMMENT, HASKELL_BLOCK_COMMENT).skipMany();
   
   /**
    * Scanner for the SQL style delimiter of tokens. For example, whitespaces and
    * line comment.
    */
   public static final Parser<Void> SQL_DELIMITER =
-      Parsers.plus(WHITESPACES, SQL_LINE_COMMENT, SQL_BLOCK_COMMENT).skipMany();
+      Parsers.or(WHITESPACES, SQL_LINE_COMMENT, SQL_BLOCK_COMMENT).skipMany();
   
   /**
    * Scanner for a regular identifier, that starts with either
