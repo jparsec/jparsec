@@ -545,6 +545,7 @@ public class ScannersTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testQuoted() {
     Parser<String> scanner = Scanners.quoted(Scanners.isChar('<'), Scanners.isChar('>'),
         Patterns.INTEGER.toScanner("number"));
@@ -556,6 +557,7 @@ public class ScannersTest {
   }
 
   @Test
+  @SuppressWarnings("deprecation")
   public void testQuoted_quotedParserConsumeNoChar() {
     Parser<String> scanner =
         Scanners.quoted(Scanners.isChar('<'), Scanners.isChar('>'), Parsers.always());

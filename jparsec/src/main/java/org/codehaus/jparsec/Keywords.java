@@ -37,7 +37,7 @@ final class Keywords {
     return set.toArray(new String[set.size()]);
   }
 
-  static <T> Lexicon lexicon(
+  static Lexicon lexicon(
       Parser<String> wordScanner, Collection<String> keywordNames,
       StringCase stringCase, final Map<String, ?> defaultMap) {
     HashMap<String, Object> map = new HashMap<String, Object>();

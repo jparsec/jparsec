@@ -37,7 +37,7 @@ final class NumberLiteralsTranslator {
     else return c - 'A' + 10;
   }
 
-  static Long tokenizeDecimalAsLong(String text) {
+  static long tokenizeDecimalAsLong(String text) {
     long n = 0;
     int len = text.length();
     for(int i = 0; i < len; i++) {
@@ -46,7 +46,7 @@ final class NumberLiteralsTranslator {
     return n;
   }
 
-  static Long tokenizeOctalAsLong(String text) {
+  static long tokenizeOctalAsLong(String text) {
     long n = 0;
     int len = text.length();
     for(int i = 0; i < len; i++) {
@@ -55,7 +55,7 @@ final class NumberLiteralsTranslator {
     return n;
   }
 
-  static Long tokenizeHexAsLong(String text) {
+  static long tokenizeHexAsLong(String text) {
     int len = text.length();
     if (len < 3) throw new IllegalStateException("illegal hex number");
     long n = 0;

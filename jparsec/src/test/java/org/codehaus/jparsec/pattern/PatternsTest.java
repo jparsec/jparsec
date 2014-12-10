@@ -249,16 +249,16 @@ public class PatternsTest {
 
   @Test
   public void testMany_withMin() {
-    assertEquals(3, Patterns.many(3, CharPredicates.ALWAYS).match("abc", 0, 3));
-    assertEquals(MISMATCH, Patterns.many(4, CharPredicates.ALWAYS).match("abc", 0, 3));
-    assertEquals(MISMATCH, Patterns.many(1, CharPredicates.NEVER).match("abc", 0, 3));
-    assertEquals(MISMATCH, Patterns.many(1, CharPredicates.ALWAYS).match("", 0, 0));
+    assertEquals(3, Patterns.atLeast(3, CharPredicates.ALWAYS).match("abc", 0, 3));
+    assertEquals(MISMATCH, Patterns.atLeast(4, CharPredicates.ALWAYS).match("abc", 0, 3));
+    assertEquals(MISMATCH, Patterns.atLeast(1, CharPredicates.NEVER).match("abc", 0, 3));
+    assertEquals(MISMATCH, Patterns.atLeast(1, CharPredicates.ALWAYS).match("", 0, 0));
   }
 
   @Test
   public void testMany_negativeNumberThrows() {
     try {
-      Patterns.many(-1, CharPredicates.ALWAYS);
+      Patterns.atLeast(-1, CharPredicates.ALWAYS);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("min < 0", e.getMessage());
@@ -267,30 +267,30 @@ public class PatternsTest {
 
   @Test
   public void testSome() {
-    assertEquals(2, Patterns.some(2, CharPredicates.ALWAYS).match("abc", 0, 3));
-    assertEquals(0, Patterns.some(0, CharPredicates.ALWAYS).match("abc", 0, 3));
-    assertEquals(0, Patterns.some(1, CharPredicates.NEVER).match("abc", 0, 3));
-    assertEquals(0, Patterns.some(2, CharPredicates.ALWAYS).match("", 0, 0));
+    assertEquals(2, Patterns.atMost(2, CharPredicates.ALWAYS).match("abc", 0, 3));
+    assertEquals(0, Patterns.atMost(0, CharPredicates.ALWAYS).match("abc", 0, 3));
+    assertEquals(0, Patterns.atMost(1, CharPredicates.NEVER).match("abc", 0, 3));
+    assertEquals(0, Patterns.atMost(2, CharPredicates.ALWAYS).match("", 0, 0));
   }
 
   @Test
   public void testSome_withMin() {
-    assertEquals(3, Patterns.some(1, 4, CharPredicates.ALWAYS).match("abc", 0, 3));
-    assertEquals(MISMATCH, Patterns.some(4, 5, CharPredicates.ALWAYS).match("abc", 0, 3));
-    assertEquals(MISMATCH, Patterns.some(1, 1, CharPredicates.NEVER).match("abc", 0, 3));
-    assertEquals(MISMATCH, Patterns.some(1, 1, CharPredicates.ALWAYS).match("", 0, 0));
+    assertEquals(3, Patterns.times(1, 4, CharPredicates.ALWAYS).match("abc", 0, 3));
+    assertEquals(MISMATCH, Patterns.times(4, 5, CharPredicates.ALWAYS).match("abc", 0, 3));
+    assertEquals(MISMATCH, Patterns.times(1, 1, CharPredicates.NEVER).match("abc", 0, 3));
+    assertEquals(MISMATCH, Patterns.times(1, 1, CharPredicates.ALWAYS).match("", 0, 0));
   }
 
   @Test
   public void testSome_negativeMaxThrows() {
     try {
-      Patterns.some(-1, CharPredicates.ALWAYS);
+      Patterns.atMost(-1, CharPredicates.ALWAYS);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("max < 0", e.getMessage());
     }
     try {
-      Patterns.some(0, -1, CharPredicates.ALWAYS);
+      Patterns.times(0, -1, CharPredicates.ALWAYS);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("max < 0", e.getMessage());
@@ -300,7 +300,7 @@ public class PatternsTest {
   @Test
   public void testSome_negativeMinThrows() {
     try {
-      Patterns.some(-1, 1, CharPredicates.ALWAYS);
+      Patterns.times(-1, 1, CharPredicates.ALWAYS);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("min < 0", e.getMessage());
@@ -310,7 +310,7 @@ public class PatternsTest {
   @Test
   public void testSome_minBiggerThanMaxThrows() {
     try {
-      Patterns.some(1, 0, CharPredicates.ALWAYS);
+      Patterns.times(1, 0, CharPredicates.ALWAYS);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("min > max", e.getMessage());
@@ -475,20 +475,14 @@ public class PatternsTest {
   }
 
   @Test
-  public void testNullable() {
-    assertEquals(MISMATCH, Patterns.nullable(string("ab")).match("", 0, 0));
-    assertEquals(0, Patterns.nullable(Patterns.optional(string("ab"))).match("", 0, 0));
-  }
-
-  @Test
   public void testToString() throws Exception {
     assertEquals("[a-zA-Z]", Patterns.isChar(CharPredicates.IS_ALPHA).toString());
     assertEquals(".{3,}", Patterns.hasAtLeast(3).toString());
     assertEquals("(foo & .{2})", Patterns.and(Patterns.string("foo"), Patterns.hasExact(2)).toString());
     assertEquals("(foo | .{2,})", Patterns.or(Patterns.string("foo"), Patterns.hasAtLeast(2)).toString());
-    assertEquals("(bar & c{3})", Patterns.and(Patterns.string("bar"), Patterns.repeat(3, isChar('c'))).toString());
+    assertEquals("(bar & c{3})", Patterns.and(Patterns.string("bar"), isChar('c').times(3)).toString());
     assertEquals("c{3}", Patterns.repeat(3, CharPredicates.isChar('c')).toString());
-    assertEquals("foo{2,}", Patterns.string("foo").many(2).toString());
+    assertEquals("foo{2,}", Patterns.string("foo").atLeast(2).toString());
     assertEquals("foo+", Patterns.string("foo").many1().toString());
     assertEquals("!(foo)", Patterns.notString("foo").toString());
     assertEquals("a+", Patterns.many1(CharPredicates.isChar('a')).toString());
@@ -496,7 +490,7 @@ public class PatternsTest {
     assertEquals("a*", Patterns.many(CharPredicates.isChar('a')).toString());
     assertEquals("foo?", Patterns.string("foo").optional().toString());
     assertEquals("foobar", Patterns.string("foo").next(string("bar")).toString());
-    assertEquals("foo{0,2}", Patterns.string("foo").some(2).toString());
+    assertEquals("foo{0,2}", Patterns.string("foo").atMost(2).toString());
     assertEquals("!(FOO)", Patterns.not(stringCaseInsensitive("foo")).toString());
     assertEquals("(?:foo)", string("foo").peek().toString());
   }

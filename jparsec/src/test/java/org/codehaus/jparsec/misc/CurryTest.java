@@ -349,8 +349,8 @@ public class CurryTest {
   }
   
   static class AmbiguousConstructor {
-    public AmbiguousConstructor(int i) {}
-    public AmbiguousConstructor(String n) {}
+    public AmbiguousConstructor(@SuppressWarnings("unused") int i) {}
+    public AmbiguousConstructor(@SuppressWarnings("unused") String n) {}
   }
 
   @Test
@@ -365,7 +365,7 @@ public class CurryTest {
   }
   
   static class VarargConstructor {
-    public VarargConstructor(String... names) {}
+    public VarargConstructor(@SuppressWarnings("unused") String... names) {}
   }
 
   @Test
