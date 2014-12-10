@@ -17,6 +17,7 @@ package org.codehaus.jparsec.pattern;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Scanners;
+import org.codehaus.jparsec.internal.util.Checks;
 
 /**
  * Encapsulates algorithm to recognize certain string pattern. When fed with a character range,
@@ -49,14 +50,14 @@ public abstract class Pattern {
    * @return the new Pattern object.
    */
   public final Pattern next(Pattern next) {
-    return Patterns.sequence(this, next);
+    return new SequencePattern(this, next);
   }
   
   /**
    * Returns a {@link Pattern} object that matches with 0 length even if {@code this} mismatches.
    */
   public final Pattern optional() {
-    return Patterns.optional(this);
+    return new OptionalPattern(this);
   }
   
   /**
@@ -64,7 +65,7 @@ public abstract class Pattern {
    * The total match length is returned.
    */
   public final Pattern many() {
-    return Patterns.many(this);
+    return new ManyPattern(this);
   }
   
   /**
@@ -73,9 +74,23 @@ public abstract class Pattern {
    * 
    * @param min the minimal number of times to match.
    * @return the new Pattern object.
+   * @deprecated Use {@link #atLeast} instead.
    */
+  @Deprecated
   public final Pattern many(int min) {
-    return Patterns.many(min, this);
+    return atLeast(min);
+  }
+  
+  /**
+   * Returns {@link Pattern} object that matches this pattern for at least {@code min} times.
+   * The total match length is returned.
+   * 
+   * @param min the minimal number of times to match.
+   * @return the new Pattern object.
+   * @since 2.2
+   */
+  public final Pattern atLeast(int min) {
+    return new ManyBoundedPattern(Checks.checkMin(min), this);
   }
   
   /**
@@ -83,7 +98,7 @@ public abstract class Pattern {
    * The total match length is returned.
    */
   public final Pattern many1() {
-    return many(1);
+    return atLeast(1);
   }
   
   /**
@@ -92,9 +107,23 @@ public abstract class Pattern {
    * 
    * @param max the maximal number of times to match.
    * @return the new Pattern object.
+   * @deprecated Use {@link #atMost} instead.
    */
+  @Deprecated
   public final Pattern some(int max) {
-    return Patterns.some(max, this);
+    return atMost(max);
+  }
+  
+  /**
+   * Returns {@link Pattern} object that matches this pattern for up to {@code max} times.
+   * The total match length is returned.
+   * 
+   * @param max the maximal number of times to match.
+   * @return the new Pattern object.
+   * @since 2.2
+   */
+  public final Pattern atMost(int max) {
+    return new SomePattern(Checks.checkMax(max), this);
   }
   
   /**
@@ -121,7 +150,7 @@ public abstract class Pattern {
    * @since 2.2
    */
   public final Pattern times(int min, int max) {
-    return Patterns.some(min, max, this);
+    return times(this, min, max);
   }
   
   /**
@@ -129,14 +158,14 @@ public abstract class Pattern {
    * otherwise.
    */
   public final Pattern not() {
-    return Patterns.not(this);
+    return new NotPattern(this);
   }
   
   /**
    * Returns {@link Pattern} object that matches with match length 0 if this Pattern object matches.
    */
   public final Pattern peek() {
-    return Patterns.peek(this);
+    return new PeekPattern(this);
   }
   
   /**
@@ -145,7 +174,7 @@ public abstract class Pattern {
    * {@code alternative} pattern.
    */
   public final Pattern ifelse(Pattern consequence, Pattern alternative) {
-    return Patterns.ifElse(this, consequence, alternative);
+    return ifElse(this, consequence, alternative);
   }
   
   /**
@@ -162,12 +191,12 @@ public abstract class Pattern {
    * @since 2.2
    */
   public final Pattern times(int n) {
-    return Patterns.repeat(n, this);
+    return new RepeatPattern(Checks.checkNonNegative(n, "n < 0"), this);
   }
   
   /** Returns {@link Pattern} object that matches if either {@code this} or {@code p2} matches. */
   public final Pattern or(Pattern p2) {
-    return Patterns.or(this, p2);
+    return new OrPattern(this, p2);
   }
 
   /**
@@ -180,5 +209,37 @@ public abstract class Pattern {
   @SuppressWarnings("deprecation")
   public final Parser<Void> toScanner(String name) {
     return Scanners.pattern(this, name);
+  }
+
+  private static Pattern ifElse(
+      final Pattern cond, final Pattern consequence, final Pattern alternative) {
+    return new Pattern() {
+      @Override
+      public int match(CharSequence src, int begin, int end) {
+        final int conditionResult = cond.match(src, begin, end);
+        if (conditionResult == MISMATCH) {
+          return alternative.match(src, begin, end);
+        } else {
+          final int consequenceResult = consequence.match(src, begin + conditionResult, end);
+          if (consequenceResult == MISMATCH)
+            return MISMATCH;
+          else
+            return conditionResult + consequenceResult;
+        }
+      }
+    };
+  }
+
+  private static Pattern times(final Pattern pp, final int min, final int max) {
+    Checks.checkMinMax(min, max);
+    return new Pattern() {
+      @Override
+      public int match(CharSequence src, int begin, int end) {
+        int minLen = RepeatPattern.matchRepeat(min, pp, src, end, begin, 0);
+        if (MISMATCH == minLen)
+          return MISMATCH;
+        return SomePattern.matchSome(max - min, pp, src, end, begin + minLen, minLen);
+      }
+    };
   }
 }

@@ -109,19 +109,19 @@ public class PatternTest {
 
   @Test
   public void testMany_withMin() {
-    assertEquals(0, ALWAYS.many(2).match("abc", 0, 3));
-    assertEquals(0, ALWAYS.many(0).match("abc", 0, 3));
-    assertEquals(0, NEVER.many(0).match("abc", 0, 3));
-    assertEquals(3, Patterns.hasAtLeast(1).many(2).match("abc", 0, 3));
-    assertEquals(4, Patterns.hasAtLeast(2).many(2).match("abcde", 0, 5));
-    assertEquals(MISMATCH, NEVER.many(2).match("abc", 0, 3));
-    assertEquals(MISMATCH, Patterns.hasAtLeast(1).many(2).match("abc", 0, 1));
+    assertEquals(0, ALWAYS.atLeast(2).match("abc", 0, 3));
+    assertEquals(0, ALWAYS.atLeast(0).match("abc", 0, 3));
+    assertEquals(0, NEVER.atLeast(0).match("abc", 0, 3));
+    assertEquals(3, Patterns.hasAtLeast(1).atLeast(2).match("abc", 0, 3));
+    assertEquals(4, Patterns.hasAtLeast(2).atLeast(2).match("abcde", 0, 5));
+    assertEquals(MISMATCH, NEVER.atLeast(2).match("abc", 0, 3));
+    assertEquals(MISMATCH, Patterns.hasAtLeast(1).atLeast(2).match("abc", 0, 1));
   }
 
   @Test
   public void testMany_throwsForNegativeMin() {
     try {
-      ALWAYS.many(-1);
+      ALWAYS.atLeast(-1);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("min < 0", e.getMessage());
@@ -130,12 +130,12 @@ public class PatternTest {
 
   @Test
   public void testSome() {
-    assertEquals(0, NEVER.some(2).match("abc", 0, 3));
-    assertEquals(0, ALWAYS.some(2).match("abc", 0, 3));
-    assertEquals(0, NEVER.some(0).match("abc", 0, 3));
-    assertEquals(0, ALWAYS.some(0).match("abc", 0, 3));
-    assertEquals(2, Patterns.hasAtLeast(1).some(2).match("abc", 0, 3));
-    assertEquals(4, Patterns.hasAtLeast(2).some(2).match("abcde", 0, 5));
+    assertEquals(0, NEVER.atMost(2).match("abc", 0, 3));
+    assertEquals(0, ALWAYS.atMost(2).match("abc", 0, 3));
+    assertEquals(0, NEVER.atMost(0).match("abc", 0, 3));
+    assertEquals(0, ALWAYS.atMost(0).match("abc", 0, 3));
+    assertEquals(2, Patterns.hasAtLeast(1).atMost(2).match("abc", 0, 3));
+    assertEquals(4, Patterns.hasAtLeast(2).atMost(2).match("abcde", 0, 5));
   }
 
   @Test
@@ -150,7 +150,7 @@ public class PatternTest {
   @Test
   public void testSome_throwsForNegativeMax() {
     try {
-      ALWAYS.some(-1);
+      ALWAYS.atMost(-1);
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("max < 0", e.getMessage());
