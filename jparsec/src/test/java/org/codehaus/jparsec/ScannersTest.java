@@ -96,7 +96,7 @@ public class ScannersTest {
 
   @Test
   public void testMany_withPattern() {
-    Parser<Void> scanner = Scanners.many(Patterns.string("ab"), "(ab)*");
+    Parser<Void> scanner = Patterns.string("ab").many().toScanner("(ab)*");
     assertScanner(scanner, "abab");
     assertScanner(scanner, "aba", "a");
     assertScanner(scanner, "abc", "c");
@@ -106,14 +106,14 @@ public class ScannersTest {
 
   @Test
   public void testMany_withPatternThatConsumesNoInput() {
-    Parser<Void> scanner = Scanners.many(Patterns.ALWAYS, "*");
+    Parser<Void> scanner = Patterns.ALWAYS.many().toScanner("*");
     assertScanner(scanner, "");
     assertScanner(scanner, "a", "a");
   }
 
   @Test
   public void testMany1_withPattern() {
-    Parser<Void> scanner = Scanners.many1(Patterns.string("ab"), "(ab)+");
+    Parser<Void> scanner = Patterns.string("ab").many1().toScanner("(ab)+");
     assertScanner(scanner, "abab");
     assertScanner(scanner, "aba", "a");
     assertScanner(scanner, "abc", "c");
@@ -123,7 +123,7 @@ public class ScannersTest {
 
   @Test
   public void testMany1_withPatternThatConsumesNoInput() {
-    Parser<Void> scanner = Scanners.many1(Patterns.ALWAYS, "+");
+    Parser<Void> scanner = Patterns.ALWAYS.many1().toScanner("+");
     assertScanner(scanner, "");
     assertScanner(scanner, "a", "a");
   }
@@ -150,7 +150,7 @@ public class ScannersTest {
 
   @Test
   public void testPattern() {
-    Parser<Void> scanner = Scanners.pattern(Patterns.INTEGER, "integer");
+    Parser<Void> scanner = Patterns.INTEGER.toScanner("integer");
     assertScanner(scanner, "123");
     assertScanner(scanner, "12a", "a");
     assertFailure(scanner, "", 1, 1, "integer expected, EOF encountered.");
@@ -442,7 +442,7 @@ public class ScannersTest {
   public void testBlockComment_withQuotedParserThatMatchesEmpty() {
     Parser<Void> scanner = Scanners.blockComment(
         Scanners.string("<!--"), Scanners.string("-->"),
-        Scanners.pattern(Patterns.ALWAYS, "nothing"));
+        Patterns.ALWAYS.toScanner("nothing"));
     assertScanner(scanner, "<!---->");
     assertFailure(scanner, "", 1, 1);
     assertFailure(scanner, "<!-", 1, 1);
@@ -452,7 +452,7 @@ public class ScannersTest {
   public void testBlockComment_withQuotedParserThatMismatches() {
     Parser<Void> scanner = Scanners.blockComment(
         Scanners.string("<!--"), Scanners.string("-->"),
-        Scanners.pattern(Patterns.NEVER, "nothing"));
+        Patterns.NEVER.toScanner("nothing"));
     assertScanner(scanner, "<!---->");
     assertFailure(scanner, "", 1, 1);
     assertFailure(scanner, "<!-", 1, 1);
@@ -547,7 +547,7 @@ public class ScannersTest {
   @Test
   public void testQuoted() {
     Parser<String> scanner = Scanners.quoted(Scanners.isChar('<'), Scanners.isChar('>'),
-        Scanners.pattern(Patterns.INTEGER, "number"));
+        Patterns.INTEGER.toScanner("number"));
     assertStringScanner(scanner, "<>");
     assertStringScanner(scanner, "<123>");
     assertFailure(scanner, "", 1, 1);

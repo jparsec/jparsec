@@ -46,13 +46,13 @@ public final class JavaLexer {
     }
   };
   
-  static final Parser<String> IDENTIFIER = Scanners.pattern(
-      Patterns.isChar(JAVA_IDENTIFIER_START).next(Patterns.isChar(JAVA_IDENTIFIER_PART).many()),
-      "identifier").source();
+  static final Parser<String> IDENTIFIER = Patterns.isChar(JAVA_IDENTIFIER_START)
+      .next(Patterns.isChar(JAVA_IDENTIFIER_PART).many())
+      .toScanner("identifier")
+      .source();
   
   static final Parser<Void> DECIMAL_POINT_SCANNER =
-      Scanners.pattern(Patterns.INTEGER.optional().next(Patterns.FRACTION),
-          "decimal point number");
+      Patterns.INTEGER.optional().next(Patterns.FRACTION).toScanner("decimal point number");
   
   static final Parser<DecimalPointNumberLiteral> DECIMAL_POINT_NUMBER = 
       Mapper.curry(DecimalPointNumberLiteral.class).sequence(

@@ -68,8 +68,8 @@ public final class Indentation {
    * A {@link Parser} that recognizes 1 or more whitespace characters on the same line.
    * Line continutation (escaped by a backslash character {@code '\'}) is considered the same line.
    */
-  public static final Parser<Void> WHITESPACES = Scanners.pattern(
-      INLINE_WHITESPACES.or(LINE_CONTINUATION).many1(), "whitespaces");
+  public static final Parser<Void> WHITESPACES =
+      INLINE_WHITESPACES.or(LINE_CONTINUATION).many1().toScanner("whitespaces");
   
   @Private static enum Punctuation {
     INDENT, OUTDENT, LF

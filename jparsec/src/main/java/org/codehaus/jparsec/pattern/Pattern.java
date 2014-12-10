@@ -147,7 +147,9 @@ public abstract class Pattern {
 
   /**
    * Returns a scanner parser using {@code this} pattern.
-   * Convenient short-hand for {@link Scanner#pattern}.
+   * Convenient short-hand for {@link Scanners#pattern}.
+   *
+   * @since 2.2
    */
   public final Parser<Void> toScanner(String name) {
     return Scanners.pattern(this, name);
