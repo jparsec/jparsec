@@ -104,8 +104,23 @@ public abstract class Pattern {
    * @param min the minimal number of times to match.
    * @param max the maximal number of times to match.
    * @return the new Pattern object.
+   * @deprecated Use {@link #times(int, int)} instead.
    */
-  public final Pattern some(final int min, final int max) {
+  @Deprecated
+  public final Pattern some(int min, int max) {
+    return times(min, max);
+  }
+  
+  /**
+   * Returns {@link Pattern} object that matches this pattern for at least {@code min} times
+   * and up to {@code max} times. The total match length is returned.
+   * 
+   * @param min the minimal number of times to match.
+   * @param max the maximal number of times to match.
+   * @return the new Pattern object.
+   * @since 2.2
+   */
+  public final Pattern times(int min, int max) {
     return Patterns.some(min, max, this);
   }
   
@@ -135,8 +150,18 @@ public abstract class Pattern {
   
   /**
    * Returns {@link Pattern} object that matches the input against this pattern for {@code n} times.
+   * @deprecated Use {@link #times(int)} instead.
    */
+  @Deprecated
   public final Pattern repeat(int n) {
+    return times(n);
+  }
+  
+  /**
+   * Returns {@link Pattern} object that matches the input against this pattern for {@code n} times.
+   * @since 2.2
+   */
+  public final Pattern times(int n) {
     return Patterns.repeat(n, this);
   }
   
