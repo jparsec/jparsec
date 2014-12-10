@@ -46,7 +46,7 @@ import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
  *
  * <p> {@code Parser}s run either on character level to scan the source, or on token level to parse a list of {@link
  * Token} objects returned from another parser. This other parser that returns the list of tokens for token level
- * parsing is hooked up via the {@link #from(Parser)} or {@link #from(Parser, Parser)} method.
+ * parsing is hooked up via the {@link #from(Parser, Parser)} or {@link #from(Parser)} method.
  *
  * <p>The following are important naming conventions used throughout the library:
  *
@@ -578,7 +578,8 @@ public abstract class Parser<T> {
 
   /**
    * A {@link Parser} that takes as input the {@link Token} collection returned by {@code lexer},
-   * and runs {@code this} to parse the tokens.
+   * and runs {@code this} to parse the tokens. Most parsers should use the simpler
+   * {@link #from(Parser, Parser)} instead.
    *
    * <p> {@code this} must be a token level parser.
    */
@@ -594,7 +595,7 @@ public abstract class Parser<T> {
    * {@code Token} with correct source location information tacked on for free. Your token object
    * can literally be anything, as long as your token level parser can recognize it later.
    *
-   * <p>The following example uses {@link Terminals#tokenizer()}: <pre class="code">
+   * <p>The following example uses {@code Terminals.tokenizer()}: <pre class="code">
    * Terminals terminals = ...;
    * return parser.from(terminals.tokenizer(), Scanners.WHITESPACES.optional()).parse(str);
    * </pre>
