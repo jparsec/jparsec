@@ -21,7 +21,7 @@ package org.codehaus.jparsec;
  * 
  * @author Ben Yu
  */
-class DelimitedParser<T, R> extends Parser<R> {
+abstract class DelimitedParser<T, R> extends Parser<R> {
   final Parser<T> parser;
   private final Parser<?> delim;
 
@@ -61,7 +61,7 @@ class DelimitedParser<T, R> extends Parser<R> {
     return null;
   }
 
-  void element(ParseContext ctxt, R result) {}
+  abstract void element(ParseContext ctxt, R result);
   
   @Override public String toString() {
     return "delimited";

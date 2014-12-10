@@ -10,7 +10,7 @@ import static org.junit.Assert.assertEquals;
  * 
  * @author Ben Yu
  */
-public final class StringsTest {
+public class StringsTest {
 
   @Test
   public void testJoin() {
@@ -25,5 +25,4 @@ public final class StringsTest {
     assertEquals("1", Strings.join(new StringBuilder(), ", ", new Object[]{1}).toString());
     assertEquals("1, 2", Strings.join(new StringBuilder(), ", ", new Object[]{1, 2}).toString());
   }
-
 }
