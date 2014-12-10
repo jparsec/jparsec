@@ -15,6 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec.examples.sql.parser;
 
+import static java.util.Arrays.asList;
 import static org.codehaus.jparsec.Parsers.between;
 
 import org.codehaus.jparsec.Parser;
@@ -44,7 +45,7 @@ final class TerminalParser {
   };
   
   private static final Terminals TERMS =
-      Terminals.operators(OPERATORS).caseInsensitiveKeywords(KEYWORDS);
+      Terminals.operators(OPERATORS).words(Scanners.IDENTIFIER).caseInsensitiveKeywords(asList(KEYWORDS)).build();
   
   private static final Parser<?> TOKENIZER = Parsers.or(
       Terminals.DecimalLiteral.TOKENIZER, Terminals.StringLiteral.SINGLE_QUOTE_TOKENIZER,

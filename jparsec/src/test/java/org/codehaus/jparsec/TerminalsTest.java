@@ -207,7 +207,8 @@ public class TerminalsTest {
 
   @Test
   public void testPhrase() {
-    Terminals terminals = Terminals.operators().keywords("hello", "world", "hell");
+    String[] keywords = { "hello", "world", "hell" };
+    Terminals terminals = Terminals.operators().words(Scanners.IDENTIFIER).keywords(asList(keywords)).build();
     Parser<?> parser =
         terminals.phrase("hello", "world").from(terminals.tokenizer(), Scanners.WHITESPACES);
     parser.parse("hello   world");
@@ -218,7 +219,8 @@ public class TerminalsTest {
 
   @Test
   public void testCaseSensitive() {
-    Terminals terminals = Terminals.operators("+", "-").keywords("foo", "bar", "baz");
+    String[] keywords = { "foo", "bar", "baz" };
+    Terminals terminals = Terminals.operators("+", "-").words(Scanners.IDENTIFIER).keywords(asList(keywords)).build();
     Parser<Token> parser =
         terminals.token("+", "-", "foo", "bar").from(terminals.tokenizer(), WHITESPACES);
     assertParser(parser, "+", new Token(0, 1, Tokens.reserved("+")));
@@ -234,8 +236,9 @@ public class TerminalsTest {
 
   @Test
   public void testCaseInsensitive() {
+    String[] keywords = { "foo", "bar", "baz" };
     Terminals terminals =
-        Terminals.operators("+", "-").caseInsensitiveKeywords("foo", "bar", "baz");
+        Terminals.operators("+", "-").words(Scanners.IDENTIFIER).caseInsensitiveKeywords(asList(keywords)).build();
     Parser<Token> parser =
         terminals.token("+", "-", "foo", "bar").from(terminals.tokenizer(), WHITESPACES);
     assertParser(parser, "+", new Token(0, 1, Tokens.reserved("+")));

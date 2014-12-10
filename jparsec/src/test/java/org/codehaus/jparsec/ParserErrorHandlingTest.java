@@ -16,6 +16,7 @@
 
 package org.codehaus.jparsec;
 
+import static java.util.Arrays.asList;
 import static org.codehaus.jparsec.Asserts.assertFailure;
 import static org.codehaus.jparsec.Scanners.isChar;
 import static org.codehaus.jparsec.TestParsers.areChars;
@@ -184,7 +185,8 @@ public class ParserErrorHandlingTest {
 
   @Test
   public void testEmptyTokenCounts() {
-    Terminals terminals = Terminals.operators("+", "-").keywords("foo", "bar", "baz");
+    String[] keywords = { "foo", "bar", "baz" };
+    Terminals terminals = Terminals.operators("+", "-").words(Scanners.IDENTIFIER).keywords(asList(keywords)).build();
     Parser<List<Token>> lexeme = terminals.tokenizer().lexer(Scanners.WHITESPACES)
         .map(new Unary<List<Token>>() {
           @Override public List<Token> map(List<Token> tokens) {
