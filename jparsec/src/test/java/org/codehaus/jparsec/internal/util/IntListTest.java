@@ -108,7 +108,7 @@ public class IntListTest {
     } catch (ArrayIndexOutOfBoundsException e) {}
   }
   
-  private void assertEqualArray(int[] array, int... values) {
+  private static void assertEqualArray(int[] array, int... values) {
     assertEquals(array.length, values.length);
     for (int i = 0; i < array.length; i++) {
       assertEquals(values[i], array[i]);
