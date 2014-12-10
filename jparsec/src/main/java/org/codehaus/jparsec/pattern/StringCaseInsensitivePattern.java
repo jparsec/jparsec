@@ -42,14 +42,6 @@ class StringCaseInsensitivePattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    if ((string.length() > 0) && compareIgnoreCase(c, string.charAt(0)))
-      return Patterns.string(string.substring(1));
-    else
-      return Patterns.NEVER;
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     return matchStringCaseInsensitive(string, src, begin, end);
   }

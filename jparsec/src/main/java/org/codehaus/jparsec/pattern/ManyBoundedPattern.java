@@ -25,14 +25,6 @@ class ManyBoundedPattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    if (min == 0)
-      return pattern.many().derive(c);
-
-    return Patterns.nextWithEmpty(pattern.derive(c), pattern.many(min - 1));
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     int minLen = RepeatPattern.matchRepeat(min, pattern, src, end, begin, 0);
     if (MISMATCH == minLen)

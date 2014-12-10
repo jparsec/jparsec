@@ -24,11 +24,6 @@ class HasAtLeastPattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    return Patterns.hasAtLeast(n - 1);
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     if ((begin + n) > end)
       return Pattern.MISMATCH;

@@ -9,14 +9,6 @@ class NotStringPattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    if (string.length() > 0 && string.charAt(0) != c)
-      return Patterns.notString(string.substring(1));
-
-    return Patterns.NEVER;
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     if (begin >= end)
       return MISMATCH;

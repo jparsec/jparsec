@@ -62,16 +62,7 @@ public final class Patterns {
    * and the first character is {@code '\'}. Mismatch otherwise.
    */
   public static final Pattern ESCAPED = new Pattern() {
-    @Override
-    public Pattern derive(char c) {
-      if (c == '\\')
-        return Patterns.ANY_CHAR;
-
-      return Patterns.NEVER;
-    }
-
-    @Override
-    public int match(CharSequence src, int begin, int end) {
+    @Override public int match(CharSequence src, int begin, int end) {
       if (begin >= (end - 1))
         return Pattern.MISMATCH;
       else if (src.charAt(begin) == '\\')

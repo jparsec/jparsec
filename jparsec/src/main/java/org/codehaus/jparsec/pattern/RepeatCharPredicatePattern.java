@@ -37,14 +37,6 @@ class RepeatCharPredicatePattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    if ((n > 0) && predicate.isChar(c))
-      return Patterns.repeat(n - 1, predicate);
-
-    return Patterns.NEVER;
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     return matchRepeat(n, predicate, src, end, begin, 0);
   }

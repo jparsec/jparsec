@@ -23,18 +23,6 @@ class OrPattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    Pattern current = null;
-    for (Pattern pattern : patterns) {
-      if (current == null)
-        current = pattern.derive(c);
-      else
-        current = Patterns.orWithoutEmpty(current, pattern.derive(c));
-    }
-    return current;
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     for (Pattern pattern : patterns) {
       int l = pattern.match(src, begin, end);

@@ -36,11 +36,6 @@ class ManyPattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    return Patterns.nextWithEmpty(pattern.derive(c), this);
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     return matchMany(pattern, src, end, begin, 0);
   }

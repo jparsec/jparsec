@@ -46,33 +46,7 @@ final class IsCharScanner extends Parser<Void> {
     return false;
   }
 
-  @Override
-  public Incremental<Void> incrementally() {
-    return new IncrementalIsCharScanner();
-  }
-
   @Override public String toString() {
     return name;
   }
-
-  private class IncrementalIsCharScanner extends Incremental<Void> {
-
-    @Override
-    Incremental<Void> parse(ParseContext context) {
-      if (context.isEof()) {
-        return this;
-      }
-      
-      char c = context.peekChar();
-      if (predicate.isChar(c)) {
-        context.next();
-        context.result = null;
-        return new Done<Void>(null);
-      } else {
-        return new Failed<Void>();
-      }
-    }
-
-  }
-
 }

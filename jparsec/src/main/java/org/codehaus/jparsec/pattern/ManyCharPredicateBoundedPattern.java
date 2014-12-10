@@ -25,18 +25,6 @@ class ManyCharPredicateBoundedPattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    if (predicate.isChar(c)) {
-      if (min > 0)
-        return Patterns.many(min - 1, predicate);
-      else
-        return Patterns.many(predicate);
-    }
-
-    return Patterns.NEVER;
-  }
-
-  @Override
   public int match(CharSequence src, int begin, int end) {
     int minLen = RepeatCharPredicatePattern.matchRepeat(min, predicate, src, end, begin, 0);
     if (minLen == MISMATCH)

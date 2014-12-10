@@ -56,14 +56,6 @@ class StringPattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    if ((string.length() > 0) && (c == string.charAt(0)))
-      return Patterns.string(string.substring(1));
-    else
-      return Patterns.NEVER;
-  }
-
-  @Override
   public String toString() {
     return string;
   }

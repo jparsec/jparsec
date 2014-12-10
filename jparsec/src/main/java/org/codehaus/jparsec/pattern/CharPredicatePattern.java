@@ -33,14 +33,6 @@ class CharPredicatePattern extends Pattern {
   }
 
   @Override
-  public Pattern derive(char c) {
-    if (predicate.isChar(c))
-      return Patterns.ALWAYS;
-    else
-      return Patterns.NEVER;
-  }
-
-  @Override
   public String toString() {
     return predicate.toString();
   }

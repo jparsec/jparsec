@@ -37,20 +37,6 @@ public abstract class Pattern {
    * @return the number of characters matched. MISMATCH otherwise.
    */
   public abstract int match(CharSequence src, int begin, int end);
-
-  /**
-   * Derives a new {@link Pattern} with respect to given input character.
-   * 
-   * <p>Defaults to a pattern that never matches (eg. empty language).</p>
-   * 
-   * @param c the character to derive pattern.
-   * @return a new Pattern which is <em>derived</em> from <code>this</code> Pattern assuming character <code>c</code> has
-   * been consumed.
-   * @since 3.0
-   */
-  public Pattern derive(char c) {
-    return Patterns.NEVER;
-  }
   
   /**
    * Returns a {@link Pattern} object that sequentially matches the character range against
