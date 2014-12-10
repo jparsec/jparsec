@@ -35,7 +35,7 @@ public final class Scanners {
   
   /** A scanner that scans greedily for 1 or more whitespace characters. */
   public static final Parser<Void> WHITESPACES = 
-      pattern(Patterns.many1(CharPredicates.IS_WHITESPACE), "whitespaces");
+      Patterns.many1(CharPredicates.IS_WHITESPACE).toScanner("whitespaces");
   
   /**
    * Matches any character in the input. Different from {@link Parsers#always()},
@@ -53,7 +53,7 @@ public final class Scanners {
   public static final Parser<Void> HASKELL_LINE_COMMENT = lineComment("--");
   
   private static final Parser<Void> JAVA_BLOCK_COMMENTED =
-      pattern(notChar2('*', '/').many(), "commented block");
+      notChar2('*', '/').many().toScanner("commented block");
   
   /** Scanner for c++/java style block comment. */
   public static final Parser<Void> JAVA_BLOCK_COMMENT =
@@ -65,7 +65,7 @@ public final class Scanners {
   
   /** Scanner for haskell style block comment. {- -} */
   public static final Parser<Void> HASKELL_BLOCK_COMMENT = Parsers.sequence(
-      string("{-"), pattern(notChar2('-', '}').many(), "commented block"), string("-}"));
+      string("{-"), notChar2('-', '}').many().toScanner("commented block"), string("-}"));
   
   /**
    * Scanner with a pattern for SQL style string literal. A SQL string literal
@@ -73,19 +73,19 @@ public final class Scanners {
    * 2 single quotes.
    */
   public static final Parser<String> SINGLE_QUOTE_STRING = quotedBy(
-      pattern(Patterns.regex("(('')|[^'])*"), "quoted string"), isChar('\'')).source();
+      Patterns.regex("(('')|[^'])*").toScanner("quoted string"), isChar('\'')).source();
 
   /**
    * Scanner with a pattern for double quoted string literal. Backslash '\' is
    * used as escape character. 
    */
   public static final Parser<String> DOUBLE_QUOTE_STRING = quotedBy(
-      pattern(Patterns.regex("(\\\\.|[^\"\\\\])").many() ,"quoted string"), Scanners.isChar('"'))
+      Patterns.regex("(\\\\.|[^\"\\\\])").many().toScanner("quoted string"), Scanners.isChar('"'))
       .source();
   
   /** Scanner for a c/c++/java style character literal. such as 'a' or '\\'. */
   public static final Parser<String> SINGLE_QUOTE_CHAR = quotedBy(
-      pattern(Patterns.regex("(\\\\.)|[^'\\\\]") ,"quoted char"), Scanners.isChar('\''))
+      Patterns.regex("(\\\\.)|[^'\\\\]").toScanner("quoted char"), Scanners.isChar('\''))
       .source();
   
   /**
@@ -113,29 +113,29 @@ public final class Scanners {
    * Scanner for a regular identifier, that starts with either
    * an underscore or an alpha character, followed by 0 or more alphanumeric characters.
    */
-  public static final Parser<String> IDENTIFIER = pattern(Patterns.WORD, "word").source();
+  public static final Parser<String> IDENTIFIER = Patterns.WORD.toScanner("word").source();
   
   /** Scanner for an integer. */
-  public static final Parser<String> INTEGER = pattern(Patterns.INTEGER, "integer").source();
+  public static final Parser<String> INTEGER = Patterns.INTEGER.toScanner("integer").source();
   
   /** Scanner for a decimal number. */
-  public static final Parser<String> DECIMAL = pattern(Patterns.DECIMAL, "decimal").source();
+  public static final Parser<String> DECIMAL = Patterns.DECIMAL.toScanner("decimal").source();
   
   /** Scanner for a decimal number. 0 is not allowed as the leading digit. */
   public static final Parser<String> DEC_INTEGER =
-      pattern(Patterns.DEC_INTEGER, "decimal integer").source();
+      Patterns.DEC_INTEGER.toScanner("decimal integer").source();
   
   /** Scanner for a octal number. 0 is the leading digit. */
   public static final Parser<String> OCT_INTEGER =
-      pattern(Patterns.OCT_INTEGER, "octal integer").source();
+      Patterns.OCT_INTEGER.toScanner("octal integer").source();
   
   /** Scanner for a hexadecimal number. Has to start with {@code 0x} or {@code 0X}. */
   public static final Parser<String> HEX_INTEGER =
-      pattern(Patterns.HEX_INTEGER, "hexadecimal integer").source();
+      Patterns.HEX_INTEGER.toScanner("hexadecimal integer").source();
   
   /** Scanner for a scientific notation. */
   public static final Parser<String> SCIENTIFIC_NOTATION =
-      pattern(Patterns.SCIENTIFIC_NOTATION, "scientific notation").source();
+      Patterns.SCIENTIFIC_NOTATION.toScanner("scientific notation").source();
   
   /**
    * A scanner that scans greedily for 0 or more characters that satisfies the given CharPredicate.
@@ -144,7 +144,7 @@ public final class Scanners {
    * @return the Parser object.
    */
   public static Parser<Void> many(CharPredicate predicate) {
-    return pattern(Patterns.isChar(predicate).many(), predicate + "*");
+    return Patterns.isChar(predicate).many().toScanner(predicate + "*");
   }
   
   /**
@@ -154,7 +154,7 @@ public final class Scanners {
    * @return the Parser object.
    */
   public static Parser<Void> many1(CharPredicate predicate) {
-    return pattern(Patterns.many1(predicate), predicate + "+");
+    return Patterns.many1(predicate).toScanner(predicate + "+");
   }
   
   /**
@@ -163,9 +163,11 @@ public final class Scanners {
    * @param pattern the pattern object.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the Parser object.
+   * @deprecated Use {@code pattern.many().toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> many(Pattern pattern, String name) {
-    return pattern(pattern.many(), name);
+    return pattern.many().toScanner(name);
   }
   
   /**
@@ -174,9 +176,11 @@ public final class Scanners {
    * @param pattern the pattern object.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the Parser object.
+   * @deprecated Use {@code pattern.many1().toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> many1(Pattern pattern, String name) {
-    return pattern(pattern.many1(), name);
+    return pattern.many1().toScanner(name);
   }
 
   /**
@@ -186,7 +190,7 @@ public final class Scanners {
    * @return the scanner.
    */
   public static Parser<Void> string(String str) {
-    return string(str, str);
+    return Patterns.string(str).toScanner(str);
   }
   
   /**
@@ -195,9 +199,11 @@ public final class Scanners {
    * @param str the string to match
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Use {@code Patterns.pattern(str).toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> string(String str, String name) {
-    return pattern(Patterns.string(str), name);
+    return Patterns.string(str).toScanner(name);
   }
   
   /**
@@ -206,7 +212,9 @@ public final class Scanners {
    * @param pattern the pattern object.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the Parser object.
+   * @deprecated Use {@link pattern.toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> pattern(Pattern pattern, String name) {
     return new PatternScanner(name, pattern);
   }
@@ -217,9 +225,11 @@ public final class Scanners {
    * @param str the string to match
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Use {@code Patterns.stringCaseInsensitive(str).toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> stringCaseInsensitive(String str, String name) {
-    return pattern(Patterns.stringCaseInsensitive(str), name);
+    return Patterns.stringCaseInsensitive(str).toScanner(name);
   }
   
   /**
@@ -228,7 +238,7 @@ public final class Scanners {
    * @return the scanner.
    */
   public static Parser<Void> stringCaseInsensitive(String str) {
-    return stringCaseInsensitive(str, str);
+    return Patterns.stringCaseInsensitive(str).toScanner(str);
   }
 
   /**
@@ -239,7 +249,7 @@ public final class Scanners {
    * @return the scanner.
    */
   public static Parser<Void> isChar(CharPredicate predicate) {
-    return isChar(predicate, predicate.toString());
+    return new IsCharScanner(predicate);
   }
   
   /**
@@ -249,9 +259,12 @@ public final class Scanners {
    * @param predicate the predicate.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Implement {@link Object#toString} in the {@code CharPredicate},
+   *             or use {@code Patterns.isChar(predicate).toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> isChar(CharPredicate predicate, String name) {
-    return new IsCharScanner(name, predicate);
+    return Patterns.isChar(predicate).toScanner(name);
   }
   
   /**
@@ -260,7 +273,10 @@ public final class Scanners {
    * @param ch the expected character.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Use {@link #isChar(char)} instead
+   *             or use {@code Patterns.isChar(ch).toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> isChar(char ch, String name) {
     return isChar(CharPredicates.isChar(ch), name);
   }
@@ -272,7 +288,7 @@ public final class Scanners {
    * @return the scanner.
    */
   public static Parser<Void> isChar(char ch) {
-    return isChar(ch, Character.toString(ch));
+    return isChar(CharPredicates.isChar(ch));
   }
   
   /**
@@ -281,7 +297,9 @@ public final class Scanners {
    * @param ch the expected character.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Use {@link #notChar(char)}.
    */
+  @Deprecated
   public static Parser<Void> notChar(char ch, String name) {
     return isChar(CharPredicates.notChar(ch), name);
   }
@@ -293,7 +311,7 @@ public final class Scanners {
    * @return the scanner.
    */
   public static Parser<Void> notChar(char ch) {
-    return notChar(ch, "^"+ch);
+    return isChar(CharPredicates.notChar(ch));
   }
   
   /**
@@ -303,7 +321,9 @@ public final class Scanners {
    * @param chars the characters.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Use {@code Patterns.among(chars).toScanner(name)}.
    */
+  @Deprecated
   public static Parser<Void> among(String chars, String name) {
     return isChar(CharPredicates.among(chars), name);
   }
@@ -325,7 +345,10 @@ public final class Scanners {
    * @param chars the characters.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
+   * @deprecated Use {@code Patterns.among(chars).not().toScanner(name)},
+   *             or {@code isChar(CharPredicates.notAmong(chars), name)}.
    */
+  @Deprecated
   public static Parser<Void> notAmong(String chars, String name) {
     return isChar(CharPredicates.notAmong(chars), name);
   }
@@ -346,7 +369,7 @@ public final class Scanners {
    * isn't consumed.
    */
   public static Parser<Void> lineComment(String begin) {
-    return pattern(Patterns.lineComment(begin), begin);
+    return Patterns.lineComment(begin).toScanner(begin);
   }
   
   /**
@@ -355,7 +378,7 @@ public final class Scanners {
    */
   public static Parser<Void> blockComment(String begin, String end) {
     Pattern opening = Patterns.string(begin).next(Patterns.notString(end).many());
-    return pattern(opening, begin).next(string(end));
+    return opening.toScanner(begin).next(string(end));
   }
   
   /**
@@ -370,7 +393,7 @@ public final class Scanners {
   public static Parser<Void> blockComment(String begin, String end, Pattern commented) {
     Pattern opening = Patterns.string(begin)
         .next(Patterns.string(end).not().next(commented).many());
-    return pattern(opening, begin).next(string(end));
+    return opening.toScanner(begin).next(string(end));
   }
   
   /**
@@ -409,7 +432,7 @@ public final class Scanners {
    */
   public static Parser<Void> nestableBlockComment(String begin, String end, Pattern commented) {
     return nestableBlockComment(
-        string(begin), string(end), pattern(commented, "commented"));
+        string(begin), string(end), commented.toScanner("commented"));
   }
   
   /**
@@ -433,7 +456,7 @@ public final class Scanners {
   public static Parser<String> quoted(char begin, char end) {
     Pattern beforeClosingQuote =
         Patterns.isChar(begin).next(Patterns.many(CharPredicates.notChar(end)));
-    return pattern(beforeClosingQuote, Character.toString(begin)).next(isChar(end)).source();
+    return beforeClosingQuote.toScanner(Character.toString(begin)).next(isChar(end)).source();
   }
   
   /**
@@ -443,7 +466,9 @@ public final class Scanners {
    * @param end ends a quote
    * @param quoted the parser that recognizes the quoted pattern.
    * @return the scanner.
+   * @deprecated Use {@code Parsers.sequence(begin, quoted.skipMany(), end).source()}.
    */
+  @Deprecated
   public static Parser<String> quoted(Parser<Void> begin, Parser<Void> end, Parser<?> quoted) {
     return Parsers.sequence(begin, quoted.skipMany(), end).source();
   }

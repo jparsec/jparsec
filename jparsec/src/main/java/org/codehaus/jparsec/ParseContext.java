@@ -50,9 +50,6 @@ abstract class ParseContext {
     /** Default value, no error. */
     NONE(false),
     
-    /** When {@link Parsers#never()} is called. Only for creating a trap programmatically. */
-    TRAP(false),
-    
     /** When {@link Parser#not()} is called. Signals that something isn't expected. */
     UNEXPECTED(false),
     
@@ -60,10 +57,7 @@ abstract class ParseContext {
     EXPECTED(true),
     
     /** When {@link Parsers#fail(String)} is called. Signals a serious problem. */
-    FAILURE(false),
-    
-    /** When {@link Parsers#expect(String)} or {@link Parser#label(String)} is called. */
-    EXPECT(true);
+    FAILURE(false);
     
     ErrorType(boolean mergeable) {
       this.mergeable = mergeable;
@@ -125,7 +119,6 @@ abstract class ParseContext {
         }
       };
     case EXPECTED:
-    case EXPECT:
       return new EmptyParseError(errorIndex, encounteredName) {
         @Override public List<String> getExpected() {
           return errorStrings;
@@ -192,10 +185,6 @@ abstract class ParseContext {
       // merge expected error.
       errors.add(subject);
     }
-  }
-  
-  final void trap() {
-    raise(ErrorType.TRAP, null);
   }
   
   final void fail(String message) {

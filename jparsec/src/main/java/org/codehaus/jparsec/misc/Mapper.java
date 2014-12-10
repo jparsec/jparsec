@@ -185,9 +185,9 @@ public abstract class Mapper<T> {
     checkNotSkipped(operator);
     checkFutureParameters(Unary.class, 2);
     return operator.map(new Map<Object, Unary<T>>() {
-      public Unary<T> map(final Object pre) {
+      @Override public Unary<T> map(final Object pre) {
         return new Unary<T>() {
-          public T map(T v) {
+          @Override public T map(T v) {
             return apply(pre, v);
           }
         };
@@ -224,9 +224,9 @@ public abstract class Mapper<T> {
     if (operatorList.size() == 1) return prefix(operatorList.get(0));
     checkFutureParameters(Unary.class, operatorList.size() + 1);
     return Parsers.list(operatorList).map(new Map<List<Object>, Unary<T>>() {
-      public Unary<T> map(final List<Object> list) {
+      @Override public Unary<T> map(final List<Object> list) {
         return new Unary<T>() {
-          public T map(T v) {
+          @Override public T map(T v) {
             list.add(v);
             return apply(list.toArray());
           }
@@ -263,9 +263,9 @@ public abstract class Mapper<T> {
     checkNotSkipped(operator);
     checkFutureParameters(Unary.class, 2);
     return operator.map(new Map<Object, Unary<T>>() {
-      public Unary<T> map(final Object post) {
+      @Override public Unary<T> map(final Object post) {
         return new Unary<T>() {
-          public T map(T v) {
+          @Override public T map(T v) {
             return apply(v, post);
           }
         };
@@ -310,9 +310,9 @@ public abstract class Mapper<T> {
     if (operator.length == 1) return postfix(operator[0]);
     checkFutureParameters(Unary.class, operator.length + 1);
     return Parsers.array(operator).map(new Map<Object[], Unary<T>>() {
-      public Unary<T> map(final Object[] array) {
+      @Override public Unary<T> map(final Object[] array) {
         return new Unary<T>() {
-          public T map(T v) {
+          @Override public T map(T v) {
             Object[] args = new Object[array.length + 1];
             args[0] = v;
             System.arraycopy(array, 0, args, 1, array.length);
@@ -352,9 +352,9 @@ public abstract class Mapper<T> {
     checkNotSkipped(operator);
     checkFutureParameters(Binary.class, 3);
     return operator.map(new Map<Object, Binary<T>>() {
-      public Binary<T> map(final Object op) {
+      @Override public Binary<T> map(final Object op) {
         return new Binary<T>() {
-          public T map(T left, T right) {
+          @Override public T map(T left, T right) {
             return apply(left, op, right);
           }
         };
@@ -398,9 +398,9 @@ public abstract class Mapper<T> {
     if (operator.length == 1) return infix(operator[0]);
     checkFutureParameters(Binary.class, operator.length + 2);
     return Parsers.array(operator).map(new Map<Object[], Binary<T>>() {
-      public Binary<T> map(final Object[] array) {
+      @Override public Binary<T> map(final Object[] array) {
         return new Binary<T>() {
-          public T map(T left, T right) {
+          @Override public T map(T left, T right) {
             Object[] args = new Object[array.length + 2];
             args[0] = left;
             System.arraycopy(array, 0, args, 1, array.length);
@@ -458,7 +458,7 @@ public abstract class Mapper<T> {
   final Unary<T> asUnary() {
     checkFutureParameters(Unary.class, 1);
     return new Unary<T>() {
-      public T map(T v) {
+      @Override public T map(T v) {
         return apply(v);
       }
       @Override public String toString() {
@@ -474,7 +474,7 @@ public abstract class Mapper<T> {
   final Binary<T> asBinary() {
     checkFutureParameters(Binary.class, 2);
     return new Binary<T>() {
-      public T map(T left, T right) {
+      @Override public T map(T left, T right) {
         return apply(left, right);
       }
       @Override public String toString() {
@@ -489,7 +489,7 @@ public abstract class Mapper<T> {
    */
   final Map<Object[], T> asMap() {
     return new Map<Object[], T>() {
-      public T map(Object[] args) {
+      @Override public T map(Object[] args) {
         return apply(args);
       }
       @Override public String toString() {
@@ -609,7 +609,7 @@ public abstract class Mapper<T> {
   private static final String SKIPPED = new String("skipped");
   
   private static final Unary<Object> SKIP = new Unary<Object>() {
-    public Object map(Object v) {
+    @Override public Object map(Object v) {
       return v;
     }
     @Override public String toString() {
@@ -637,7 +637,7 @@ public abstract class Mapper<T> {
       if (isSkipped(parser)) {
         // scan forward until a non-skipped parser is found or the end of the array.
         int from = i;
-        for (i++; i < parsers.length && isSkipped(parsers[i]); i++);
+        for (i++; i < parsers.length && isSkipped(parsers[i]); i++) {}
         if (i == parsers.length) {
           // we are at the end of the array
           Checks.checkArgument(!result.isEmpty(), "Cannot skip all parser parameters.");

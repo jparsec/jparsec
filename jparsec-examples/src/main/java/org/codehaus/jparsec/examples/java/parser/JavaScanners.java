@@ -30,11 +30,9 @@ public class JavaScanners {
    * 
    * @see <a href="http://docs.oracle.com/javase/specs/jls/se7/html/jls-3.html#jls-3.10.1">Java Language Specification</a> */
   public static final Parser<String> DEC_INTEGER =
-      Scanners.pattern(DEC_INTEGER_PATTERN, "decimal integer").source();
+      DEC_INTEGER_PATTERN.toScanner("decimal integer").source();
 
   /** Scanner for a octal number. 0 is the leading digit. */
   public static final Parser<String> OCT_INTEGER =
-      Scanners.pattern(OCT_INTEGER_PATTERN, "octal integer").source();
-
-
+      OCT_INTEGER_PATTERN.toScanner("octal integer").source();
 }

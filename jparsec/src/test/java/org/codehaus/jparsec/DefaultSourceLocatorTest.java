@@ -188,7 +188,7 @@ public class DefaultSourceLocatorTest {
     assertEquals(new Location(2, 5), locator.locate(2)); // this will call lookup()
   }
   
-  private void addLineBreaks(DefaultSourceLocator locator, int... indices) {
+  private static void addLineBreaks(DefaultSourceLocator locator, int... indices) {
     for (int i : indices) {
       locator.lineBreakIndices.add(i);
     }

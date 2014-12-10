@@ -30,7 +30,6 @@ public class MapperTest {
   }
   
   private static class CharSequenceMap extends Mapper<CharSequence> {
-    @SuppressWarnings("unused")
     String map(String s, Integer n) {
       return s + n;
     }
@@ -226,7 +225,7 @@ public class MapperTest {
     assertWrongParameters(fooMapper(), 2, 3);
   }
 
-  private <T> Mapper<T> fooMapper() {
+  private static <T> Mapper<T> fooMapper() {
     return new Mapper<T>() {
       @SuppressWarnings("unused")
       Foo map(String name, int unused) {
@@ -242,7 +241,7 @@ public class MapperTest {
 
   @Test
   public void testNonGenericMapper() {
-    assertEquals("1", new Mapper() {
+    assertEquals("1", new Mapper<String>() {
       @SuppressWarnings("unused")
       public String map(int i) {
         return Integer.toString(i);
@@ -407,12 +406,12 @@ public class MapperTest {
     }
   }
   
-  private void assertFoo(String name, Object actual) {
+  private static void assertFoo(String name, Object actual) {
     assertTrue(actual instanceof Foo);
     assertEquals(name, ((Foo) actual).name);
   }
   
-  private void assertWrongParameters(Mapper<?> mapper, int expected, int provided) {
+  private static void assertWrongParameters(Mapper<?> mapper, int expected, int provided) {
     Parser<?>[] parsers = new Parser<?>[provided];
     for (int i = 0; i < provided; i++) {
       parsers[i] = Parsers.always();
@@ -441,6 +440,7 @@ public class MapperTest {
     }
   }
 
+  @SuppressWarnings("unused")
   @Test
   public void testMissingMapperMethod() {
     try { 
@@ -449,15 +449,14 @@ public class MapperTest {
     } catch (IllegalStateException e) {}
   }
 
+  @SuppressWarnings("unused")
   @Test
   public void testAmbiguousMapperMethods() {
     try { 
       new Mapper<String>() {
-        @SuppressWarnings("unused")
         String map(int i) {
           return null;
         }
-        @SuppressWarnings("unused")
         String map() {
           return null;
         }
@@ -466,11 +465,11 @@ public class MapperTest {
     } catch (IllegalStateException e) {}
   }
 
+  @SuppressWarnings("unused")
   @Test
   public void testIncompatibleReturnType() {
     try {
       new Mapper<String>() {
-        @SuppressWarnings("unused")
         int map() {
           return 0;
         }
@@ -479,11 +478,11 @@ public class MapperTest {
     } catch (IllegalStateException e) {}
   }
 
+  @SuppressWarnings("unused")
   @Test
   public void testIncompatibleGenericReturnType() {
     try {
       new Mapper<List<String>>() {
-        @SuppressWarnings("unused")
         Collection<String> map() {
           return Arrays.asList("foo");
         }
@@ -493,7 +492,6 @@ public class MapperTest {
   }
   
   static class CharSequenceSubMap extends CharSequenceMap {
-    @SuppressWarnings("unused")
     @Override String map(String s, Integer n) {
       return "sub." + s + n;
     }

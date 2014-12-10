@@ -1,15 +1,13 @@
 package org.codehaus.jparsec;
 
-import java.util.Arrays;
-
-import org.codehaus.jparsec.error.ParserException;
-
-
-import junit.framework.Assert;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+
+import org.codehaus.jparsec.error.ParserException;
+import org.junit.Assert;
 
 /**
  * Extra assertions.

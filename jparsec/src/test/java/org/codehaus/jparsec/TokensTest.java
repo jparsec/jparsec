@@ -57,7 +57,7 @@ public class TokensTest {
         Tokens.scientificNotation("1.0", "-2"), Tokens.scientificNotation("2", "2"));
   }
   
-  private void assertFragment(Object tag, String text, Fragment fragment) {
+  private static void assertFragment(Object tag, String text, Fragment fragment) {
     assertEquals(text, fragment.text());
     assertEquals(tag, fragment.tag());
   }

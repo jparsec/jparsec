@@ -112,7 +112,7 @@ final class Curry<T> extends Mapper<T> {
    */
   @Override public boolean equals(Object obj) {
     if (obj instanceof Curry) {
-      return valueList().equals(((Curry) obj).valueList());
+      return valueList().equals(((Curry<?>) obj).valueList());
     }
     return false;
   }

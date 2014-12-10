@@ -96,7 +96,7 @@ public class TokenizerMapsTest {
         TokenizerMaps.SCIENTIFIC_NOTATION.map("0E0"));
   }
 
-  private void assertFragment(Object tag, Map<String, Fragment> map) {
+  private static void assertFragment(Object tag, Map<String, Fragment> map) {
     Fragment fragment = map.map("foo");
     assertEquals(tag, fragment.tag());
     assertEquals("foo", fragment.text());
