@@ -18,9 +18,9 @@ package org.codehaus.jparsec;
 import java.util.Collections;
 import java.util.List;
 
-import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
+import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
 
 /**

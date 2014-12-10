@@ -15,11 +15,11 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Maps;
+import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Checks;
 
 import java.io.IOException;

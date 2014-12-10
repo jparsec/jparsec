@@ -17,8 +17,8 @@ package org.codehaus.jparsec;
 
 import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
 
-import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Map;
+import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Strings;
 
 /**

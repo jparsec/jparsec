@@ -18,7 +18,7 @@ package org.codehaus.jparsec.error;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.codehaus.jparsec.annotations.Private;
+import org.codehaus.jparsec.internal.annotations.Private;
 
 /**
  * Reports parser errors in human-readable format. 

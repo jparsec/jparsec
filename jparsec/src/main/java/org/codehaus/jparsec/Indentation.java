@@ -19,8 +19,8 @@ package org.codehaus.jparsec;
 import java.util.List;
 import java.util.Stack;
 
-import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Unary;
+import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
 import org.codehaus.jparsec.internal.util.Objects;
 import org.codehaus.jparsec.pattern.CharPredicate;
