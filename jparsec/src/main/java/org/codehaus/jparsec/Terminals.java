@@ -133,7 +133,7 @@ public final class Terminals extends Lexicon {
      * {@code Long} value.
      */
     public static final Parser<Long> TOKENIZER =
-        Parsers.plus(HEX_TOKENIZER, DEC_TOKENIZER, OCT_TOKENIZER);
+        Parsers.or(HEX_TOKENIZER, DEC_TOKENIZER, OCT_TOKENIZER);
   }
   
   /** Entry point for any arbitrary integer literal represented as a {@link String}. */

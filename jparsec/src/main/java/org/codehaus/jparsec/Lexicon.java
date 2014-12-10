@@ -65,7 +65,7 @@ class Lexicon {
     for(int i = 0; i < tokenNames.length; i++) {
       ps[i] = Parsers.token(InternalFunctors.tokenWithSameValue(word(tokenNames[i])));
     }
-    return Parsers.plus(ps);
+    return Parsers.or(ps);
   }
   
   /** A {@link Parser} that recognizes the token identified by {@code tokenName}. */
@@ -90,6 +90,6 @@ class Lexicon {
   Lexicon union(Lexicon that) {
     return new Lexicon(
         InternalFunctors.fallback(words, that.words),
-        Parsers.plus(tokenizer, that.tokenizer));
+        Parsers.or(tokenizer, that.tokenizer));
   }
 }

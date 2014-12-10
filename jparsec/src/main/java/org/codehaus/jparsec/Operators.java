@@ -54,7 +54,7 @@ final class Operators {
       operators.put(s, value);
       lexers[i] = scanner.retn(value);
     }
-    return new Lexicon(Maps.map(operators), Parsers.plus(lexers));
+    return new Lexicon(Maps.map(operators), Parsers.or(lexers));
   }
   
   private static final Comparator<String> LONGER_STRING_FIRST = new Comparator<String>() {
