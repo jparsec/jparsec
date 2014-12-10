@@ -8,9 +8,9 @@ import java.util.List;
 import net.sf.cglib.reflect.FastClass;
 
 import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Binary;
 import org.codehaus.jparsec.functors.Unary;
+import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Checks;
 
 /**

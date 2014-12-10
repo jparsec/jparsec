@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
@@ -31,6 +30,7 @@ import org.codehaus.jparsec.functors.Pair;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
+import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
 
 /**

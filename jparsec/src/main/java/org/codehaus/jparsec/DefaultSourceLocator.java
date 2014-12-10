@@ -15,8 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.error.Location;
+import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.IntList;
 
 /**

@@ -7,7 +7,7 @@ jparsec
 
 # How to Use?
 
-jparsec is available in maven-central.
+jparsec is available in maven-central. [Snapshot Javadoc](http://jparsec.github.io/jparsec/apidocs/)
 
 ## Maven
 

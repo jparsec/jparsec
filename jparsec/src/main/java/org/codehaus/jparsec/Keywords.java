@@ -21,8 +21,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.TreeSet;
 
-import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Map;
+import org.codehaus.jparsec.internal.annotations.Private;
 
 /**
  * Helper class for creating lexers and parsers for keywords.

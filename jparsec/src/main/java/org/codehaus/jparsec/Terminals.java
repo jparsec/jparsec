@@ -25,8 +25,8 @@ import java.util.Collection;
 import org.codehaus.jparsec.Tokens.Fragment;
 import org.codehaus.jparsec.Tokens.ScientificNotation;
 import org.codehaus.jparsec.Tokens.Tag;
-import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Map;
+import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Objects;
 import org.codehaus.jparsec.internal.util.Strings;
 

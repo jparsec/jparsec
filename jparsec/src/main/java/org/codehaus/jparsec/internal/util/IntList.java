@@ -15,7 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec.internal.util;
 
-import org.codehaus.jparsec.annotations.Private;
+import org.codehaus.jparsec.internal.annotations.Private;
 
 /**
  * A simple, efficient and dynamic int list.

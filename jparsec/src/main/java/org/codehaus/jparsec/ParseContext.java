@@ -18,9 +18,9 @@ package org.codehaus.jparsec;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.error.ParseErrorDetails;
 import org.codehaus.jparsec.error.ParserException;
+import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
 
 /**

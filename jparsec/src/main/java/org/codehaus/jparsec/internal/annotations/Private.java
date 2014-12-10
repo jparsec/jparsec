@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and       *
  * limitations under the License.                                            *
  *****************************************************************************/
-package org.codehaus.jparsec.annotations;
+package org.codehaus.jparsec.internal.annotations;
 
 import static java.lang.annotation.ElementType.CONSTRUCTOR;
 import static java.lang.annotation.ElementType.FIELD;
