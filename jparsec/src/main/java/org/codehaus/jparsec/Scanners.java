@@ -452,7 +452,8 @@ public final class Scanners {
    * A scanner that after character level {@code outer} succeeds,
    * subsequently feeds the recognized characters to {@code inner} for a nested scanning.
    * 
-   * <p> Is useful for scenarios like parsing string interpolation grammar.
+   * <p> Is useful for scenarios like parsing string interpolation grammar, with parsing errors
+   * correctly pointing to the right location in the original source.
    */
   public static Parser<Void> nestedScanner(Parser<?> outer, Parser<Void> inner) {
     return new NestedScanner(outer, inner);
