@@ -11,7 +11,7 @@
     A parser combinator library in Java, modelled after Haskell' Parsec
   </description>
 
-  <url>http://github.com/abailly/jparsec</url>
+  <url>http://github.com/jparsec/jparsec</url>
 
   <distributionManagement>
     <repository>
@@ -32,9 +32,9 @@
   </licenses>
 
   <scm>
-    <url>http://github.com/abailly/jparsec</url>
-    <connection>scm:git:git@github.com:abailly/jparsec.git</connection>
-    <developerConnection>scm:git:git@github.com:abailly/jparsec.git</developerConnection>
+    <url>http://github.com/jparsec/jparsec</url>
+    <connection>scm:git:git@github.com:jparsec/jparsec.git</connection>
+    <developerConnection>scm:git:git@github.com:jparsec/jparsec.git</developerConnection>
   </scm>
 
   <developers>
