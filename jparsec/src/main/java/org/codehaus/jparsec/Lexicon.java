@@ -39,7 +39,10 @@ class Lexicon {
     this.tokenizer = tokenizer;
   }
   
-  /** Returns the tokenizer that tokenizes all managed terminals. */
+  /**
+   * Returns the tokenizer that tokenizes all terminals (operators, keywords, identifiers etc.)
+   * managed in this instance.
+   */
   public Parser<?> tokenizer() {
     return tokenizer;
   }
