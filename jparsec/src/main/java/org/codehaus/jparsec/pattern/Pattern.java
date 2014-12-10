@@ -15,6 +15,9 @@
  *****************************************************************************/
 package org.codehaus.jparsec.pattern;
 
+import org.codehaus.jparsec.Parser;
+import org.codehaus.jparsec.Scanners;
+
 /**
  * Encapsulates algorithm to recognize certain string pattern. When fed with a character range,
  * a {@link Pattern} object either fails to match, or matches with the match length returned.
@@ -140,5 +143,13 @@ public abstract class Pattern {
   /** Returns {@link Pattern} object that matches if either {@code this} or {@code p2} matches. */
   public final Pattern or(Pattern p2) {
     return Patterns.or(this, p2);
+  }
+
+  /**
+   * Returns a scanner parser using {@code this} pattern.
+   * Convenient short-hand for {@link Scanner#pattern}.
+   */
+  public final Parser<Void> toScanner(String name) {
+    return Scanners.pattern(this, name);
   }
 }
