@@ -15,7 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec.functors;
 
-import org.codehaus.jparsec.util.Objects;
+import org.codehaus.jparsec.internal.util.Objects;
 
 /**
  * Immutable data holder for 4 values.

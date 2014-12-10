@@ -28,9 +28,9 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 
+import org.codehaus.jparsec.internal.util.Lists;
 import org.codehaus.jparsec.pattern.CharPredicate;
 import org.codehaus.jparsec.pattern.Pattern;
-import org.codehaus.jparsec.util.Lists;
 import org.junit.Test;
 
 /**

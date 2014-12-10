@@ -16,10 +16,12 @@
 package org.codehaus.jparsec.pattern;
 
 import java.util.ArrayList;
+
 import static java.util.Arrays.asList;
+
 import java.util.Collections;
 
-import org.codehaus.jparsec.util.Lists;
+import org.codehaus.jparsec.internal.util.Lists;
 
 
 class SequencePattern extends Pattern {

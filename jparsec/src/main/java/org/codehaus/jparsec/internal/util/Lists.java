@@ -14,7 +14,7 @@
  * limitations under the License.                                            *
  *****************************************************************************/
 
-package org.codehaus.jparsec.util;
+package org.codehaus.jparsec.internal.util;
 
 import java.util.ArrayList;
 

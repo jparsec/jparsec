@@ -15,7 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec.pattern;
 
-import org.codehaus.jparsec.util.Strings;
+import org.codehaus.jparsec.internal.util.Strings;
 
 /**
  * Provides common {@link CharPredicate} implementations.

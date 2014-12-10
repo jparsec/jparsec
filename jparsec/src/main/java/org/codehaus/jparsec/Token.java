@@ -15,7 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import org.codehaus.jparsec.util.Objects;
+import org.codehaus.jparsec.internal.util.Objects;
 
 /**
  * Represents any token with a token value and the 0-based index in the source.

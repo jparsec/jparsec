@@ -11,7 +11,7 @@ import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Binary;
 import org.codehaus.jparsec.functors.Unary;
-import org.codehaus.jparsec.util.Checks;
+import org.codehaus.jparsec.internal.util.Checks;
 
 /**
  * Curries the only public constructor defined in the {@code T} class and invokes it with

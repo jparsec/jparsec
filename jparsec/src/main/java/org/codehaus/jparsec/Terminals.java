@@ -16,8 +16,8 @@
 package org.codehaus.jparsec;
 
 import static java.util.Arrays.asList;
-import static org.codehaus.jparsec.util.Checks.checkArgument;
-import static org.codehaus.jparsec.util.Checks.checkNotNull;
+import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
+import static org.codehaus.jparsec.internal.util.Checks.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,8 +27,8 @@ import org.codehaus.jparsec.Tokens.ScientificNotation;
 import org.codehaus.jparsec.Tokens.Tag;
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.util.Objects;
-import org.codehaus.jparsec.util.Strings;
+import org.codehaus.jparsec.internal.util.Objects;
+import org.codehaus.jparsec.internal.util.Strings;
 
 /**
  * Provides convenient API to build lexer and parsers for terminals.

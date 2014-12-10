@@ -33,8 +33,8 @@ import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.functors.Binary;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Unary;
-import org.codehaus.jparsec.util.Checks;
-import org.codehaus.jparsec.util.Lists;
+import org.codehaus.jparsec.internal.util.Checks;
+import org.codehaus.jparsec.internal.util.Lists;
 
 /**
  * Allows mapping arbitrary number of {@link Parser} results  to an object of {@code T} type-safely
