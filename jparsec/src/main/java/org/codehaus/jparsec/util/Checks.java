@@ -22,6 +22,14 @@ package org.codehaus.jparsec.util;
  */
 public final class Checks {
 
+  /** Checks that {@code value} cannot be null. */
+  public static <T> T checkNotNull(T value) throws NullPointerException {
+    if (value == null) {
+      throw new NullPointerException();
+    }
+    return value;
+  }
+
   /**
    * Checks that an argument satisfies requirement.
    *

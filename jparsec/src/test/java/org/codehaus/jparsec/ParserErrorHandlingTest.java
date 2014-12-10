@@ -160,8 +160,11 @@ public class ParserErrorHandlingTest {
 
   @Test
   public void testTokenLevelError() {
-    Terminals terminals =
-        Terminals.caseSensitive(new String[] {"+", "-"}, new String[] {"foo", "bar", "baz"});
+    Terminals terminals = Terminals
+        .operators("+", "-")
+        .words(Scanners.IDENTIFIER)
+        .keywords("foo", "bar", "baz")
+        .build();
     Parser<?> lexer = terminals.tokenizer();
     Parser<List<Token>> foobar =
         terminals.token("foo", "bar").times(2).from(lexer, Scanners.WHITESPACES);
@@ -181,11 +184,10 @@ public class ParserErrorHandlingTest {
 
   @Test
   public void testEmptyTokenCounts() {
-    Terminals terminals =
-      Terminals.caseSensitive(new String[] {"+", "-"}, new String[] {"foo", "bar", "baz"});
+    Terminals terminals = Terminals.operators("+", "-").keywords("foo", "bar", "baz");
     Parser<List<Token>> lexeme = terminals.tokenizer().lexer(Scanners.WHITESPACES)
         .map(new Unary<List<Token>>() {
-          public List<Token> map(List<Token> tokens) {
+          @Override public List<Token> map(List<Token> tokens) {
             List<Token> result = Lists.arrayList();
             for (Token token : tokens) {
               result.add(new Token(token.index(), 0, "("));

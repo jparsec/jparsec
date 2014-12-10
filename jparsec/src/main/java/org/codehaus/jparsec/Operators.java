@@ -17,8 +17,10 @@ package org.codehaus.jparsec;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Map;
 
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Maps;
@@ -39,11 +41,11 @@ final class Operators {
    * ones. Yet shorter operators are more often used than longer ones and the scanning of them is
    * faster. However, scanning shorter operators first has the chance that a "==" is mistakenly
    * scanned as "=" followed by another "=". In order to avoid this, we analyze the prefix
-   * relationship and make sure that prefixes are scanned after prefixees.
+   * relationship and make sure that prefixes are scanned after prefixes.
    */
-  static Lexicon lexicon(final String... operatorNames) {
-    final HashMap<String, Object> operators = new HashMap<String, Object>();
-    final String[] ops = sort(operatorNames);
+  static Lexicon lexicon(final Collection<String> operatorNames) {
+    final Map<String, Object> operators = new HashMap<String, Object>();
+    final String[] ops = sort(operatorNames.toArray(new String[operatorNames.size()]));
     final Parser<?>[] lexers = new Parser<?>[ops.length];
     for (int i = 0; i < ops.length; i++) {
       String s = ops[i];

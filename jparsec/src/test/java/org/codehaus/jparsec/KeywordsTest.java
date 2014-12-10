@@ -1,7 +1,11 @@
 package org.codehaus.jparsec;
 
+import static java.util.Arrays.asList;
 import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.junit.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -14,7 +18,7 @@ public class KeywordsTest {
 
   @Test
   public void testLexicon_caseSensitive() {
-    String[] keywords = {"foo", "Bar"};
+    List<String> keywords = asList("foo", "Bar");
     Lexicon lexicon = Keywords.lexicon(
         Scanners.IDENTIFIER, keywords, StringCase.CASE_SENSITIVE, TokenizerMaps.IDENTIFIER_FRAGMENT);
     for (String keyword : keywords) {
@@ -29,7 +33,7 @@ public class KeywordsTest {
 
   @Test
   public void testLexicon_caseInsensitive() {
-    String[] keywords = {"foo", "Bar"};
+    List<String> keywords = asList("foo", "Bar");
     Lexicon lexicon = Keywords.lexicon(
         Scanners.IDENTIFIER, keywords, StringCase.CASE_INSENSITIVE, TokenizerMaps.IDENTIFIER_FRAGMENT);
     for (String keyword : keywords) {

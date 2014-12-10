@@ -589,7 +589,8 @@ public abstract class Parser<T> {
   }
 
   /**
-   * Parses an input incrementally with this parser.
+   * Parses an input incrementally with this parser. Note that this is work-in-progress. DO NOT CALL
+   * this method yet!
    * 
    * @return an incremental version of this parser.
    */

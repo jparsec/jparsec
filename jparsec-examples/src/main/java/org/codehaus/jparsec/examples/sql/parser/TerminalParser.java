@@ -43,7 +43,8 @@ final class TerminalParser {
     "union", "all", "case", "when", "then", "else", "end"
   };
   
-  private static final Terminals TERMS = Terminals.caseInsensitive(OPERATORS, KEYWORDS);
+  private static final Terminals TERMS =
+      Terminals.operators(OPERATORS).caseInsensitiveKeywords(KEYWORDS);
   
   private static final Parser<?> TOKENIZER = Parsers.or(
       Terminals.DecimalLiteral.TOKENIZER, Terminals.StringLiteral.SINGLE_QUOTE_TOKENIZER,

@@ -1,5 +1,8 @@
 package org.codehaus.jparsec;
 
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -23,8 +26,9 @@ public class OperatorsTest {
 
   @Test
   public void testLexicon() {
-    String[] ops = {"++", "--", "+", "-", "+=", "-=", "+++",
-        "=", "==", "===", "!", "!=", "<", "<=", ">", ">=", "<>"};
+    List<String> ops = Arrays.asList(
+        "++", "--", "+", "-", "+=", "-=", "+++",
+        "=", "==", "===", "!", "!=", "<", "<=", ">", ">=", "<>");
     Lexicon lexicon = Operators.lexicon(ops);
     for (String op : ops) {
       assertEquals(Tokens.reserved(op), lexicon.word(op));

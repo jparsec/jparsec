@@ -15,17 +15,35 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import static java.util.Arrays.asList;
+import static org.codehaus.jparsec.util.Checks.checkArgument;
+import static org.codehaus.jparsec.util.Checks.checkNotNull;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
 import org.codehaus.jparsec.Tokens.Fragment;
 import org.codehaus.jparsec.Tokens.ScientificNotation;
 import org.codehaus.jparsec.Tokens.Tag;
 import org.codehaus.jparsec.annotations.Private;
 import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.util.Checks;
 import org.codehaus.jparsec.util.Objects;
 import org.codehaus.jparsec.util.Strings;
 
 /**
  * Provides convenient API to build lexer and parsers for terminals.
+ * The following example is a parser snippet for Java generic type expression such as
+ * {@code List<String>} : <pre>   {@code
+ *   Terminals terms = Terminals
+ *       .operators("?", "<", ">", ",")
+ *       .keywords("super", "extends")
+ *       .build();
+ *   Parser<String> typeName = Terminals.identifier();
+ *   Parser<?> wildcardWithUpperBound = terms.phrase("?", "extends");
+ *   ...
+ *   parser.from(terms.tokenizer(), Scanners.WHITESPACES.optional()).parse("List<String>");
+ * }</pre>
  * 
  * @author Ben Yu
  */
@@ -215,11 +233,11 @@ public final class Terminals extends Lexicon {
    * @param ops the operator names.
    * @param keywords the keyword names.
    * @return the Terminals instance.
+   * @deprecated Use {@code operators(ops).withCaseInsensitiveKeywords(keywords)} instead.
    */
+  @Deprecated
   public static Terminals caseInsensitive(String[] ops, String[] keywords) {
-    return instance(
-        Scanners.IDENTIFIER, ops, keywords,
-        StringCase.CASE_INSENSITIVE, TokenizerMaps.IDENTIFIER_FRAGMENT);
+    return operators(ops).caseInsensitiveKeywords(keywords);
   }
   
   /**
@@ -238,11 +256,11 @@ public final class Terminals extends Lexicon {
    * @param ops the operator names.
    * @param keywords the keyword names.
    * @return the Terminals instance.
+   * @deprecated Use {@code operators(ops).keywords(keywords)} instead.
    */
+  @Deprecated
   public static Terminals caseSensitive(String[] ops, String[] keywords) {
-    return instance(
-        Scanners.IDENTIFIER, ops, keywords,
-        StringCase.CASE_SENSITIVE, TokenizerMaps.IDENTIFIER_FRAGMENT);
+    return operators(ops).keywords(keywords);
   }
   
   /**
@@ -259,10 +277,16 @@ public final class Terminals extends Lexicon {
    * @param ops the operator names.
    * @param keywords the keyword names.
    * @return the Terminals instance.
+   * @deprecated Use {@code operators(ops).words(wordScasnner).caseInsensitiveKeywords(keywords).build()}
+   *             instead.
    */
+  @Deprecated
   public static Terminals caseInsensitive(
       Parser<String> wordScanner, String[] ops, String[] keywords) {
-    return caseInsensitive(wordScanner, ops, keywords, TokenizerMaps.IDENTIFIER_FRAGMENT);
+    return operators(ops)
+        .words(wordScanner)
+        .caseInsensitiveKeywords(keywords)
+        .build();
   }
   
   /**
@@ -279,10 +303,15 @@ public final class Terminals extends Lexicon {
    * @param ops the operator names.
    * @param keywords the keyword names.
    * @return the Terminals instance.
+   * @deprecated Use {@code operators(ops).words(wordScanner).keywords(keywords).build()} instead.
    */
+  @Deprecated
   public static Terminals caseSensitive(
       Parser<String> wordScanner, String[] ops, String[] keywords) {
-    return caseSensitive(wordScanner, ops, keywords, TokenizerMaps.IDENTIFIER_FRAGMENT);
+    return operators(ops)
+        .words(wordScanner)
+        .keywords(keywords)
+        .build();
   }
   
   /**
@@ -301,11 +330,20 @@ public final class Terminals extends Lexicon {
    * @param wordMap maps the text to a token value for non-keywords recognized by
    * {@code wordScanner}.
    * @return the Terminals instance.
+   * @deprecated Use {@code operators(ops)
+   *                 .words(wordScanner)
+   *                 .tokenizeWordsWith(wordMap)
+   *                 .caseInsensitiveKeywords(keywords)
+   *                 .build()} instead.
    */
+  @Deprecated
   public static Terminals caseInsensitive(
       Parser<String> wordScanner, String[] ops, String[] keywords, Map<String, ?> wordMap) {
-    return instance(
-        wordScanner, ops, keywords, StringCase.CASE_INSENSITIVE, wordMap);
+    return operators(ops)
+        .words(wordScanner)
+        .caseInsensitiveKeywords(keywords)
+        .tokenizeWordsWith(wordMap)
+        .build();
   }
   
   /**
@@ -324,35 +362,231 @@ public final class Terminals extends Lexicon {
    * @param wordMap maps the text to a token value for non-keywords recognized by
    * {@code wordScanner}.
    * @return the Terminals instance.
+   * @deprecated Use {@code operators(ops)
+   *                 .words(wordScanner)
+   *                 .tokenizeWordsWith(wordMap)
+   *                 .keywords(keywords)
+   *                 .build()} instead.
    */
+  @Deprecated
   public static Terminals caseSensitive(
       Parser<String> wordScanner, String[] ops, String[] keywords, Map<String, ?> wordMap) {
-    return instance(wordScanner, ops, keywords, StringCase.CASE_SENSITIVE, wordMap);
+    return operators(ops)
+        .words(wordScanner)
+        .keywords(keywords)
+        .tokenizeWordsWith(wordMap)
+        .build();
   }
   
   /**
    * Returns a {@link Terminals} object for lexing the operators with names specified in
    * {@code ops}. Operators are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag.
    * For example, to get the parser for operator "?", simply call {@link #token("?")}.
+   *
+   * <p>If words and keywords need to be parsed, they can be configured via {@link #words},
+   * {@link #keywords} or {@link #caseInsensitiveKeywords}.
    * 
    * @param ops the operator names.
    * @return the Terminals instance.
    */
   public static Terminals operators(String... ops) {
+    return operators(asList(ops));
+  }
+  
+  /**
+   * Returns a {@link Terminals} object for lexing the operators with names specified in
+   * {@code ops}. Operators are lexed as {@link Tokens.Fragment} with {@link Tag#RESERVED} tag.
+   * For example, to get the parser for operator "?", simply call {@link #token("?")}.
+   *
+   * <p>If words and keywords need to be parsed, they can be configured via {@link #words},
+   * {@link #keywords} or {@link #caseInsensitiveKeywords}.
+   * 
+   * @param ops the operator names.
+   * @return the Terminals instance.
+   * @since 2.2
+   */
+  public static Terminals operators(Collection<String> ops) {
     return new Terminals(Operators.lexicon(ops));
   }
 
-  /** Returns a {@link Parser} that recognizes identifiers (a.k.a words, variable names etc. */
+  /**
+   * Starts building a new {@code Terminals} instance that recognizes words not already recognized
+   * by {@code this} {@code Terminals} instance (typically operators).
+   *
+   * <p>By default identifiers are recognized through {@link #identifier} during token-level
+   * parsing phase. Use {@link Builder#tokenizeWordsWith} to tokenize differently, and choose an
+   * alternative token-level parser accordingly.
+   *
+   * @param wordScanner defines words recognized by the new instance
+   * @since 2.2
+   */
+  public Builder words(Parser<String> wordScanner) {
+    return new Builder(wordScanner);
+  }
+
+  /**
+   * Returns new {@code Terminals} instance that recognizes identifiers that
+   * aren't already recognized by {@code this} {@code Terminals} instance
+   * (typically operators). {@code keywords} are special identifiers with their own grammar rules.
+   * To get the parser for a keyword, call {@link Terminals#token}.
+   *
+   * <p>Identifiers are defined by {@link Scanners#IDENTIFIER} and are recognized through
+   * {@link #identifier} during token-level parsing phase.
+   *        
+   * @since 2.2
+   */
+  public Terminals keywords(String... keywords) {
+    return keywords(asList(keywords));
+  }
+
+  /**
+   * Returns new {@code Terminals} instance that recognizes identifiers that
+   * aren't already recognized by {@code this} {@code Terminals} instance
+   * (typically operators). {@code keywords} are special identifiers with their own grammar rules.
+   * To get the parser for a keyword, call {@link Terminals#token}.
+   *
+   * <p>Identifiers are defined by {@link Scanners#IDENTIFIER} and are recognized through
+   * {@link #identifier} during token-level parsing phase.
+   *        
+   * @since 2.2
+   */
+  public Terminals keywords(Collection<String> keywords) {
+    return words(Scanners.IDENTIFIER).keywords(keywords).build();
+  }
+
+  /**
+   * Returns a new {@code Terminals} instance that recognizes identifiers that
+   * aren't already recognized by {@code this} {@code Terminals} instance
+   * (typically operators). {@code keywords} are case insensitive special identifiers with their own
+   * grammar rules. To get the parser for a keyword, call {@link Terminals#token}.
+   *
+   * <p>Identifiers are defined by {@link Scanners#IDENTIFIER} and are recognized through
+   * {@link #identifier} during token-level parsing phase.
+   *        
+   * @since 2.2
+   */
+  public Terminals caseInsensitiveKeywords(String... keywords) {
+    return caseInsensitiveKeywords(asList(keywords));
+  }
+
+  /**
+   * Returns a new {@code Terminals} instance that recognizes identifiers that
+   * aren't already recognized by {@code this} {@code Terminals} instance
+   * (typically operators). {@code keywords} are case insensitive special identifiers with their own
+   * grammar rules. To get the parser for a keyword, call {@link Terminals#token}.
+   *
+   * <p>Identifiers are defined by {@link Scanners#IDENTIFIER} and are recognized through
+   * {@link #identifier} during token-level parsing phase.
+   *        
+   * @since 2.2
+   */
+  public Terminals caseInsensitiveKeywords(Collection<String> keywords) {
+    return words(Scanners.IDENTIFIER).caseInsensitiveKeywords(keywords).build();
+  }
+
+  /**
+   * Builds {@link Terminals} instance by defining the words and keywords recognized.
+   *
+   * @since 2.2
+   */
+  public final class Builder {
+    private final Parser<String> wordScanner;
+
+    private Collection<String> keywords = new ArrayList<String>();
+    private StringCase stringCase = StringCase.CASE_SENSITIVE;
+    private Map<String, ?> wordTokenMap = TokenizerMaps.IDENTIFIER_FRAGMENT;
+    
+    Builder(Parser<String> wordScanner) {
+      this.wordScanner = checkNotNull(wordScanner);
+    }
+
+    /**
+     * Defines keywords. Keywords are special words with their own grammar rules.
+     * To get the parser for a keyword, call {@link Terminals#token}.
+     *
+     * <p>Note that if you call {@link #keywords} or {@link #caseInsensitiveKeywords} multiple
+     * times on the same {@link Builder} instance, the last call overwrites previous calls.
+     */
+    public Builder keywords(@SuppressWarnings("hiding") String... keywords) {
+      return keywords(asList(keywords));
+    }
+
+    /**
+     * Defines keywords. Keywords are special words with their own grammar rules.
+     * To get the parser for a keyword, call {@link Terminals#token}.
+     *
+     * <p>Note that if you call {@link #keywords} or {@link #caseInsensitiveKeywords} multiple
+     * times on the same {@link Builder} instance, the last call overwrites previous calls.
+     */
+    public Builder keywords(@SuppressWarnings("hiding") Collection<String> keywords) {
+      this.keywords = keywords;
+      this.stringCase = StringCase.CASE_SENSITIVE;
+      return this;
+    }
+
+    /**
+     * Defines case insensitive keywords. Keywords are special words with their own grammar
+     * rules. To get the parser for a keyword, call {@link Terminals#token}.
+     *
+     * <p>Note that if you call {@link #keywords} or {@link #caseInsensitiveKeywords} multiple
+     * times on the same {@link Builder} instance, the last call overwrites previous calls.
+     */
+    public Builder caseInsensitiveKeywords(@SuppressWarnings("hiding") String... keywords) {
+      return caseInsensitiveKeywords(asList(keywords));
+    }
+
+    /**
+     * Defines case insensitive keywords. Keywords are special words with their own grammar
+     * rules. To get the parser for a keyword, call {@link Terminals#token}.
+     *
+     * <p>Note that if you call {@link #keywords} or {@link #caseInsensitiveKeywords} multiple
+     * times on the same {@link Builder} instance, the last call overwrites previous calls.
+     */
+    public Builder caseInsensitiveKeywords(@SuppressWarnings("hiding") Collection<String> keywords) {
+      this.keywords = keywords;
+      this.stringCase = StringCase.CASE_INSENSITIVE;
+      return this;
+    }
+
+    /** Configures alternative tokenization strategy for words (except keywords). */
+    public Builder tokenizeWordsWith(Map<String, ?> wordMap) {
+      this.wordTokenMap = checkNotNull(wordMap);
+      return this;
+    }
+
+    /** Builds a new {@link Terminals} instance that recognizes words defined in this builder. */
+    public Terminals build() {
+      return new Terminals(
+          union(Keywords.lexicon(wordScanner, keywords, stringCase, wordTokenMap)));
+    }
+  }
+
+  /**
+   * Returns a {@link Parser} that recognizes identifiers (a.k.a words, variable names etc).
+   * Equivalent to {@link Identifier#PARSER}.
+   *
+   * @since 2.2
+   */
   public static Parser<String> identifier() {
     return Identifier.PARSER;
   }
 
-  /** Returns a {@link Parser} that recognizes natural integer literals. */
+  /**
+   * Returns a {@link Parser} that recognizes natural integer literals.
+   * Equivalent to {@link IntegerLiteral#PARSER}.
+   *
+   * @since 2.2
+   */
   public static Parser<String> integer() {
     return IntegerLiteral.PARSER;
   }
 
-  /** Returns a {@link Parser} that recognizes decimal point integer literals. */
+  /**
+   * Returns a {@link Parser} that recognizes decimal point integer literals.
+   * Equivalent to {@link DecimalLiteral#PARSER}.
+   *
+   * @since 2.2
+   */
   public static Parser<String> decimal() {
     return DecimalLiteral.PARSER;
   }
@@ -382,23 +616,10 @@ public final class Terminals extends Lexicon {
     };
   }
   
-  private static Terminals instance(
-      Parser<String> wordScanner, String[] ops, String[] keywords,
-      StringCase stringCase, Map<String, ?> wordMap) {
-    checkDup(ops, keywords, true);
-    Lexicon operators = Operators.lexicon(ops);
-    Lexicon keywordsOrWords = Keywords.lexicon(wordScanner, keywords, stringCase, wordMap);
-    return new Terminals(operators.union(keywordsOrWords));
-  }
-  
-  @Private static boolean equals(String a, String b, boolean caseSensitive) {
-    return caseSensitive ? a.equals(b) : a.equalsIgnoreCase(b);
-  }
-  
-  @Private static void checkDup(String[] a, String[] b, boolean caseSensitive) {
+  @Private static void checkDup(Iterable<String> a, Iterable<String> b) {
     for (String s1 : a) {
       for (String s2 : b) {
-        Checks.checkArgument(!equals(s1, s2, caseSensitive), "%s duplicated", s1);
+        checkArgument(!s1.equals(s2), "%s duplicated", s1);
       }
     }
   }

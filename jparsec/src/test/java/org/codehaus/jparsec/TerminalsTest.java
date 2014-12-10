@@ -1,5 +1,6 @@
 package org.codehaus.jparsec;
 
+import static java.util.Arrays.asList;
 import static org.codehaus.jparsec.Asserts.assertFailure;
 import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.codehaus.jparsec.Scanners.WHITESPACES;
@@ -9,8 +10,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import org.codehaus.jparsec.Tokens.Tag;
+import java.util.Arrays;
 
+import org.codehaus.jparsec.Tokens.Tag;
 import org.junit.Test;
 
 /**
@@ -209,8 +211,7 @@ public class TerminalsTest {
 
   @Test
   public void testPhrase() {
-    Terminals terminals =
-        Terminals.caseSensitive(new String[] {}, new String[] {"hello", "world", "hell"});
+    Terminals terminals = Terminals.operators().keywords("hello", "world", "hell");
     Parser<?> parser =
         terminals.phrase("hello", "world").from(terminals.tokenizer(), Scanners.WHITESPACES);
     parser.parse("hello   world");
@@ -221,8 +222,7 @@ public class TerminalsTest {
 
   @Test
   public void testCaseSensitive() {
-    Terminals terminals =
-        Terminals.caseSensitive(new String[]{"+", "-"}, new String[]{"foo", "bar", "baz"});
+    Terminals terminals = Terminals.operators("+", "-").keywords("foo", "bar", "baz");
     Parser<Token> parser =
         terminals.token("+", "-", "foo", "bar").from(terminals.tokenizer(), WHITESPACES);
     assertParser(parser, "+", new Token(0, 1, Tokens.reserved("+")));
@@ -239,7 +239,7 @@ public class TerminalsTest {
   @Test
   public void testCaseInsensitive() {
     Terminals terminals =
-        Terminals.caseInsensitive(new String[]{"+", "-"}, new String[]{"foo", "bar", "baz"});
+        Terminals.operators("+", "-").caseInsensitiveKeywords("foo", "bar", "baz");
     Parser<Token> parser =
         terminals.token("+", "-", "foo", "bar").from(terminals.tokenizer(), WHITESPACES);
     assertParser(parser, "+", new Token(0, 1, Tokens.reserved("+")));
@@ -255,8 +255,11 @@ public class TerminalsTest {
 
   @Test
   public void testCaseSensitive_withScanner() {
-    Terminals terminals = Terminals.caseSensitive(
-        Scanners.INTEGER, new String[]{"+", "-"}, new String[]{"12", "34"});
+    Terminals terminals = Terminals
+        .operators("+", "-")
+        .words(Scanners.INTEGER)
+        .keywords("12", "34")
+        .build();
   Parser<Token> parser =
       terminals.token("+", "-", "12", "34").from(terminals.tokenizer(), WHITESPACES);
   assertParser(parser, "+", new Token(0, 1, Tokens.reserved("+")));
@@ -271,8 +274,11 @@ public class TerminalsTest {
 
   @Test
   public void testCaseInsensitive_withScanner() {
-    Terminals terminals = Terminals.caseInsensitive(
-        Scanners.INTEGER, new String[]{"+", "-"}, new String[]{"12", "34"});
+    Terminals terminals = Terminals
+        .operators("+", "-")
+        .words(Scanners.INTEGER)
+        .caseInsensitiveKeywords("12", "34")
+        .build();
   Parser<Token> parser =
       terminals.token("+", "-", "12", "34").from(terminals.tokenizer(), WHITESPACES);
   assertParser(parser, "+", new Token(0, 1, Tokens.reserved("+")));
@@ -286,26 +292,15 @@ public class TerminalsTest {
   }
 
   @Test
-  public void testEquals() {
-    assertTrue(Terminals.equals("a", "a", true));
-    assertTrue(Terminals.equals("a", "a", false));
-    assertTrue(Terminals.equals("a", "A", false));
-    assertFalse(Terminals.equals("a", "A", true));
-    assertFalse(Terminals.equals("a", "b", false));
-  }
-
-  @Test
   public void testCheckDup() {
-    Terminals.checkDup(new String[]{"a", "b"}, new String[]{"+", "-"}, true);
-    Terminals.checkDup(new String[]{"a", "b"}, new String[]{"A", "B"}, true);
-    Terminals.checkDup(new String[]{"a", "b"}, new String[]{"+", "-"}, false);
-    assertDup(new String[]{"a", "b"}, new String[]{"x", "b"}, true);
-    assertDup(new String[]{"a", "b"}, new String[]{"x", "B"}, false);
+    Terminals.checkDup(asList("a", "b"), asList("+", "-"));
+    Terminals.checkDup(asList("a", "b"), asList("A", "B"));
+    assertDup(asList("a", "b"), asList("x", "b"));
   }
   
-  private void assertDup(String[] array1, String[] array2, boolean caseSensitive) {
+  private static void assertDup(Iterable<String> a, Iterable<String> b) {
     try {
-      Terminals.checkDup(array1, array2, caseSensitive);
+      Terminals.checkDup(a, b);
       fail();
     } catch (IllegalArgumentException e) {}
   }

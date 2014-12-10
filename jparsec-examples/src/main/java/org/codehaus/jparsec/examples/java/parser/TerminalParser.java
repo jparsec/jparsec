@@ -57,8 +57,11 @@ public final class TerminalParser {
     "goto", "const", "strictfp",
   };
   
-  private static final Terminals TERMS =
-      Terminals.caseSensitive(JavaLexer.IDENTIFIER, OPERATORS, KEYWORDS);
+  private static final Terminals TERMS = Terminals
+      .operators(OPERATORS)
+      .words(JavaLexer.IDENTIFIER)
+      .keywords(KEYWORDS)
+      .build();
   
   // hex, oct, int, decimal, scientific, string literal, char literal and the other terms.
   // Let's not worry about unicode escape in char and string literals for now.
