@@ -46,7 +46,7 @@ public abstract class Pattern {
    * @param c the character to derive pattern.
    * @return a new Pattern which is <em>derived</em> from <code>this</code> Pattern assuming character <code>c</code> has
    * been consumed.
-   * @since 2.2
+   * @since 3.0
    */
   public Pattern derive(char c) {
     return Patterns.NEVER;
