@@ -587,17 +587,6 @@ public abstract class Parser<T> {
     copy(readable, builder);
     return parse(builder, moduleName);
   }
-
-  /**
-   * Parses an input incrementally with this parser. Note that this is work-in-progress. DO NOT CALL
-   * this method yet!
-   * 
-   * @return an incremental version of this parser.
-   */
-  Incremental<T> incrementally() {
-    throw new UnsupportedOperationException("incremental parsing is work-in-progress. Only supported by some Parser" +
-        "implementations");
-  }
   
   abstract boolean apply(ParseContext ctxt);
 
@@ -653,99 +642,5 @@ public abstract class Parser<T> {
     if (e instanceof ParserException)
       return (ParserException) e;
     return new ParserException(e, null, ctxt.module, ctxt.locator.locate(ctxt.getIndex()));
-  }
-
-  /**
-   * An incremental parser that can be called repeatedly with {@link CharSequence} fragments until completion or failure.
-   * <p>
-   *   An incremental parser builds up its result incrementally, consuming input in distinct calls to {@link #parse(CharSequence)}.
-   *   Each time this method is called it returns a new {@link Incremental} parser that may be in one of 3 states:
-   * </p>
-   * <ol>
-   *   <li>It expects more input,</li>
-   *   <li>It is failed: {@link #isFailed()} returns {@code true},</li>
-   *   <li>It completed parsing: {@link #isDone()} returns {@code true} and result is available through method 
-   *   {@link #result()}.</li>
-   * </ol>
-   * <p>Typical usage would be to use it in a loop with asynchronous input being fed from some source:</p>
-   * <pre>
-   *   Incremental parser = myParser.incrementally();
-   *   while(true) {
-   *     String input = getSomeInput();
-   *     parser = parser.parse(input);
-   *     if(parser.isDone()) {
-   *        doSomethingWith(parser.result());
-   *        break;
-   *     }
-   *     
-   *     if(parser.isFailed()) {
-   *        throw new ParseException("...");
-   *     }
-   *   }
-   * </pre>
-   * @param <T> type of result produced by this {@link Parser}.
-   */
-  public static abstract class Incremental<T> {
-
-    public final Incremental<T> parse(CharSequence input){
-      return parse(new ScannerState(null, input, 0, new DefaultSourceLocator(input)));
-    }
-
-    abstract Incremental<T> parse(ParseContext context);
-    
-    public  boolean isDone(){
-      return false;
-    }
-    
-    public T result() {
-      return null;
-    }
-
-    public boolean isFailed() {
-      return false;
-    }
-  }
-
-  /** An incremental parser which represents a successful parsing */
-  static class Done<T> extends Incremental<T> {
-    private final T result;
-
-    public Done(T result) {
-      this.result = result;
-    }
-
-    @Override
-    Incremental<T> parse(ParseContext context) {
-      return this;
-    }
-
-    @Override
-    public boolean isDone() {
-      return true;
-    }
-
-    @Override
-    public T result() {
-      return result;
-    }
-  }
-
-  /** An incremental parser which represents a failed parsing */
-  static class Failed<T> extends Incremental<T> {
-
-    @Override
-    Incremental<T> parse(ParseContext context) {
-      throw new IllegalStateException("cannot parse anymore, parser has failed");
-    }
-
-    @Override
-    public boolean isDone() {
-      return true;
-    }
-
-    @Override
-    public boolean isFailed() {
-      return true;
-    }
   }
 }
