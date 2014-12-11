@@ -297,7 +297,7 @@ public final class Patterns {
   /**
    * Returns a {@link Pattern} that matches at least {@code min} and up to {@code max} number of characters satisfying
    * {@code predicate},
-   * @deprecated Use {@link times(int, int, CharPredicate)} instead.
+   * @deprecated Use {@link #times(int, int, CharPredicate)} instead.
    */
   @Deprecated
   public static Pattern some(int min, int max, CharPredicate predicate) {

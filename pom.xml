@@ -158,7 +158,7 @@
         </plugin>
         <plugin>
           <artifactId>maven-site-plugin</artifactId>
-          <version>3.0</version>
+          <version>3.4</version>
         </plugin>
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
@@ -190,13 +190,19 @@
       </plugin>
 
       <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+            <excludePackageNames>org.codehaus.jparsec.internal.*</excludePackageNames>
+        </configuration>
         <executions>
           <!-- always deploy sources on Nexus -->
           <execution>
+            <id>aggregate</id>
             <goals>
-              <goal>jar</goal>
+                <goal>aggregate</goal>
             </goals>
+            <phase>site</phase>
           </execution>
         </executions>
       </plugin>

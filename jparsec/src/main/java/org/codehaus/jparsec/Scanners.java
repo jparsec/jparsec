@@ -212,7 +212,7 @@ public final class Scanners {
    * @param pattern the pattern object.
    * @param name the name of what's expected logically. Is used in error message.
    * @return the Parser object.
-   * @deprecated Use {@link pattern.toScanner(name)}.
+   * @deprecated Use {{@code pattern.toScanner(name)}.
    */
   @Deprecated
   public static Parser<Void> pattern(Pattern pattern, String name) {
