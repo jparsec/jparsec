@@ -21,13 +21,14 @@ package org.codehaus.jparsec;
  * may be present in the body (e.g. {@code (bodyWithParens ()())())}
  * @author michael
  */
+@Deprecated
 final class ReluctantBetweenParser<T> extends Parser<T> {
 	
 	private final Parser<?> start;
 	private final Parser<T> between;
 	private final Parser<?> end;
 
-	public ReluctantBetweenParser(Parser<?> start, Parser<T> between, Parser<?> end) {
+ ReluctantBetweenParser(Parser<?> start, Parser<T> between, Parser<?> end) {
 		this.start = start;
 		this.between = between;
 		this.end = end;
@@ -35,23 +36,22 @@ final class ReluctantBetweenParser<T> extends Parser<T> {
 	
 	@Override
 	boolean apply(ParseContext ctxt) {
-		boolean r1 = start.run(ctxt);
-		if (!r1) return false;
+		if (!start.apply(ctxt)) return false;
 		int betweenAt = ctxt.at;
 		
 		// try to match the end of the sequence beginning from the very end giving a chance to empty parser to be matched
 		// (see https://github.com/abailly/jparsec/issues/25)
 		ctxt.at = ctxt.source.length();
-		boolean r2 = end.run(ctxt);
+		boolean r2 = end.apply(ctxt);
 		int endAt = ctxt.at;
 		while ( !r2 && ctxt.at >=betweenAt ) {
       ctxt.at--;
       endAt = ctxt.at;
-			r2 = end.run(ctxt);
+			r2 = end.apply(ctxt);
 		}
 		if (!r2) return false;
 		ParseContext betweenCtxt = new ScannerState(ctxt.module, ctxt.source, betweenAt, endAt, ctxt.locator, ctxt.result );
-		boolean rb = between.run(betweenCtxt);
+		boolean rb = between.apply(betweenCtxt);
 		
 		if ( ! rb ) return false;
 		

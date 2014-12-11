@@ -389,8 +389,11 @@ public abstract class Parser<T> {
    * In effect, {@code this} behaves reluctantly, giving
    * {@code after} a chance to grab input that would have been consumed by {@code this}
    * otherwise.
+   * @deprecated This method probably only works in the simplest cases. And it's a character-level
+   * parser only. Use it at your own risk. It may be deleted later when we find a better way.
    */
-  public final Parser<T> reluctantBetween( Parser<?> before, Parser<?> after ) {
+  @Deprecated
+  public final Parser<T> reluctantBetween(Parser<?> before, Parser<?> after) {
 	  return new ReluctantBetweenParser<T>(before, this, after);
   }
 
