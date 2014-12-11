@@ -10,28 +10,36 @@ import org.junit.Test;
  */
 public class ReluctantBetweenTest {
 
-    @Test
+  @Test
 	public void parsing_input_with_delimiting_character_inside_delimiters () {
-		Parser<Pair<String,String>> sut = Parsers.tuple(Scanners.IDENTIFIER.followedBy(Scanners.among(":")),
-				Scanners.ANY_CHAR.many().source()
-				).reluctantBetween(Scanners.isChar('('), Scanners.isChar(')'));
-        Asserts.assertParser(sut, "(hello:world))", new Pair<String,String>("hello","world)"));
+    Parser<?> relunctant = Parsers.tuple(
+        Scanners.IDENTIFIER.followedBy(Scanners.isChar(':')),
+        Scanners.ANY_CHAR.many().source());
+    Asserts.assertParser(relunctant.reluctantBetween(Scanners.isChar('('), Scanners.isChar(')')),
+        "(hello:world))", new Pair<String,String>("hello","world)"));
 	}
 
-    @Test
+  @Test
 	public void parsing_simple_input() {
-		Asserts.assertParser( Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
+      Asserts.assertParser(
+          Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')'))
+              .followedBy(Scanners.ANY_CHAR.skipMany()),
+          "(hello)and the rest", "hello");
+		Asserts.assertParser(
+		    Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
 				"(hello)", "hello");
-		Asserts.assertParser(Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')').optional()),
+		Asserts.assertParser(
+		    Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')').optional()),
 				"(hello", "hello");
-		Asserts.assertParser( Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
+		Asserts.assertParser(
+		    Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
 				"()", "");
 	}
 
-    @Test
+  @Test
 	public void parsing_incorrect_input() {
-		Asserts.assertFailure(Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
+		Asserts.assertFailure(
+		    Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')),
 				"(hello", 1,7);
 	}
-
 }
