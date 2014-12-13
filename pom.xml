@@ -19,7 +19,8 @@
       <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
     </repository>
     <snapshotRepository>
-      <id>sonatype</id>
+      <id>ossrh</id>
+      <name>Sonatype Nexus snapshot repository</name>
       <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
     </snapshotRepository>
   </distributionManagement>
@@ -169,6 +170,17 @@
         <plugin>
           <artifactId>maven-javadoc-plugin</artifactId>
           <version>2.9.1</version>
+        </plugin>
+        <plugin>
+          <groupId>org.sonatype.plugins</groupId>
+          <artifactId>nexus-staging-maven-plugin</artifactId>
+          <version>1.6.3</version>
+          <extensions>true</extensions>
+          <configuration>
+             <serverId>ossrh</serverId>
+             <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+             <autoReleaseAfterClose>true</autoReleaseAfterClose>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
