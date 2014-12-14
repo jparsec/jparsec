@@ -233,7 +233,7 @@
     see https://docs.sonatype.org/display/Repository/How+To+Generate+PGP+Signatures+With+Maven
     -->
     <profile>
-      <id>release-sign-artifacts</id>
+      <id>release</id>
       <activation>
         <property>
           <name>performRelease</name>
