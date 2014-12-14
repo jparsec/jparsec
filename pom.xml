@@ -214,13 +214,13 @@
             <excludePackageNames>org.codehaus.jparsec.internal.*</excludePackageNames>
         </configuration>
         <executions>
-          <!-- always deploy sources on Nexus -->
           <execution>
-            <id>aggregate</id>
-            <goals>
-                <goal>aggregate</goal>
-            </goals>
+            <id>attach-docs</id>
+          </execution>
+          <execution>
+            <id>generate-javadoc-site-report</id>
             <phase>site</phase>
+            <goals><goal>javadoc</goal></goals>
           </execution>
         </executions>
       </plugin>
