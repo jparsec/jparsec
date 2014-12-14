@@ -199,7 +199,7 @@ public final class Scanners {
    * @param str the string to match
    * @param name the name of what's expected logically. Is used in error message.
    * @return the scanner.
-   * @deprecated Use {@code Patterns.pattern(str).toScanner(name)}.
+   * @deprecated Use {@code Patterns.string(str).toScanner(name)}.
    */
   @Deprecated
   public static Parser<Void> string(String str, String name) {
