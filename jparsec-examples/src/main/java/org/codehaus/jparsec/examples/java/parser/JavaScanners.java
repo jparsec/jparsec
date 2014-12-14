@@ -1,12 +1,15 @@
 package org.codehaus.jparsec.examples.java.parser;
 
+import static org.codehaus.jparsec.pattern.Patterns.isChar;
+import static org.codehaus.jparsec.pattern.Patterns.many;
+import static org.codehaus.jparsec.pattern.Patterns.many1;
+import static org.codehaus.jparsec.pattern.Patterns.or;
+import static org.codehaus.jparsec.pattern.Patterns.sequence;
+
 import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.pattern.CharPredicates;
 import org.codehaus.jparsec.pattern.Pattern;
 import org.codehaus.jparsec.pattern.Patterns;
-
-import static org.codehaus.jparsec.pattern.Patterns.*;
 
 public class JavaScanners {
   

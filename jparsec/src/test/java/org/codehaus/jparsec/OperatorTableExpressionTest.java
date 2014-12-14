@@ -68,7 +68,7 @@ public class OperatorTableExpressionTest extends BaseMockTest {
         .build(Scanners.INTEGER.source());
   }
   
-  private <T> Parser<T> op(String name, T value) {
+  private static <T> Parser<T> op(String name, T value) {
     return Scanners.string(name).retn(value);
   }
 }

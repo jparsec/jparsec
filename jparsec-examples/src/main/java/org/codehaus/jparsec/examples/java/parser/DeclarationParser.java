@@ -65,7 +65,7 @@ public final class DeclarationParser {
     Parser<Member> empty = term(";").retn(null);
     return Mapper.curry(DefBody.class).sequence(
         term("{"), empty.or(member).many().map(new Map<List<Member>, List<Member>>() {
-          public List<Member> map(List<Member> from) {
+          @Override public List<Member> map(List<Member> from) {
             removeNulls(from);
             return from;
           }

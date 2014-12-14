@@ -58,6 +58,7 @@ public class ParsersTest extends BaseMockTest {
     assertEquals("foo", Parsers.constant("foo").toString());
   }
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testRunnable() {
     Runnable runnable = mock(Runnable.class);
@@ -226,11 +227,13 @@ public class ParsersTest extends BaseMockTest {
     assertEquals("foo", Parsers.fail("foo").toString());
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testPlus_0Parser() {
     assertSame(Parsers.never(), Parsers.plus());
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testPlus_1Parser() {
     Parser<?> parser = Parsers.constant(1);
@@ -257,17 +260,20 @@ public class ParsersTest extends BaseMockTest {
     assertFailure(Parsers.plus(areChars("ab"), isChar('b'), isChar('c')), "a", 1, 2);
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testOr_0Parser() {
     assertSame(Parsers.never(), Parsers.or());
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testOr_1Parser() {
     Parser<?> parser = Parsers.constant(1);
     assertSame(parser, Parsers.or(parser));
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testOr_withIterable() {
     Parser<Character> parser = Parsers.or(Arrays.asList(isChar('a'), isChar('b')));
@@ -399,6 +405,7 @@ public class ParsersTest extends BaseMockTest {
         "a", 'a');
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testOr_10Parsers() {
     Parser<Character> parser = Parsers.or(
@@ -442,17 +449,20 @@ public class ParsersTest extends BaseMockTest {
     assertEquals("shortest", Parsers.shorter(isChar('a'), isChar('b')).toString());
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testLongest_0Parser() {
     assertSame(Parsers.never(), Parsers.longest());
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testLongest_1Parser() {
     Parser<?> parser = Parsers.constant(1);
     assertSame(parser, Parsers.longest(parser));
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testLongest() {
     assertParser(Parsers.longest(isChar('a'), isChar('b'), areChars("ab")), "ab", 'b');
@@ -463,17 +473,20 @@ public class ParsersTest extends BaseMockTest {
     assertEquals("longest", Parsers.longest(isChar('a'), isChar('b')).toString());
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testShortest_0Parser() {
     assertSame(Parsers.never(), Parsers.shortest());
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testShortest_1Parser() {
     Parser<?> parser = Parsers.constant(1);
     assertSame(parser, Parsers.shortest(parser));
   }
 
+  @SuppressWarnings("unchecked")
   @Test
   public void testShortest() {
     assertParser(Parsers.shortest(isChar('a'), areChars("ab")).followedBy(Scanners.isChar('b')),

@@ -20,7 +20,7 @@ public class CalculatorTest {
     assertResult(1, "((1-2)/-1)");
   }
 
-  private void assertResult(int expected, String source) {
+  private static void assertResult(int expected, String source) {
     assertEquals(expected, Calculator.evaluate(source));
   }
 }

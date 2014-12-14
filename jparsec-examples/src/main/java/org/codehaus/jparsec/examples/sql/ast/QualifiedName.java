@@ -37,7 +37,7 @@ public final class QualifiedName extends ValueObject implements Iterable<String>
     return new QualifiedName(Arrays.asList(names));
   }
 
-  public Iterator<String> iterator() {
+  @Override public Iterator<String> iterator() {
     return names.iterator();
   }
 }

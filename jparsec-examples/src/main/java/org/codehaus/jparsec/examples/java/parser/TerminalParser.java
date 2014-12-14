@@ -34,33 +34,24 @@ import org.codehaus.jparsec.functors.Map;
  * @author Ben Yu
  */
 public final class TerminalParser {
-  /**
-   * {@literal <<}, {@literal >>} and {@literal >>>} are handled by {@link #adjacent(String)},
-   * to avoid ambiguity with generics syntax.
-   */
-  private static final String[] OPERATORS = {
-    "+", "-", "*", "/", "%", "&", "|", "~", "^",
-    ">", "<", "==", ">=", "<=", "!=", "&&", "||", "!",
-    ".", ",",  "?", ":", ";", "...", "@",
-    "=", "+=", "-=", "*=", "/=", "%=", "^=", "&=", "|=", "<<=", ">>=", ">>>=", "++", "--",
-    "(", ")", "[", "]", "{", "}",
-  };
   
-  private static final String[] KEYWORDS = {
-    "private", "protected", "public", "final", "abstract", "native", "static",
-    "transient", "volatile", "throws", "class", "interface", "enum", "package", "import",
-    "if", "else", "for", "while", "do", "continue", "break", "return",
-    "switch", "case", "default", "throw", "try", "catch", "finally",
-    "new", "this", "super", "synchronized", "instanceof", "extends", "implements", "assert",
-    "byte", "short", "int", "long", "char", "float", "double", "boolean", "char", "void",
-    "true", "false", "null",
-    "goto", "const", "strictfp",
-  };
-  
-  private static final Terminals TERMS = Terminals
-      .operators(OPERATORS)
+  private static final Terminals TERMS = Terminals      
+       // <<, >> and >>> are handled by {@link #adjacent(String)},
+       // to avoid ambiguity with generics syntax.
+      .operators("+", "-", "*", "/", "%", "&", "|", "~", "^",
+          ">", "<", "==", ">=", "<=", "!=", "&&", "||", "!",
+          ".", ",",  "?", ":", ";", "...", "@",
+          "=", "+=", "-=", "*=", "/=", "%=", "^=", "&=", "|=", "<<=", ">>=", ">>>=", "++", "--",
+          "(", ")", "[", "]", "{", "}")
       .words(JavaLexer.IDENTIFIER)
-      .keywords(KEYWORDS)
+      .keywords("private", "protected", "public", "final", "abstract", "native", "static",
+          "transient", "volatile", "throws", "class", "interface", "enum", "package", "import",
+          "if", "else", "for", "while", "do", "continue", "break", "return",
+          "switch", "case", "default", "throw", "try", "catch", "finally",
+          "new", "this", "super", "synchronized", "instanceof", "extends", "implements", "assert",
+          "byte", "short", "int", "long", "char", "float", "double", "boolean", "char", "void",
+          "true", "false", "null",
+          "goto", "const", "strictfp")
       .build();
   
   // hex, oct, int, decimal, scientific, string literal, char literal and the other terms.
@@ -76,14 +67,14 @@ public final class TerminalParser {
    * A {@link Parser} that succeeds only if the {@link Token} objects in the {@link List} are
    * adjacent.
    */
-  public static Parser<Token> adjacent(Parser<List<Token>> parser, final String name) {
-    return parser.next(new Map<List<Token>, Parser<Object>>() {
-      public Parser<Object> map(List<Token> tokens) {
+  public static Parser<Token> adjacent(Parser<List<Token>> parser, final Parser<?> otherwise) {
+    return parser.next(new Map<List<Token>, Parser<?>>() {
+      @Override public Parser<?> map(List<Token> tokens) {
         if (tokens.isEmpty()) return Parsers.always();
         int offset = tokens.get(0).index();
         for (Token token : tokens) {
           if (token.index() != offset) {
-            return Parsers.expect(name);
+            return otherwise;
           }
           offset += token.length();
         }
@@ -102,7 +93,7 @@ public final class TerminalParser {
     for (int i = 0; i < operator.length(); i++) {
       parsers.add(TERMS.token(Character.toString(operator.charAt(i))));
     }
-    return adjacent(Parsers.list(parsers), operator);
+    return adjacent(Parsers.list(parsers), Parsers.expect(operator));
   }
   
   public static Parser<?> term(String name) {

@@ -58,12 +58,12 @@ public class JavaParserIntegrationTest {
         Operator.class, NewExpression.class, FunctionExpression.class, Annotation.class);
   }
 
-  private void parseJavaSourceFiles(Class<?>...classes) throws IOException {
+  private static void parseJavaSourceFiles(Class<?>...classes) throws IOException {
     for (Class<?> cls : classes) {
       parseJavaSourceFile(cls);
     }
   }
-  private void parseJavaSourceFile(Class<?> cls) throws IOException {
+  private static void parseJavaSourceFile(Class<?> cls) throws IOException {
     DeclarationParser.parse(toSourceUrl(cls));
   }
   

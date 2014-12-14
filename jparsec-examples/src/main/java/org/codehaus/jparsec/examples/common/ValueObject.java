@@ -78,7 +78,7 @@ public abstract class ValueObject {
 
 
   private static final Comparator<Field> NAME_ORDER = new Comparator<Field>() {
-    public int compare(Field field1, Field field2) {
+    @Override public int compare(Field field1, Field field2) {
       return field1.getName().compareTo(field2.getName());
     }
   };
