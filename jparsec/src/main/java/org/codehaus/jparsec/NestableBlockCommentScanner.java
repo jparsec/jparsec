@@ -15,7 +15,6 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-
 /**
  * Parses any nestable comment pattern.
  * 
