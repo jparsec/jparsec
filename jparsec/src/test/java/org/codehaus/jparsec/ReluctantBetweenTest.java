@@ -1,6 +1,7 @@
 package org.codehaus.jparsec;
 
 import static org.codehaus.jparsec.Scanners.isChar;
+
 import org.codehaus.jparsec.functors.Pair;
 import org.junit.Test;
 
@@ -8,6 +9,7 @@ import org.junit.Test;
  *
  * @author michael
  */
+@SuppressWarnings("deprecation")
 public class ReluctantBetweenTest {
 
   @Test

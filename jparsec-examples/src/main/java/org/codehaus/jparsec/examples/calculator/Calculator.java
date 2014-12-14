@@ -37,43 +37,43 @@ public final class Calculator {
   }
   
   static final Parser<Integer> NUMBER = Scanners.INTEGER.map(new Map<String, Integer>() {
-    public Integer map(String text) {
+    @Override public Integer map(String text) {
       return Integer.valueOf(text);
     }
   });
   
   static final Binary<Integer> PLUS = new Binary<Integer>() {
-    public Integer map(Integer a, Integer b) {
+    @Override public Integer map(Integer a, Integer b) {
       return a + b;
     }
   };
   
   static final Binary<Integer> MINUS = new Binary<Integer>() {
-    public Integer map(Integer a, Integer b) {
+    @Override public Integer map(Integer a, Integer b) {
       return a - b;
     }
   };
   
   static final Binary<Integer> MUL = new Binary<Integer>() {
-    public Integer map(Integer a, Integer b) {
+    @Override public Integer map(Integer a, Integer b) {
       return a * b;
     }
   };
   
   static final Binary<Integer> DIV = new Binary<Integer>() {
-    public Integer map(Integer a, Integer b) {
+    @Override public Integer map(Integer a, Integer b) {
       return a / b;
     }
   };
   
   static final Binary<Integer> MOD = new Binary<Integer>() {
-    public Integer map(Integer a, Integer b) {
+    @Override public Integer map(Integer a, Integer b) {
       return a % b;
     }
   };
   
   static final Unary<Integer> NEG = new Unary<Integer>() {
-    public Integer map(Integer i) {
+    @Override public Integer map(Integer i) {
       return -i;
     }
   };

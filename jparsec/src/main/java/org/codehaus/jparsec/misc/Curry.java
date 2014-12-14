@@ -82,7 +82,7 @@ final class Curry<T> extends Mapper<T> {
     int curry = 0;
     for (Object curryArg : curryArgs) {
       int curryIndex = findCurryIndex(constructor, parameterTypes, curry, curryArg);
-      checkDup(curryIndexes, curry, curryIndex, curryArg, constructor);
+      checkDup(curryIndexes, curry, curryIndex, constructor);
       curryIndexes[curry++] = curryIndex;
     }
     return new Curry<T>(
@@ -122,7 +122,7 @@ final class Curry<T> extends Mapper<T> {
   }
   
   private static void checkDup(
-      int[] curryIndexes, int curry, int curryIndex, Object curryArg, Constructor<?> constructor) {
+      int[] curryIndexes, int curry, int curryIndex, Constructor<?> constructor) {
     for (int i = 0; i < curry; i++) {
       if (curryIndexes[i] == curryIndex) {
         throw new IllegalArgumentException(

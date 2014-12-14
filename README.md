@@ -16,7 +16,7 @@ Add the following fragment to your `<dependencies>` section:
       <dependency>
         <groupId>org.jparsec</groupId>
         <artifactId>jparsec</artifactId>
-        <version>2.2</version>
+        <version>2.2.1</version>
       </dependency>
 
 ## What is jparsec?

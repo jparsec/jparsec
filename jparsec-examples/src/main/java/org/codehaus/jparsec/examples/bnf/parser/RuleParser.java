@@ -67,7 +67,7 @@ public final class RuleParser {
   
   static Parser<Rule> sequential(Parser<Rule> rule) {
     return rule.many1().map(new Map<List<Rule>, Rule>() {
-      public Rule map(List<Rule> list) {
+      @Override public Rule map(List<Rule> list) {
         return list.size() == 1 ? list.get(0) : new SequentialRule(list);
       }
     });
@@ -75,7 +75,7 @@ public final class RuleParser {
   
   static Parser<Rule> alternative(Parser<Rule> rule) {
     return rule.sepBy1(term("|")).map(new Map<List<Rule>, Rule>() {
-      public Rule map(List<Rule> list) {
+      @Override public Rule map(List<Rule> list) {
         return list.size() == 1 ? list.get(0) : new AltRule(list);
       }
     });
