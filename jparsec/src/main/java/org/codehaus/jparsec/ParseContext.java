@@ -15,11 +15,12 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import static org.codehaus.jparsec.internal.util.Checks.checkState;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.jparsec.error.ParseErrorDetails;
-import org.codehaus.jparsec.error.ParseTree;
 import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
@@ -72,9 +73,9 @@ abstract class ParseContext {
   private ErrorType currentErrorType = ErrorType.NONE;
   private int currentErrorAt;
   private int currentErrorIndex = 0; // TODO: is it necessary to set this to the starting index?
-  private TreeNode currentErrorNode = null;
   private final ArrayList<Object> errors = Lists.arrayList();
   private String encountered = null; // for explicitly setting encountered token into ScannerState.
+  private TreeNode currentErrorNode = null;
   
   // explicit suppresses error recording if true.
   private boolean errorSuppressed = false;
@@ -91,26 +92,12 @@ abstract class ParseContext {
     return currentErrorIndex;
   }
 
-  /** The type of the current most relevant error. */
-  final ErrorType errorType() {
-    return currentErrorType;
-  }
-  
-  /** The current most relevant error. {@code null} if none. */
-  final List<Object> errors() {
-    return errors;
-  }
-
-  final TreeNode currentErrorNode() {
-    return currentErrorNode;
-  }
-
   final void traceCurrentResult() {
     trace.setCurrentResult(result);
   }
 
   final ParseTree buildParseTree() {
-    return toParseTree(trace.getChildren());
+    return toParseTree(trace.getLatestChild());
   }
 
   final ParseTree buildErrorParseTree() {
@@ -153,19 +140,11 @@ abstract class ParseContext {
     }
   }
 
-  final String getEncountered() {
+  private String getEncountered() {
     if (encountered != null) {
       return encountered;
     }
     return getInputName(currentErrorAt);
-  }
-  
-  /**
-   * Explicitly sets the encountered token,
-   * which is from a nested {@link ParseContext} instance.
-   */
-  final void setEncountered(String encountered) {
-    this.encountered = encountered;
   }
   
   /** Returns the string representation of the current input (character or token). */
@@ -191,7 +170,7 @@ abstract class ParseContext {
     if (errorSuppressed) return;
     if (at < currentErrorAt) return;
     if (at > currentErrorAt) {
-      setErrorState(at, getIndex(), type, trace.getChildren());
+      setErrorState(at, getIndex(), type);
       errors.add(subject);
       return;
     }
@@ -200,7 +179,7 @@ abstract class ParseContext {
       return;
     }
     if (type.ordinal() > currentErrorType.ordinal()) {
-      setErrorState(at, getIndex(), type, trace.getChildren());
+      setErrorState(at, getIndex(), type);
       errors.add(subject);
       return;
     }
@@ -223,27 +202,28 @@ abstract class ParseContext {
     raise(ErrorType.UNEXPECTED, what);
   }
   
-  final void set(int step, int at, Object ret, TreeNode node) {
+  final void set(int step, int at, Object ret, TreeNode children) {
+    set(step, at, ret);
+    trace.setLatestChild(children);
+  }
+  
+  final void set(int step, int at, Object ret) {
     this.step = step;
     this.at = at;
     this.result = ret;
-    trace.setChildren(node);
   }
   
   final void setErrorState(
-      int errorAt, int errorIndex, ErrorType errorType, List<Object> errors,
-      TreeNode currentNode) {
-    setErrorState(errorAt, errorIndex, errorType, currentNode);
+      int errorAt, int errorIndex, ErrorType errorType, List<Object> errors) {
+    setErrorState(errorAt, errorIndex, errorType);
     this.errors.addAll(errors);
-    this.currentErrorNode = currentNode;
   }
 
-  private void setErrorState(int errorAt, int errorIndex, ErrorType errorType,
-      TreeNode currentNode) {
+  private void setErrorState(int errorAt, int errorIndex, ErrorType errorType) {
     this.currentErrorIndex = errorIndex;
     this.currentErrorAt = errorAt;
     this.currentErrorType = errorType;
-    this.currentErrorNode = currentNode;
+    this.currentErrorNode = trace.getLatestChild();
     this.encountered = null;
     this.errors.clear();
   }
@@ -276,16 +256,30 @@ abstract class ParseContext {
         current.setEndIndex(getIndex());
         this.current = current.parent();
       }
-      @Override public TreeNode getChildren() {
-        return current.youngestChild;
+      @Override public TreeNode getParentNode() {
+        return current.parent();
       }
-      @Override public void setChildren(TreeNode children) {
-        current.youngestChild = children;
+      @Override public TreeNode getLatestChild() {
+        return current.latestChild;
+      }
+      @Override public void setLatestChild(TreeNode latest) {
+        checkState(latest == null || latest.parent() == current,
+            "Trying to set a child node not owned by the parent node");
+        current.latestChild = latest;
       }
       @Override public void setCurrentResult(Object result) {
         current.setResult(result);
       }
     };
+  }
+
+  final void copyErrorFrom(ParseContext that) {
+    int errorIndex = that.errorIndex();
+    setErrorState(errorIndex, errorIndex, that.currentErrorType, that.errors);
+    if (!that.isEof()) {
+      this.encountered = that.getEncountered();
+    }
+    currentErrorNode = that.currentErrorNode;
   }
   
   //caller should not change input after it is passed in.

@@ -34,16 +34,16 @@ final class Sequence4Parser<A, B, C, D, T> extends Parser<T> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    boolean r1 = p1.run(ctxt);
+    boolean r1 = p1.apply(ctxt);
     if (!r1) return false;
     A o1 = p1.getReturn(ctxt);
-    boolean r2 = p2.run(ctxt);
+    boolean r2 = p2.apply(ctxt);
     if (!r2) return false;
     B o2 = p2.getReturn(ctxt);
-    boolean r3 = p3.run(ctxt);
+    boolean r3 = p3.apply(ctxt);
     if (!r3) return false;
     C o3 = p3.getReturn(ctxt);
-    boolean r4 = p4.run(ctxt);
+    boolean r4 = p4.apply(ctxt);
     if (!r4) return false;
     D o4 = p4.getReturn(ctxt);
     ctxt.result = m4.map(o1, o2, o3, o4);

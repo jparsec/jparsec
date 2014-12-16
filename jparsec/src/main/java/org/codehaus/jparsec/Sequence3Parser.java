@@ -32,13 +32,13 @@ final class Sequence3Parser<A, B, C, T> extends Parser<T> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    boolean r1 = p1.run(ctxt);
+    boolean r1 = p1.apply(ctxt);
     if (!r1) return false;
     A o1 = p1.getReturn(ctxt);
-    boolean r2 = p2.run(ctxt);
+    boolean r2 = p2.apply(ctxt);
     if (!r2) return false;
     B o2 = p2.getReturn(ctxt);
-    boolean r3 = p3.run(ctxt);
+    boolean r3 = p3.apply(ctxt);
     if (!r3) return false;
     C o3 = p3.getReturn(ctxt);
     ctxt.result = m3.map(o1, o2, o3);

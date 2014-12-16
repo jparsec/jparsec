@@ -88,22 +88,6 @@ public final class Parsers {
   }
   
   /**
-   * Runs a character level {@code parser} against {@code src} using {@code locator} to locate
-   * error location.
-   */
-  static <T> T parse(
-      CharSequence src, Parser<T> parser, SourceLocator locator, String module) {
-    ScannerState ctxt = new ScannerState(module, src, 0, locator);
-    if (!parser.run(ctxt)) {
-      ParserException exception =  new ParserException(
-          ctxt.renderError(), ctxt.module, locator.locate(ctxt.errorIndex()));
-      exception.setParseTree(ctxt.buildParseTree());
-      throw exception;
-    }
-    return parser.getReturn(ctxt);
-  }
-
-  /**
    * A {@link Parser} that always succeeds and invokes {@code runnable}.
    */
   @Deprecated
@@ -547,7 +531,7 @@ public final class Parsers {
   @SuppressWarnings("unchecked")
   static <From> boolean runNext(ParseContext state, Map<? super From, ? extends Parser<?>> next) {
     Parser<?> parser = next.map((From) state.result);
-    return parser.run(state);
+    return parser.apply(state);
   }
 
   @SuppressWarnings("rawtypes")

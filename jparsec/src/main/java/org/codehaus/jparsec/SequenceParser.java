@@ -24,7 +24,7 @@ final class SequenceParser extends Parser<Object> {
 
   @Override boolean apply(ParseContext ctxt) {
     for (Parser<?> p : parsers) {
-      if (!p.run(ctxt)) return false;
+      if (!p.apply(ctxt)) return false;
     }
     return true;
   }

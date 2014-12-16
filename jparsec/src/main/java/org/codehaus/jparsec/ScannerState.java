@@ -15,6 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import org.codehaus.jparsec.error.ParserException;
+
 
 /**
  * Parser state for scanner.
@@ -66,5 +68,27 @@ final class ScannerState extends ParseContext {
 
   @Override Token getToken() {
     throw new IllegalStateException("Parser not on token level");
+  }
+
+  final <T> T run(Parser<T> parser) {
+    if (!applyWithExceptionWrapped(parser)) {
+      ParserException exception =  new ParserException(
+          renderError(), module, locator.locate(errorIndex()));
+      exception.setParseTree(buildErrorParseTree());
+      throw exception;
+    }
+    return parser.getReturn(this);
+  }
+
+  private boolean applyWithExceptionWrapped(Parser<?> parser) {
+    try {
+      return parser.apply(this);
+    } catch (RuntimeException e) {
+      if (e instanceof ParserException) throw (ParserException) e;
+      ParserException wrapper =
+          new ParserException(e, null, module, locator.locate(getIndex()));
+      wrapper.setParseTree(buildParseTree());
+      throw wrapper;
+    }
   }
 }

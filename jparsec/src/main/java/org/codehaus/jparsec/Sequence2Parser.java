@@ -29,10 +29,10 @@ final class Sequence2Parser<A, B, T> extends Parser<T> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    boolean r1 = p1.run(ctxt);
+    boolean r1 = p1.apply(ctxt);
     if (!r1) return false;
     A o1 = p1.getReturn(ctxt);
-    boolean r2 = p2.run(ctxt);
+    boolean r2 = p2.apply(ctxt);
     if (!r2) return false;
     B o2 = p2.getReturn(ctxt);
     ctxt.result = m2.map(o1, o2);

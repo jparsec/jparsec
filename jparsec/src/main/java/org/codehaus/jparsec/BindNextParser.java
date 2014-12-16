@@ -34,9 +34,7 @@ final class BindNextParser<From, To> extends Parser<To> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    if (!parser.run(ctxt))
-      return false;
-    return Parsers.runNext(ctxt, map);
+    return parser.apply(ctxt) && Parsers.runNext(ctxt, map);
   }
   
   @Override public String toString() {

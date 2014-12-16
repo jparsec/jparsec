@@ -15,6 +15,9 @@
  *****************************************************************************/
 package org.codehaus.jparsec.internal.util;
 
+import static java.util.Arrays.asList;
+
+
 /**
  * Internal utility for {@link String} operation.
  * 
@@ -31,6 +34,11 @@ public final class Strings {
 
   /** Joins {@code objects} with {@code delim} as the delimiter. */
   public static StringBuilder join(StringBuilder builder, String delim, Object[] objects) {
+    return join(builder, delim, asList(objects));
+  }
+
+  /** Joins {@code objects} with {@code delim} as the delimiter. */
+  public static StringBuilder join(StringBuilder builder, String delim, Iterable<?> objects) {
     int i = 0;
     for (Object obj : objects) {
       if (i++ > 0) builder.append(delim);

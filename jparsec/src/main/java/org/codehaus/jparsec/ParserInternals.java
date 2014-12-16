@@ -31,11 +31,11 @@ final class ParserInternals {
     int bestAt = state.at;
     int bestStep = state.step;
     Object bestResult = state.result;
-    TreeNode bestNode = state.trace.getChildren();
+    TreeNode bestNode = state.trace.getLatestChild();
     for (int i = from; i < parsers.length; i++) {
       state.set(originalStep, originalAt, originalResult, originalNode);
       Parser<?> parser = parsers[i];
-      boolean ok = parser.run(state);
+      boolean ok = parser.apply(state);
       if (!ok) continue;
       int at2 = state.at;
       if (order.compare(at2, bestAt)) {
@@ -49,7 +49,7 @@ final class ParserInternals {
 
   static boolean repeat(Parser<?> parser, int n, ParseContext ctxt) {
     for (int i = 0; i < n; i++) {
-      if (!parser.run(ctxt)) return false;
+      if (!parser.apply(ctxt)) return false;
     }
     return true;
   }
@@ -75,7 +75,7 @@ final class ParserInternals {
   static <T> boolean repeat(
       Parser<? extends T> parser, int n, Collection<T> collection, ParseContext ctxt) {
     for (int i = 0; i < n; i++) {
-      if (!parser.run(ctxt)) return false;
+      if (!parser.apply(ctxt)) return false;
       collection.add(parser.getReturn(ctxt));
     }
     return true;
@@ -114,29 +114,17 @@ final class ParserInternals {
 
   static boolean runNestedParser(
       ParseContext ctxt, ParseContext freshInitState, Parser<?> parser) {
-    if (parser.run(freshInitState))  {
-      ctxt.set(freshInitState.step, ctxt.at, freshInitState.result, freshInitState.trace.getChildren());
-      ctxt.trace = freshInitState.trace;
+    if (parser.apply(freshInitState))  {
+      ctxt.set(freshInitState.step, ctxt.at, freshInitState.result);
       return true;
     }
     // index on token level is the "at" on character level
-    ctxt.set(ctxt.step, freshInitState.getIndex(), null, freshInitState.trace.getChildren());
-    ctxt.trace = freshInitState.trace;
+    ctxt.set(ctxt.step, freshInitState.getIndex(), null);
     
     // always copy error because there could be false alarms in the character level.
     // For example, a "or" parser nested in a "many" failed in one of its branches.
-    copyError(ctxt, freshInitState);
+    ctxt.copyErrorFrom(freshInitState);
     return false;
-  }
-
-  private static void copyError(ParseContext ctxt, ParseContext nestedState) {
-    int errorIndex = nestedState.errorIndex();
-    ctxt.setErrorState(
-        errorIndex, errorIndex, nestedState.errorType(), nestedState.errors(),
-        nestedState.currentErrorNode());
-    if (!nestedState.isEof()) {
-      ctxt.setEncountered(nestedState.getEncountered());
-    }
   }
 
   /**
@@ -144,13 +132,13 @@ final class ParserInternals {
    * May want to suppress irrelevant errors (such the 'x expected' in x*).
    */
   static boolean greedyRun(Parser<?> parser, ParseContext ctxt) {
-    return parser.run(ctxt);
+    return parser.apply(ctxt);
   }
 
   /** Runs {@code parser} with error recording suppressed. */
   static boolean runWithoutRecordingError(Parser<?> parser, ParseContext ctxt) {
     boolean oldValue = ctxt.suppressError(true);
-    boolean ok = parser.run(ctxt);
+    boolean ok = parser.apply(ctxt);
     ctxt.suppressError(oldValue);
     return ok;
   }

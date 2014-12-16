@@ -33,13 +33,13 @@ final class IfElseParser<T, C> extends Parser<T> {
     final Object ret = ctxt.result;
     final int step = ctxt.step;
     final int at = ctxt.at;
-    final TreeNode node = ctxt.trace.getChildren();
+    final TreeNode node = ctxt.trace.getLatestChild();
     if (ParserInternals.runWithoutRecordingError(cond, ctxt)) {
       Parser<? extends T> parser = consequence.map(cond.getReturn(ctxt));
-      return parser.run(ctxt);
+      return parser.apply(ctxt);
     }
     ctxt.set(step, at, ret, node);
-    return alternative.run(ctxt);
+    return alternative.apply(ctxt);
   }
   
   @Override public String toString() {

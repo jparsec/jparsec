@@ -15,6 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec.error;
 
+import org.codehaus.jparsec.ParseTree;
+
 /**
  * Is thrown when any grammar error happens or any exception is thrown during parsing.
  * 

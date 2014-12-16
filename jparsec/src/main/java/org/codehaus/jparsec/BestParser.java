@@ -28,10 +28,10 @@ final class BestParser<T> extends Parser<T> {
     final Object result = ctxt.result;
     final int step = ctxt.step;
     final int at = ctxt.at;
-    final TreeNode node = ctxt.trace.getChildren();
+    final TreeNode node = ctxt.trace.getLatestChild();
     for (int i = 0; i < parsers.length; i++) {
       Parser<? extends T> parser = parsers[i];
-      if (parser.run(ctxt)) {
+      if (parser.apply(ctxt)) {
         ParserInternals.runForBestFit(order, parsers, i + 1, ctxt, result, step, at, node);
         return true;
       }

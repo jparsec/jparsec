@@ -756,28 +756,11 @@ public abstract class Parser<T> {
    * @return the result
    */
   final T parse(CharSequence source, String moduleName, SourceLocator sourceLocator) {
-    return Parsers.parse(source, followedBy(Parsers.EOF), sourceLocator, moduleName);
+    return new ScannerState(moduleName, source, 0, sourceLocator).run(followedBy(Parsers.EOF));
   }
 
   @SuppressWarnings("unchecked")
   final T getReturn(ParseContext ctxt) {
     return (T) ctxt.result;
-  }
-
-  final boolean run(ParseContext ctxt) {
-    try {
-      return apply(ctxt);
-    } catch (RuntimeException e) {
-      throw asParserException(e, ctxt);
-    }
-  }
-
-  private static ParserException asParserException(Throwable e, ParseContext ctxt) {
-    if (e instanceof ParserException)
-      return (ParserException) e;
-    ParserException wrapper =
-        new ParserException(e, null, ctxt.module, ctxt.locator.locate(ctxt.getIndex()));
-    wrapper.setParseTree(ctxt.buildErrorParseTree());
-    return wrapper;
   }
 }

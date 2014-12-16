@@ -39,7 +39,24 @@ public final class Checks {
    *
    * @throws IllegalArgumentException if {@code condition} is false
    */
-  public static void checkArgument(boolean condition, String message, Object... args) throws IllegalArgumentException {
+  public static void checkArgument(boolean condition, String message)
+      throws IllegalArgumentException {
+    if (!condition) {
+      throw new IllegalArgumentException(message);
+    }
+  }
+
+  /**
+   * Checks that an argument satisfies requirement.
+   *
+   * @param  condition the condition that has to be true
+   * @param  message   the error message if {@code condition} is false
+   * @param  args      the arguments to the error message
+   *
+   * @throws IllegalArgumentException if {@code condition} is false
+   */
+  public static void checkArgument(boolean condition, String message, Object... args)
+      throws IllegalArgumentException {
     if (!condition) {
       throw new IllegalArgumentException(String.format(message, args));
     }
@@ -54,10 +71,40 @@ public final class Checks {
    *
    * @throws IllegalStateException if {@code condition} is false
    */
-  public static void checkState(boolean condition, String message, Object... args) throws IllegalStateException {
+  public static void checkState(boolean condition, String message)
+      throws IllegalStateException {
+    if (!condition) {
+      throw new IllegalStateException(message);
+    }
+  }
+
+  /**
+   * Checks a certain state.
+   *
+   * @param  condition the condition of the state that has to be true
+   * @param  message   the error message if {@code condition} is false
+   * @param  args      the arguments to the error message
+   *
+   * @throws IllegalStateException if {@code condition} is false
+   */
+  public static void checkState(boolean condition, String message, Object... args)
+      throws IllegalStateException {
     if (!condition) {
       throw new IllegalStateException(String.format(message, args));
     }
+  }
+
+  /**
+   * Checks that {@code object} is not null.
+   *
+   * @param  object  the object that cannot be null
+   * @param  message the error message if {@code condition} is false
+   * @param  args    the arguments to the error message
+   *
+   * @throws IllegalStateException if {@code object} is null
+   */
+  public static void checkNotNullState(Object object, String message) {
+    checkState(object != null, message);
   }
 
   /**

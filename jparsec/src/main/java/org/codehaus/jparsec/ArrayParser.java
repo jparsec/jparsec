@@ -31,7 +31,7 @@ final class ArrayParser extends Parser<Object[]> {
     Object[] ret = new Object[parsers.length];
     for (int i = 0; i < parsers.length; i++) {
       Parser<?> parser = parsers[i];
-      if (!parser.run(ctxt)) return false;
+      if (!parser.apply(ctxt)) return false;
       ret[i] = parser.getReturn(ctxt);
     }
     ctxt.result = ret;
