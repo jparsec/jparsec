@@ -350,7 +350,8 @@ public abstract class Parser<T> {
   /**
    * A {@link Parser} that runs {@code consequence} if {@code this} succeeds, or {@code alternative} otherwise.
    */
-  public final <R> Parser<R> ifelse(Map<? super T, ? extends Parser<? extends R>> consequence, Parser<? extends R> alternative) {
+  public final <R> Parser<R> ifelse(
+      Map<? super T, ? extends Parser<? extends R>> consequence, Parser<? extends R> alternative) {
     return new IfElseParser<R, T>(this, consequence, alternative);
   }
 
@@ -359,7 +360,7 @@ public abstract class Parser<T> {
    * match.
    */
   public final Parser<T> label(String name) {
-    return Parsers.plus(this, Parsers.<T>expect(name));
+    return Parsers.plus(this, Parsers.<T>expect(name)).asNode(name);
   }
 
   /**
@@ -641,6 +642,49 @@ public abstract class Parser<T> {
   }
 
   /**
+   * Returns a new {@link Parser} that enables trace. When any parsing error happens inside the
+   * parser, the trace of all succeeded sub-parsers are reported in the {@link ParserException}.
+   * For example: <pre>   {@code
+   *   try {
+   *     parser.enableTrace("root").parse(text);
+   *   } catch (ParserException e) {
+   *     System.out.println(e.getParseTree().toJson());
+   *   }
+   * }</pre>
+   */
+  public final Parser<T> enableTrace(final String name) {
+    final Parser<T> traced = this;
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        ParserTrace oldTrace = ctxt.trace;
+        try {
+          ctxt.trace = ctxt.newTrace(name);
+          return traced.apply(ctxt);
+        } finally {
+          ctxt.trace = oldTrace;
+        }
+      }
+    };
+  }
+
+  /** Annotates this parser to construct a syntax node in the parse tree. */
+  final Parser<T> asNode(final String name) {
+    final Parser<T> delegate = this;
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        ctxt.trace.push(name);
+        boolean ok = delegate.apply(ctxt);
+        if (ok) ctxt.traceCurrentResult();
+        ctxt.trace.pop();
+        return ok;
+      }
+      @Override public String toString() {
+        return name;
+      }
+    };
+  }
+
+  /**
    * Parses {@code source}.
    *
    * @param source     the source string
@@ -731,6 +775,9 @@ public abstract class Parser<T> {
   private static ParserException asParserException(Throwable e, ParseContext ctxt) {
     if (e instanceof ParserException)
       return (ParserException) e;
-    return new ParserException(e, null, ctxt.module, ctxt.locator.locate(ctxt.getIndex()));
+    ParserException wrapper =
+        new ParserException(e, null, ctxt.module, ctxt.locator.locate(ctxt.getIndex()));
+    wrapper.setParseTree(ctxt.buildErrorParseTree());
+    return wrapper;
   }
 }

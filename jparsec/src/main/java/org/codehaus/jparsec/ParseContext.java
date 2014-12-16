@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.codehaus.jparsec.error.ParseErrorDetails;
+import org.codehaus.jparsec.error.ParseTree;
 import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
@@ -44,6 +45,8 @@ abstract class ParseContext {
   
   /** The current parse result. */
   Object result;
+
+  ParserTrace trace = ParserTrace.DISABLED;
   
   enum ErrorType {
     
@@ -69,6 +72,7 @@ abstract class ParseContext {
   private ErrorType currentErrorType = ErrorType.NONE;
   private int currentErrorAt;
   private int currentErrorIndex = 0; // TODO: is it necessary to set this to the starting index?
+  private TreeNode currentErrorNode = null;
   private final ArrayList<Object> errors = Lists.arrayList();
   private String encountered = null; // for explicitly setting encountered token into ScannerState.
   
@@ -95,6 +99,26 @@ abstract class ParseContext {
   /** The current most relevant error. {@code null} if none. */
   final List<Object> errors() {
     return errors;
+  }
+
+  final TreeNode currentErrorNode() {
+    return currentErrorNode;
+  }
+
+  final void traceCurrentResult() {
+    trace.setCurrentResult(result);
+  }
+
+  final ParseTree buildParseTree() {
+    return toParseTree(trace.getChildren());
+  }
+
+  final ParseTree buildErrorParseTree() {
+    return toParseTree(currentErrorNode);
+  }
+
+  private static ParseTree toParseTree(TreeNode node) {
+    return node == null ? null : node.materialize().toParseTree();
   }
   
   /** Only called when rendering the error in {@link ParserException}. */
@@ -167,7 +191,7 @@ abstract class ParseContext {
     if (errorSuppressed) return;
     if (at < currentErrorAt) return;
     if (at > currentErrorAt) {
-      setErrorState(at, getIndex(), type);
+      setErrorState(at, getIndex(), type, trace.getChildren());
       errors.add(subject);
       return;
     }
@@ -176,7 +200,7 @@ abstract class ParseContext {
       return;
     }
     if (type.ordinal() > currentErrorType.ordinal()) {
-      setErrorState(at, getIndex(), type);
+      setErrorState(at, getIndex(), type, trace.getChildren());
       errors.add(subject);
       return;
     }
@@ -199,22 +223,27 @@ abstract class ParseContext {
     raise(ErrorType.UNEXPECTED, what);
   }
   
-  final void set(int step, int at, Object ret) {
+  final void set(int step, int at, Object ret, TreeNode node) {
     this.step = step;
     this.at = at;
     this.result = ret;
+    trace.setChildren(node);
   }
   
   final void setErrorState(
-      int errorAt, int errorIndex, ErrorType errorType, List<Object> errors) {
-    setErrorState(errorAt, errorIndex, errorType);
+      int errorAt, int errorIndex, ErrorType errorType, List<Object> errors,
+      TreeNode currentNode) {
+    setErrorState(errorAt, errorIndex, errorType, currentNode);
     this.errors.addAll(errors);
+    this.currentErrorNode = currentNode;
   }
 
-  private void setErrorState(int errorAt, int errorIndex, ErrorType errorType) {
+  private void setErrorState(int errorAt, int errorIndex, ErrorType errorType,
+      TreeNode currentNode) {
     this.currentErrorIndex = errorIndex;
     this.currentErrorAt = errorAt;
     this.currentErrorType = errorType;
+    this.currentErrorNode = currentNode;
     this.encountered = null;
     this.errors.clear();
   }
@@ -232,6 +261,31 @@ abstract class ParseContext {
   final void next(int n) {
     at += n;
     if (n > 0) step++;
+  }
+
+  final ParserTrace newTrace(final String rootName) {
+    return new ParserTrace() {
+      private TreeNode current = new TreeNode(rootName, getIndex());
+  
+      @Override public void push(String name) {
+        TreeNode newChild = new TreeNode(name, getIndex());
+        current.addChild(newChild);
+        this.current = newChild;
+      }
+      @Override public void pop() {
+        current.setEndIndex(getIndex());
+        this.current = current.parent();
+      }
+      @Override public TreeNode getChildren() {
+        return current.youngestChild;
+      }
+      @Override public void setChildren(TreeNode children) {
+        current.youngestChild = children;
+      }
+      @Override public void setCurrentResult(Object result) {
+        current.setResult(result);
+      }
+    };
   }
   
   //caller should not change input after it is passed in.

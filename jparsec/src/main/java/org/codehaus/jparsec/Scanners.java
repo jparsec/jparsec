@@ -205,7 +205,7 @@ public final class Scanners {
   public static Parser<Void> string(String str, String name) {
     return Patterns.string(str).toScanner(name);
   }
-  
+
   /**
    * A scanner that scans the input for an occurrence of a string pattern.
    * 
@@ -216,9 +216,9 @@ public final class Scanners {
    */
   @Deprecated
   public static Parser<Void> pattern(Pattern pattern, String name) {
-    return new PatternScanner(name, pattern);
+    return new PatternScanner(name, pattern).asNode(name);
   }
-  
+
   /**
    * A scanner that matches the input against the specified string case insensitively.
    * 
@@ -231,7 +231,7 @@ public final class Scanners {
   public static Parser<Void> stringCaseInsensitive(String str, String name) {
     return Patterns.stringCaseInsensitive(str).toScanner(name);
   }
-  
+
   /**
    * A scanner that matches the input against the specified string case insensitively.
    * @param str the string to match

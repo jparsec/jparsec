@@ -26,6 +26,7 @@ public class ParserException extends RuntimeException {
   private final ParseErrorDetails error;
   private final Location location;
   private final String module;
+  private ParseTree parseTree = null;
   
   /**
    * Creates a {@link ParserException} object.
@@ -60,6 +61,18 @@ public class ParserException extends RuntimeException {
   /** Returns the detailed description of the error, or {@code null} if none. */
   public ParseErrorDetails getErrorDetails() {
     return error;
+  }
+
+  /**
+   * Returns the parse tree until the parse error happened. {@code null} if
+   * {@link Parser#enableTrace()} isn't called.
+   */
+  public ParseTree getParseTree() {
+    return parseTree;
+  }
+
+  public void setParseTree(ParseTree parseTree) {
+    this.parseTree = parseTree;
   }
   
   private static String toErrorMessage(

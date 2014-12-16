@@ -27,12 +27,13 @@ final class ParserInternals {
   static void runForBestFit(
       IntOrder order, Parser<?>[] parsers, int from,
       ParseContext state,
-      Object originalResult, int originalStep, int originalAt) {
+      Object originalResult, int originalStep, int originalAt, TreeNode originalNode) {
     int bestAt = state.at;
     int bestStep = state.step;
     Object bestResult = state.result;
+    TreeNode bestNode = state.trace.getChildren();
     for (int i = from; i < parsers.length; i++) {
-      state.set(originalStep, originalAt, originalResult);
+      state.set(originalStep, originalAt, originalResult, originalNode);
       Parser<?> parser = parsers[i];
       boolean ok = parser.run(state);
       if (!ok) continue;
@@ -43,7 +44,7 @@ final class ParserInternals {
         bestResult = state.result;
       }
     }
-    state.set(bestStep, bestAt, bestResult);
+    state.set(bestStep, bestAt, bestResult, bestNode);
   }
 
   static boolean repeat(Parser<?> parser, int n, ParseContext ctxt) {
@@ -114,11 +115,13 @@ final class ParserInternals {
   static boolean runNestedParser(
       ParseContext ctxt, ParseContext freshInitState, Parser<?> parser) {
     if (parser.run(freshInitState))  {
-      ctxt.set(freshInitState.step, ctxt.at, freshInitState.result);
+      ctxt.set(freshInitState.step, ctxt.at, freshInitState.result, freshInitState.trace.getChildren());
+      ctxt.trace = freshInitState.trace;
       return true;
     }
     // index on token level is the "at" on character level
-    ctxt.set(ctxt.step, freshInitState.getIndex(), null);
+    ctxt.set(ctxt.step, freshInitState.getIndex(), null, freshInitState.trace.getChildren());
+    ctxt.trace = freshInitState.trace;
     
     // always copy error because there could be false alarms in the character level.
     // For example, a "or" parser nested in a "many" failed in one of its branches.
@@ -129,7 +132,8 @@ final class ParserInternals {
   private static void copyError(ParseContext ctxt, ParseContext nestedState) {
     int errorIndex = nestedState.errorIndex();
     ctxt.setErrorState(
-        errorIndex, errorIndex, nestedState.errorType(), nestedState.errors());
+        errorIndex, errorIndex, nestedState.errorType(), nestedState.errors(),
+        nestedState.currentErrorNode());
     if (!nestedState.isEof()) {
       ctxt.setEncountered(nestedState.getEncountered());
     }

@@ -15,7 +15,6 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-
 final class BestParser<T> extends Parser<T> {
   private final Parser<? extends T>[] parsers;
   private final IntOrder order;
@@ -29,14 +28,15 @@ final class BestParser<T> extends Parser<T> {
     final Object result = ctxt.result;
     final int step = ctxt.step;
     final int at = ctxt.at;
+    final TreeNode node = ctxt.trace.getChildren();
     for (int i = 0; i < parsers.length; i++) {
       Parser<? extends T> parser = parsers[i];
       if (parser.run(ctxt)) {
-        ParserInternals.runForBestFit(order, parsers, i + 1, ctxt, result, step, at);
+        ParserInternals.runForBestFit(order, parsers, i + 1, ctxt, result, step, at, node);
         return true;
       }
       // in alternate, we do not care partial match.
-      ctxt.set(step, at, result);
+      ctxt.set(step, at, result, node);
     }
     return false;
   }
