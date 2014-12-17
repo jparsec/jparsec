@@ -31,32 +31,33 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
 
 /**
- * Defines grammar and encapsulates parsing logic. A {@link Parser} takes as input a {@link CharSequence} source and
- * parses it when the {@link #parse(CharSequence)} method is called. A value of type {@code T} will be returned if
- * parsing succeeds, or a {@link ParserException} is thrown to indicate parsing error. For example:
+ * Defines grammar and encapsulates parsing logic. A {@link Parser} takes as input a
+ * {@link CharSequence} source and parses it when the {@link #parse(CharSequence)} method is called.
+ * A value of type {@code T} will be returned if parsing succeeds, or a {@link ParserException}
+ * is thrown to indicate parsing error. For example: <pre>   {@code
+ *   Parser<String> scanner = Scanners.IDENTIFIER;
+ *   assertEquals("foo", scanner.parse("foo"));
+ * }</pre>
  *
- * <pre>
- * Parser&lt;String> scanner = Scanners.IDENTIFIER;
- * assertEquals("foo", scanner.parse("foo"));
- * </pre>
- *
- * <p> {@code Parser}s are immutable and inherently covariant on the type parameter {@code T}. Because Java generics has
- * no native support for covariant type parameter, a workaround is to use the {@link Parser#cast()} method to explicitly
- * force covariance whenever needed.
- *
- * <p> {@code Parser}s run either on character level to scan the source, or on token level to parse a list of {@link
- * Token} objects returned from another parser. This other parser that returns the list of tokens for token level
- * parsing is hooked up via the {@link #from(Parser, Parser)} or {@link #from(Parser)} method.
+ * <p> {@code Parser}s run either on character level to scan the source, or on token level to parse
+ * a list of {@link Token} objects returned from another parser. This other parser that returns the
+ * list of tokens for token level parsing is hooked up via the {@link #from(Parser, Parser)}
+ * or {@link #from(Parser)} method.
  *
  * <p>The following are important naming conventions used throughout the library:
  *
  * <ul>
  * <li>A character level parser object that recognizes a single lexical word is called a scanner.
  * <li>A scanner that translates the recognized lexical word into a token is called a tokenizer.
- * <li >A character level parser object that does lexical analysis and returns a list of {@link Token} is called a
- * lexer.
+ * <li>A character level parser object that does lexical analysis and returns a list of
+ *     {@link Token} is called a lexer.
  * <li>All {@code index} parameters are 0-based indexes in the original source.
  * </ul>
+ *
+ * To debug a complex parser that fails in un-obvious way, pass {@link Mode#DEBUG} mode to
+ * {@link #parse(CharSequence, Mode)} and inspect the result in
+ * {@link ParserException#getParseTree()}. All {@link #label labeled} parsers will generate a node
+ * in the exception's parse tree, with matched indices in the source.
  *
  * @author Ben Yu
  */
@@ -656,7 +657,10 @@ public abstract class Parser<T> {
   }
 
   /**
-   * Parses {@code source} under the given {@code mode}.
+   * Parses {@code source} under the given {@code mode}. For example: <pre>
+   *   parser.parse(text, Mode.DEBUG);
+   * </pre>
+   *
    * @since 2.3
    */
   public final T parse(CharSequence source, Mode mode) {
@@ -664,7 +668,10 @@ public abstract class Parser<T> {
   }
 
   /**
-   * Parses source read from {@code readable} under the given {@code mode}.
+   * Parses source read from {@code readable} under the given {@code mode}. For example: <pre>
+   *   parser.parse(text, Mode.DEBUG);
+   * </pre>
+   *
    * @since 2.3
    */
   public final T parse(Readable readable, Mode mode) throws IOException {
@@ -689,9 +696,9 @@ public abstract class Parser<T> {
      */
     DEBUG {
       @Override <T> T run(Parser<T> parser, CharSequence source) {
-        return new ScannerState(source)
-            .enableTrace("root")
-            .run(parser.followedBy(Parsers.EOF));
+        ScannerState state = new ScannerState(source);
+        state.enableTrace("root");
+        return state.run(parser.followedBy(Parsers.EOF));
       }
     }
     ;

@@ -29,6 +29,7 @@ final class NestedParser<T> extends Parser<T> {
     Token[] tokens = lexer.getReturn(ctxt);
     ParserState parserState = new ParserState(
         ctxt.module, ctxt.source, tokens, 0, ctxt.locator, ctxt.getIndex(), tokens);
+    ctxt.trace.startFresh(parserState);
     return ctxt.applyNested(parser, parserState);
   }
   

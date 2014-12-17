@@ -34,7 +34,13 @@ final class NestedScanner extends Parser<Void> {
     if (!outer.apply(ctxt)) return false;
     ScannerState scannerState = new ScannerState(
         ctxt.module, ctxt.characters(), from, ctxt.at, ctxt.locator, ctxt.result);
-    return ctxt.applyNested(inner, scannerState);
+    ctxt.trace.startFresh(scannerState);
+    scannerState.trace.setCurrentNode(ctxt.trace.getCurrentNode());
+    try {
+      return ctxt.applyNested(inner, scannerState);
+    } finally {
+      ctxt.trace.setCurrentNode(scannerState.trace.getCurrentNode());
+    }
   }
   
   @Override public String toString() {

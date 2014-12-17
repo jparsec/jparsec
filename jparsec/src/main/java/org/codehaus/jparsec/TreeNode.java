@@ -7,6 +7,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * A TreeNode remembers it's parent (which corresponds to a parent parser that syntactically
+ * encloses this parter), it's previous node (which is the parser at the same syntactical level
+ * and had just <em>succeeded</em> before this parser started). It also keeps all the children.
+ * 
+ * <p>Once a parser's parent and "previous" node is set, they stay immutable (well, unless the node
+ * is being discarded). The list of children nodes however can change. When the alternative parsers
+ * in an {@code or} parser are attempted one after another, they each generate new child node of
+ * the parent node. These "alternative" nodes all point to the same parent and same "previous" node.
+ * 
+ * <p>When exception is to be thrown, the most relevant error is picked, along with the tree node
+ * that was recorded at time of {@link ParseContext#raise}. That tree node is then
+ * {@link #freeze frozen} by setting its parent's {@link #latestChild} to this error
+ * node's "previous" successful node, and that of its grandparent's to its parent node, all the way
+ * up to the root. This essentially freezes and collapse the "multi universes" into a single error
+ * state, with all other "potential" error state destroyed and forgotten.
+ */
 final class TreeNode {
 
   private final String name;
@@ -42,6 +59,11 @@ final class TreeNode {
     this.latestChild = child;
   }
 
+  /**
+   * When this leaf node has errors, it didn't complete and shouldn't be part of the parse tree
+   * that is the current partial parse result with all successful matches.
+   * In that case, return the parent node, by setting its {@link #latestChild} to {@link #previous}.
+   */
   TreeNode orphanize() {
     if (parent == null) {
       // Root node is provided free, without an explicit asNode() call.
@@ -53,7 +75,7 @@ final class TreeNode {
   }
 
   /**
-   * Materializes the current tree node to make it the latest child of its parent
+   * Freezes the current tree node to make it the latest child of its parent
    * (discarding nodes that have been tacked on after it in the same hierarchy level); and
    * recursively apply to all of its ancestors.
    *
@@ -63,7 +85,7 @@ final class TreeNode {
    *
    * <p>Returns the root node, which can then be used to {@link #toParseTree()}.
    */
-  TreeNode materialize(int index) {
+  TreeNode freeze(int index) {
     TreeNode node = this;
     node.setEndIndex(index);
     while (node.parent != null) {
@@ -74,6 +96,7 @@ final class TreeNode {
     return node;
   }
 
+  /** Converts this node into a {@link ParseTree} representation. */
   ParseTree toParseTree() {
     List<ParseTree> children = new ArrayList<ParseTree>();
     for (TreeNode child = latestChild; child != null; child = child.previous) {

@@ -2,15 +2,34 @@ package org.codehaus.jparsec;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 import java.util.List;
 
 import org.codehaus.jparsec.error.ParserException;
+import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.pattern.CharPredicates;
 import org.junit.Test;
 
 public class DebugModeTest {
+
+  @Test
+  public void runtimeExceptionPopulatesParseTree() {
+    Parser<?> parser = Scanners.string("hello").source().label("word")
+        .map(new Map<Object, String>() {
+          @Override public String map(Object from) {
+            throw new RuntimeException("intentional");
+          }
+        }).label("throws");
+    try {
+      parser.parse("hello", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(rootNode("hello", node("throws", null, "hello", stringNode("word", "hello"))),
+          e.getParseTree());
+    }
+  }
 
   @Test
   public void emptyParseTreeInParserException() {
@@ -344,11 +363,106 @@ public class DebugModeTest {
     }
   }
 
+  @Test
+  public void terminalsPhrasePopulatedInParseTree() {
+    Terminals terminals = Terminals.operators("if", "then");
+    Parser<?> parser = terminals.phrase("if", "then")
+        .from(terminals.tokenizer(), Scanners.WHITESPACES);
+    try {
+      parser.parse("if then then", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(rootNode("if then ", node("if then", "if then", "if then ")),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void tokenLevelLabelPopulatedInParseTree() {
+    Terminals terminals = Terminals.operators("if", "then");
+    Parser<?> parser = terminals.token("if").retn(true).label("condition")
+        .from(terminals.tokenizer().label("token"), Scanners.WHITESPACES);
+    try {
+      parser.parse("if then", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(rootNode("if ", node("condition", true, "if ")),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void unrecognizedCharactersReportedInTokenLevelParseTree() {
+    Terminals terminals = Terminals.operators("if", "then");
+    Parser<?> parser = terminals.token("if").retn(true).label("condition")
+        .from(terminals.tokenizer().label("token"), Scanners.WHITESPACES);
+    try {
+      parser.parse("if x", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      ParseTree root = e.getParseTree();
+      assertEquals(0, root.getBeginIndex());
+      assertEquals(3, root.getEndIndex());
+      assertEquals(1, root.getChildren().size());
+      ParseTree child = root.getChildren().get(0);
+      assertEquals("token", child.getName());
+      assertEquals(0, child.getBeginIndex());
+      assertEquals(2, child.getEndIndex());
+      assertEquals("if", child.getValue().toString());
+    }
+  }
+
+  @Test
+  public void errorInOuterScanner() {
+    Parser<?> parser = Scanners.nestedScanner(
+        Scanners.string("ab").label("outer1").next(Scanners.isChar('c').label("outer2"))
+            .label("outer"),
+        Scanners.ANY_CHAR.label("inner").skipMany());
+    try {
+      parser.parse("abd", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(rootNode("ab", node("outer", null, "ab", node("outer1", null, "ab"))),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void errorInInnerScanner() {
+    Parser<?> parser = Scanners.nestedScanner(
+        Scanners.string("ab").source().label("outer1")
+            .next(Scanners.isChar('c').source().label("outer2"))
+            .source()
+            .label("outer"),
+        Scanners.string("a").source().label("inner1")
+            .next(Scanners.string("bd").source().label("inner2"))
+            .label("inner")
+            .<Void>retn(null));
+    try {
+      parser.parse("abc", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      ParseTree tree = e.getParseTree();
+      assertEquals(0, tree.getBeginIndex());
+      assertEquals(1, tree.getEndIndex());
+      assertEquals(2, tree.getChildren().size());
+      assertParseTree(
+          stringNode("outer", "abc",
+                  stringNode("outer1", "ab"),
+                  stringNode("outer2", "c")),
+          tree.getChildren().get(0));
+      assertParseTree(
+          node("inner", null, "a", stringNode("inner1", "a")),
+          tree.getChildren().get(1));
+    }
+  }
+
   private static void assertParseTree(MatchNode expected, ParseTree actual) {
     assertParseTree(0, expected, actual);
   }
 
   private static void assertParseTree(int offset, MatchNode expected, ParseTree actual) {
+    assertNotNull(actual);
     assertEquals(actual.toString(), expected.name, actual.getName());
     assertEquals(actual.toString(), offset, actual.getBeginIndex());
     assertEquals(actual.toString(),

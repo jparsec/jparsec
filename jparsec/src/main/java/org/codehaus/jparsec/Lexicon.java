@@ -56,8 +56,8 @@ class Lexicon {
     for (int i = 0; i < tokenNames.length; i++) {
       wordParsers[i] = token(tokenNames[i]);
     }
-    return Parsers.sequence(wordParsers).atomic()
-      .label(Strings.join(" ", tokenNames));
+    String phrase = Strings.join(" ", tokenNames);
+    return Parsers.sequence(wordParsers).atomic().retn(phrase).label(phrase);
   }
   
   /** A {@link Parser} that recognizes a token identified by any of {@code tokenNames}. */

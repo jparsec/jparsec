@@ -15,6 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import static org.codehaus.jparsec.internal.util.Checks.checkState;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -115,18 +117,17 @@ abstract class ParseContext {
   }
 
   final ParseTree buildParseTree() {
-    return toCompletedParseTree(trace.getCurrentNode());
+    TreeNode currentNode = trace.getCurrentNode();
+    if (currentNode == null) return null;
+    return currentNode.freeze(getIndex()).toParseTree();
   }
 
   final ParseTree buildErrorParseTree() {
-    return toCompletedParseTree(currentErrorNode);
-  }
-
-  private ParseTree toCompletedParseTree(TreeNode node) {
     // The current node is partially done because there was an error.
     // So orphanize it. But at the same time, all ancestor nodes should have their endIndex set to
     // where we are now.
-    return (node == null) ? null : node.orphanize().materialize(getIndex()).toParseTree();
+    if (currentErrorNode == null) return null;
+    return currentErrorNode.orphanize().freeze(getIndex()).toParseTree();
   }
   
   /** Only called when rendering the error in {@link ParserException}. */
@@ -245,6 +246,7 @@ abstract class ParseContext {
   }
 
   final boolean applyNested(Parser<?> parser, ParseContext nestedState) {
+    // nested is either the token-level parser, or the inner scanner of a subpattern.
     if (parser.apply(nestedState))  {
       set(nestedState.step, at, nestedState.result);
       return true;
@@ -291,6 +293,43 @@ abstract class ParseContext {
   final void next(int n) {
     at += n;
     if (n > 0) step++;
+  }
+
+  /** Enables parse tree tracing with {@code rootName} as the name of the root node. */
+  final void enableTrace(final String rootName) {
+    this.trace = new ParserTrace() {
+        private TreeNode current = new TreeNode(rootName, getIndex());
+    
+        @Override public void push(String name) {
+          TreeNode newChild = new TreeNode(name, getIndex());
+          current.addChild(newChild);
+          this.current = newChild;
+        }
+        @Override public void pop() {
+          current.setEndIndex(getIndex());
+          this.current = current.parent();
+        }
+        @Override public TreeNode getCurrentNode() {
+          return current;
+        }
+        @Override public void setCurrentNode(TreeNode node) {
+          current = node;
+        }
+        @Override public TreeNode getLatestChild() {
+          return current.latestChild;
+        }
+        @Override public void setLatestChild(TreeNode latest) {
+          checkState(latest == null || latest.parent() == current,
+              "Trying to set a child node not owned by the parent node");
+          current.latestChild = latest;
+        }
+        @Override public void setCurrentResult(Object result) {
+          current.setResult(result);
+        }
+        @Override public void startFresh(ParseContext context) {
+          context.enableTrace(rootName);
+        } 
+      };
   }
   
   private void setErrorState(
