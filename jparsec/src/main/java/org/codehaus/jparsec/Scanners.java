@@ -41,7 +41,21 @@ public final class Scanners {
    * Matches any character in the input. Different from {@link Parsers#always()},
    * it fails on EOF. Also it consumes the current character in the input.
    */
-  public static final Parser<Void> ANY_CHAR = new AnyCharScanner("any character");
+  public static final Parser<Void> ANY_CHAR = new Parser<Void>() {
+    @Override boolean apply(ParseContext ctxt) {
+      if (ctxt.isEof()) {
+        ctxt.missing("any character");
+        return false;
+      }
+      ctxt.next();
+      ctxt.result = null;
+      return true;
+    }
+    
+    @Override public String toString() {
+      return "any character";
+    }
+  };
   
   /** Scanner for c++/java style line comment. */
   public static final Parser<Void> JAVA_LINE_COMMENT = lineComment("//");
@@ -248,8 +262,29 @@ public final class Scanners {
    * @param predicate the predicate.
    * @return the scanner.
    */
-  public static Parser<Void> isChar(CharPredicate predicate) {
-    return new IsCharScanner(predicate);
+  public static Parser<Void> isChar(final CharPredicate predicate) {
+    return new Parser<Void>() {
+      final String name = predicate.toString();
+
+      @Override boolean apply(ParseContext ctxt) {
+        if (ctxt.isEof()) {
+          ctxt.missing(name);
+          return false;
+        }
+        char c = ctxt.peekChar();
+        if (predicate.isChar(c)) {
+          ctxt.next();
+          ctxt.result = null;
+          return true;
+        }
+        ctxt.missing(name);
+        return false;
+      }
+
+      @Override public String toString() {
+        return name;
+      }
+    };
   }
   
   /**

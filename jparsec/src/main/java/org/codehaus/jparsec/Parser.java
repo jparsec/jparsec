@@ -117,10 +117,22 @@ public abstract class Parser<T> {
    *   }
    * }</pre>
    */
+  @SuppressWarnings("serial")
   public static final class Reference<T> extends AtomicReference<Parser<T>> {
-    private static final long serialVersionUID = -8778697271614979497L;
-
-    private final Parser<T> lazy = new LazyParser<T>(this);
+    private final Parser<T> lazy = new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        return deref().apply(ctxt);
+      }
+      private Parser<T> deref() {
+        Parser<T> p = get();
+        Checks.checkNotNullState(p,
+            "Uninitialized lazy parser reference. Did you forget to call set() on the reference?");
+        return p;
+      }
+      @Override public String toString() {
+        return "lazy";
+      }
+    };
 
     /**
      * A {@link Parser} that delegates to the parser object referenced by {@code this} during parsing time.

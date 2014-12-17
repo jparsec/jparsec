@@ -18,15 +18,6 @@ import org.junit.Test;
 public class InternalFunctorsTest {
 
   @Test
-  public void testIsTokenType() {
-    TokenMap<Integer> fromToken = InternalFunctors.isTokenType(Integer.class, "int");
-    assertEquals("int", fromToken.toString());
-    assertNull(fromToken.map(new Token(1, 1, "foo")));
-    assertNull(fromToken.map(new Token(1, 1, null)));
-    assertEquals(Integer.valueOf(1), fromToken.map(new Token(1, 1, 1)));
-  }
-
-  @Test
   public void testTokenWithSameValue() {
     Integer i = new Integer(10);
     TokenMap<Token> fromToken = InternalFunctors.tokenWithSameValue(i);

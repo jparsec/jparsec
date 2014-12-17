@@ -15,7 +15,6 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Map3;
 import org.codehaus.jparsec.functors.Map4;
@@ -27,20 +26,6 @@ import org.codehaus.jparsec.functors.Map5;
  * @author Ben Yu
  */
 final class InternalFunctors {
-  
-  static <T> TokenMap<T> isTokenType(final Class<T> targetType, final String name) {
-    return new TokenMap<T>() {
-      @Override public T map(Token token) {
-        if (targetType.isInstance(token.value())) {
-          return targetType.cast(token.value());
-        }
-        return null;
-      }
-      @Override public String toString() {
-        return name;
-      }
-    };
-  }
   
   static TokenMap<Token> tokenWithSameValue(final Object value) {
     return new TokenMap<Token>() {
@@ -126,22 +111,5 @@ final class InternalFunctors {
   @SuppressWarnings("unchecked")
   static<A, B, C, D, T> Map5<A, B, C, D, T, T> lastOfFive() {
     return LAST_OF_FIVE;
-  }
-
-  /**
-   * Returns a {@link Map} that delegates to {@code map} and falls back to {@code defaultMap} for
-   * null return values.
-   */
-  static <F, T> Map<F, T> fallback(
-      final Map<F, T> map, final Map<? super F, ? extends T> defaultMap) {
-    return new Map<F, T>() {
-      @Override public T map(F v) {
-        T result = map.map(v);
-        return (result == null) ? defaultMap.map(v) : result;
-      }
-      @Override public String toString() {
-        return "fallback";
-      }
-    };
   }
 }

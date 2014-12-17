@@ -29,7 +29,7 @@ final class ListFactories {
   
   /** Returns a {@link ListFactory} that creates an empty {@link ArrayList}. */
   @SuppressWarnings("unchecked")
-  public static <T> ListFactory<T> arrayListFactory() {
+  static <T> ListFactory<T> arrayListFactory() {
     return ARRAY_LIST_FACTORY;
   }
   
@@ -37,7 +37,7 @@ final class ListFactories {
    * Returns a {@link ListFactory} that creates an {@link ArrayList} instance
    * with {@code first} as the first element.
    */
-  public static <T> ListFactory<T> arrayListFactoryWithFirstElement(final T first) {
+  static <T> ListFactory<T> arrayListFactoryWithFirstElement(final T first) {
     return new ListFactory<T>() {
       @Override public List<T> newList() {
         ArrayList<T> list = Lists.arrayList();

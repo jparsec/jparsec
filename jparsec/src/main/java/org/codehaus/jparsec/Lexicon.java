@@ -92,7 +92,24 @@ class Lexicon {
   /** Returns a {@link Lexicon} instance that's a union of {@code this} and {@code that}. */
   Lexicon union(Lexicon that) {
     return new Lexicon(
-        InternalFunctors.fallback(words, that.words),
+        fallback(words, that.words),
         Parsers.or(tokenizer, that.tokenizer));
+  }
+
+  /**
+   * Returns a {@link Map} that delegates to {@code map} and falls back to {@code defaultMap} for
+   * null return values.
+   */
+  private static <F, T> Map<F, T> fallback(
+      final Map<F, T> map, final Map<? super F, ? extends T> defaultMap) {
+    return new Map<F, T>() {
+      @Override public T map(F v) {
+        T result = map.map(v);
+        return (result == null) ? defaultMap.map(v) : result;
+      }
+      @Override public String toString() {
+        return "fallback";
+      }
+    };
   }
 }

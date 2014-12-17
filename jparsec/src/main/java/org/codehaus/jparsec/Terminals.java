@@ -436,19 +436,19 @@ public final class Terminals extends Lexicon {
   /**
    * Builds {@link Terminals} instance by defining the words and keywords recognized.
    * The following example implements a calculator with logical operators: <pre>   {@code
- *   Terminals terms = Terminals
- *       .operators("<", ">", "=", ">=", "<=")
- *       .words(Scanners.IDENTIFIER)
- *       .caseInsensitiveKeywords("and", "or")
- *       .build();
- *   Parser<String> var = Terminals.identifier();
- *   Parser<Integer> integer = Terminals.IntegerLiteral.PARSER.map(...);
- *   Parser<?> and = terms.token("and");
- *   Parser<?> lessThan = terms.token("<");
- *   ...
- *   Parser<?> parser = grammar.from(
- *       terms.tokenizer().or(IntegerLiteral.TOKENIZER), Scanners.WHITSPACES.optional());
- * }</pre>
+   *   Terminals terms = Terminals
+   *       .operators("<", ">", "=", ">=", "<=")
+   *       .words(Scanners.IDENTIFIER)
+   *       .caseInsensitiveKeywords("and", "or")
+   *       .build();
+   *   Parser<String> var = Terminals.identifier();
+   *   Parser<Integer> integer = Terminals.IntegerLiteral.PARSER.map(...);
+   *   Parser<?> and = terms.token("and");
+   *   Parser<?> lessThan = terms.token("<");
+   *   ...
+   *   Parser<?> parser = grammar.from(
+   *       terms.tokenizer().or(IntegerLiteral.TOKENIZER), Scanners.WHITSPACES.optional());
+   * }</pre>
    *
    * @since 2.2
    */
@@ -547,9 +547,15 @@ public final class Terminals extends Lexicon {
    * tagged with one of {@code tags}.
    */
   static TokenMap<String> fromFragment(final Object... tags) {
-    return new IsFragment() {
-      @Override boolean isExpectedTag(Object type) {
-        return Objects.in(type, tags);
+    return new TokenMap<String>() {
+      @Override public String map(final Token token) {
+        final Object val = token.value();
+        if (val instanceof Fragment) {
+          Fragment c = (Fragment) val;
+          if (!Objects.in(c.tag(), tags)) return null;
+          return c.text();
+        }
+        else return null;
       }
       @Override public String toString() {
         if (tags.length == 0) return "";

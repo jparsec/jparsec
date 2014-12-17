@@ -53,7 +53,15 @@ public final class Parsers {
     });
   
   /** A {@link Parser} that retrieves the current index in the source. */
-  public static final Parser<Integer> INDEX = new GetIndexParser();
+  public static final Parser<Integer> INDEX = new Parser<Integer>() {
+    @Override boolean apply(final ParseContext ctxt) {
+      ctxt.result = ctxt.getIndex();
+      return true;
+    }
+    @Override public String toString() {
+      return "getIndex";
+    }
+  };
   
   @SuppressWarnings("rawtypes")
   private static final Parser ALWAYS = constant(null);
@@ -77,21 +85,49 @@ public final class Parsers {
   }
 
   /** A {@link Parser} that succeeds only if EOF is met. Fails with {@code message} otherwise. */
-  static Parser<?> eof(String message) {
-    return new EofParser(message);
+  static Parser<?> eof(final String message) {
+    return new Parser<Object>() {
+      @Override boolean apply(ParseContext ctxt) {
+        if (ctxt.isEof()) return true;
+        ctxt.missing(message);
+        return false;
+      }
+      
+      @Override public String toString() {
+        return message;
+      }
+    };
   }
 
   /** A {@link Parser} that always fails with {@code message}. */
-  public static <T> Parser<T> fail(String message) {
-    return new FailureParser<T>(message);
+  public static <T> Parser<T> fail(final String message) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        ctxt.fail(message);
+        return false;
+      }
+      
+      @Override public String toString() {
+        return message;
+      }
+    };
   }
   
   /**
    * A {@link Parser} that always succeeds and invokes {@code runnable}.
    */
   @Deprecated
-  public static Parser<?> runnable(Runnable runnable) {
-    return new ActionParser(runnable);
+  public static Parser<?> runnable(final Runnable runnable) {
+    return new Parser<Object>() {      
+      @Override boolean apply(ParseContext ctxt) {
+        runnable.run();
+        return true;
+      }
+      
+      @Override public String toString() {
+        return runnable.toString();
+      }
+    };
   }
 
   /** Converts a parser of a collection of {@link Token} to a parser of an array of {@code Token}.*/
@@ -210,8 +246,23 @@ public final class Parsers {
    * A {@link Parser} that sequentially runs {@code parsers} one by one and collects the return
    * values in an array.
    */
-  public static Parser<Object[]> array(Parser<?>... parsers) {
-    return new ArrayParser(parsers);
+  public static Parser<Object[]> array(final Parser<?>... parsers) {
+    return new Parser<Object[]>() {
+      @Override boolean apply(ParseContext ctxt) {
+        Object[] ret = new Object[parsers.length];
+        for (int i = 0; i < parsers.length; i++) {
+          Parser<?> parser = parsers[i];
+          if (!parser.apply(ctxt)) return false;
+          ret[i] = parser.getReturn(ctxt);
+        }
+        ctxt.result = ret;
+        return true;
+      }
+      
+      @Override public String toString() {
+        return "array";
+      }
+    };
   }
   
   /**
@@ -468,8 +519,17 @@ public final class Parsers {
   }
   
   /** A {@link Parser} that fails and reports that {@code name} is logically expected. */
-  public static <T> Parser<T> expect(String name) {
-    return new ExpectParser<T>(name);    
+  public static <T> Parser<T> expect(final String name) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        ctxt.expected(name);
+        return false;
+      }
+      
+      @Override public String toString() {
+        return name;
+      }
+    };
   }
 
   /** A {@link Parser} that fails and reports that {@code name} is logically unexpected. */
@@ -485,8 +545,28 @@ public final class Parsers {
    * @param fromToken the {@code FromToken} object.
    * @return the new Parser object.
    */
-  public static <T> Parser<T> token(TokenMap<? extends T> fromToken) {
-    return new IsTokenParser<T>(fromToken);
+  public static <T> Parser<T> token(final TokenMap<? extends T> fromToken) {
+    return new Parser<T>() {
+      @Override boolean apply(final ParseContext ctxt) {
+        if (ctxt.isEof()) {
+          ctxt.missing(fromToken);
+          return false;
+        }
+        Token token = ctxt.getToken();
+        Object v = fromToken.map(token);
+        if (v == null) {
+          ctxt.missing(fromToken);
+          return false;
+        }
+        ctxt.result = v;
+        ctxt.next();
+        return true;
+      }
+      
+      @Override public String toString() {
+        return fromToken.toString();
+      }
+    };
   }
 
   /**
@@ -497,8 +577,18 @@ public final class Parsers {
    * @param name the name of what's logically expected.
    * @return the new Parser object.
    */
-  public static <T> Parser<T> tokenType(Class<? extends T> type, String name) {
-    return token(InternalFunctors.isTokenType(type, name));
+  public static <T> Parser<T> tokenType(final Class<? extends T> type, final String name) {
+    return token(new TokenMap<T>() {
+      @Override public T map(Token token) {
+        if (type.isInstance(token.value())) {
+          return type.cast(token.value());
+        }
+        return null;
+      }
+      @Override public String toString() {
+        return name;
+      }
+    });
   }
 
   @Private static <T> Parser<T>[] toArrayWithIteration(
