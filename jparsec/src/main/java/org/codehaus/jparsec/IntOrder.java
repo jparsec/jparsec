@@ -20,7 +20,34 @@ package org.codehaus.jparsec;
  * 
  * @author Ben Yu
  */
-interface IntOrder {
+enum IntOrder {
+  
+  /**
+   * An {@link IntOrder} instance that determines if the first integer is less than the second one.
+   * 
+   * <p> {@code LT.compare(1, 2) == true}.
+   */
+  LT {
+    @Override public boolean compare(int a, int b) { return a < b; }
+    @Override public String toString() {
+      return "shortest";
+    }
+  },
+  
+  /**
+   * An {@link IntOrder} instance that determines if the first integer is smaller than the second
+   * one.
+   * 
+   * <p> {@code GT.compare(2, 1) == true}.
+   */
+  GT {
+    @Override public boolean compare(int a, int b) {return a > b;}
+    @Override public String toString() {
+      return "longest";
+    }
+  }
+
+  ;
   /**
    * Compares two integers.
    * 
@@ -28,5 +55,5 @@ interface IntOrder {
    * @param b 2nd int
    * @return the comparison result.
    */
-  boolean compare(int a, int b);
+  abstract boolean compare(int a, int b);
 }

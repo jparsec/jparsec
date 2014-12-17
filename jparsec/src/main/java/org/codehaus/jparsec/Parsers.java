@@ -429,7 +429,7 @@ public final class Parsers {
   public static <T> Parser<T> longest(Parser<? extends T>... parsers) {
     if (parsers.length == 0) return never();
     if (parsers.length == 1) return parsers[0].cast();
-    return new BestParser<T>(parsers, IntOrders.GT);
+    return new BestParser<T>(parsers, IntOrder.GT);
   }
 
   /**
@@ -456,7 +456,7 @@ public final class Parsers {
   public static <T> Parser<T> shortest(Parser<? extends T>... parsers) {
     if (parsers.length == 0) return never();
     if (parsers.length == 1) return parsers[0].cast();
-    return new BestParser<T>(parsers, IntOrders.LT);
+    return new BestParser<T>(parsers, IntOrder.LT);
   }
 
   /**
