@@ -6,7 +6,7 @@ interface ParserTrace {
     @Override public void push(String name) {}
     @Override public void pop() {}
     @Override public TreeNode getParentNode() { return null; }
-    @Override public TreeNode getLatestChild() { return null; }
+    @Override public TreeNode getCurrentNode() { return null; }
     @Override public void setLatestChild(TreeNode node) {}
     @Override public void setCurrentResult(Object result) {}
   };
@@ -15,6 +15,6 @@ interface ParserTrace {
   void pop();
   void setCurrentResult(Object result);
   TreeNode getParentNode();
-  TreeNode getLatestChild();
+  TreeNode getCurrentNode();
   void setLatestChild(TreeNode node);
 }

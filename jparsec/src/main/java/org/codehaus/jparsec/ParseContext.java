@@ -15,8 +15,6 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import static org.codehaus.jparsec.internal.util.Checks.checkState;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -114,11 +112,11 @@ abstract class ParseContext {
   }
 
   final ParseTree buildParseTree() {
-    return toCompletedParseTree(trace.getLatestChild());
+    return toCompletedParseTree(trace.getCurrentNode());
   }
 
   final ParseTree buildErrorParseTree() {
-    return toCompletedParseTree(currentErrorNode);
+    return toCompletedParseTree(currentErrorNode == null ? trace.getCurrentNode() : currentErrorNode);
   }
 
   private static ParseTree toCompletedParseTree(TreeNode node) {
@@ -285,36 +283,6 @@ abstract class ParseContext {
     at += n;
     if (n > 0) step++;
   }
-
-  final ParserTrace newTrace(final String rootName) {
-    return new ParserTrace() {
-      private TreeNode current = new TreeNode(rootName, getIndex());
-  
-      @Override public void push(String name) {
-        TreeNode newChild = new TreeNode(name, getIndex());
-        current.addChild(newChild);
-        this.current = newChild;
-      }
-      @Override public void pop() {
-        current.setEndIndex(getIndex());
-        this.current = current.parent();
-      }
-      @Override public TreeNode getParentNode() {
-        return current.parent();
-      }
-      @Override public TreeNode getLatestChild() {
-        return current.latestChild;
-      }
-      @Override public void setLatestChild(TreeNode latest) {
-        checkState(latest == null || latest.parent() == current,
-            "Trying to set a child node not owned by the parent node");
-        current.latestChild = latest;
-      }
-      @Override public void setCurrentResult(Object result) {
-        current.setResult(result);
-      }
-    };
-  }
   
   private void setErrorState(
       int errorAt, int errorIndex, ErrorType errorType, List<Object> errors) {
@@ -326,7 +294,7 @@ abstract class ParseContext {
     this.currentErrorIndex = errorIndex;
     this.currentErrorAt = errorAt;
     this.currentErrorType = errorType;
-    this.currentErrorNode = trace.getLatestChild();
+    this.currentErrorNode = trace.getCurrentNode();
     this.encountered = null;
     this.errors.clear();
   }

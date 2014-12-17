@@ -15,6 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import static org.codehaus.jparsec.internal.util.Checks.checkState;
+
 import org.codehaus.jparsec.error.ParserException;
 
 /**
@@ -67,6 +69,37 @@ final class ScannerState extends ParseContext {
 
   @Override Token getToken() {
     throw new IllegalStateException("Parser not on token level");
+  }
+
+  ScannerState enableTrace(final String rootName) {
+    this.trace = new ParserTrace() {
+        private TreeNode current = new TreeNode(rootName, getIndex());
+    
+        @Override public void push(String name) {
+          TreeNode newChild = new TreeNode(name, getIndex());
+          current.addChild(newChild);
+          this.current = newChild;
+        }
+        @Override public void pop() {
+          current.setEndIndex(getIndex());
+          this.current = current.parent();
+        }
+        @Override public TreeNode getParentNode() {
+          return current.parent();
+        }
+        @Override public TreeNode getCurrentNode() {
+          return current;
+        }
+        @Override public void setLatestChild(TreeNode latest) {
+          checkState(latest == null || latest.parent() == current,
+              "Trying to set a child node not owned by the parent node");
+          current.latestChild = latest;
+        }
+        @Override public void setCurrentResult(Object result) {
+          current.setResult(result);
+        }
+      };
+    return this;
   }
 
   final <T> T run(Parser<T> parser) {

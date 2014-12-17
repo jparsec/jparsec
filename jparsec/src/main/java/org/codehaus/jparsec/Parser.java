@@ -641,32 +641,6 @@ public abstract class Parser<T> {
     return delim.optional().next(token().sepEndBy(delim));
   }
 
-  /**
-   * Returns a new {@link Parser} that enables trace. When any parsing error happens inside the
-   * parser, the trace of all succeeded sub-parsers are reported in the {@link ParserException}.
-   * For example: <pre>   {@code
-   *   try {
-   *     parser.enableTrace("root").parse(text);
-   *   } catch (ParserException e) {
-   *     System.out.println(e.getParseTree().toJson());
-   *   }
-   * }</pre>
-   */
-  public final Parser<T> enableTrace(final String name) {
-    final Parser<T> traced = this;
-    return new Parser<T>() {
-      @Override boolean apply(ParseContext ctxt) {
-        ParserTrace oldTrace = ctxt.trace;
-        try {
-          ctxt.trace = ctxt.newTrace(name);
-          return traced.apply(ctxt);
-        } finally {
-          ctxt.trace = oldTrace;
-        }
-      }
-    };
-  }
-
   /** Annotates this parser to construct a syntax node in the parse tree. */
   final Parser<T> asNode(final String name) {
     final Parser<T> delegate = this;
@@ -732,8 +706,7 @@ public abstract class Parser<T> {
     CharBuffer buf = CharBuffer.allocate(2048);
     for (; ; ) {
       int r = from.read(buf);
-      if (r == -1)
-        break;
+      if (r == -1) break;
       buf.flip();
       to.append(buf, 0, r);
     }
@@ -757,6 +730,12 @@ public abstract class Parser<T> {
    */
   final T parse(CharSequence source, String moduleName, SourceLocator sourceLocator) {
     return new ScannerState(moduleName, source, 0, sourceLocator).run(followedBy(Parsers.EOF));
+  }
+
+  final T parseWithTrace(CharSequence source, String moduleName, SourceLocator sourceLocator) {
+    return new ScannerState(moduleName, source, 0, sourceLocator)
+        .enableTrace("root")
+        .run(followedBy(Parsers.EOF));
   }
 
   @SuppressWarnings("unchecked")
