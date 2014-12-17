@@ -27,8 +27,8 @@ final class SkipTimesParser extends Parser<Void> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    if (!ParserInternals.repeat(parser, min, ctxt)) return false;
-    if (ParserInternals.repeatAtMost(parser, max - min, ctxt)) {
+    if (!ctxt.repeat(parser, min)) return false;
+    if (repeatAtMost(max - min, ctxt)) {
       ctxt.result = null;
       return true;
     }
@@ -37,5 +37,15 @@ final class SkipTimesParser extends Parser<Void> {
   
   @Override public String toString() {
     return "skipTimes";
+  }
+
+  private boolean repeatAtMost(int times, ParseContext ctxt) {
+    for (int i = 0; i < times; i++) {
+      int physical = ctxt.at;
+      int logical = ctxt.step;
+      if (!parser.apply(ctxt))
+        return ctxt.stillThere(physical, logical);
+    }
+    return true;
   }
 }

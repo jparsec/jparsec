@@ -43,7 +43,7 @@ final class NestableBlockCommentScanner extends Parser<Void> {
         level--;
         continue;
       }
-      if (!ParserInternals.stillThere(ctxt, at, step)) return false;
+      if (!ctxt.stillThere(at, step)) return false;
       if (openQuote.apply(ctxt)) {
         if (at == ctxt.at) {
           throw new IllegalStateException("opening comment scanner not consuming input.");
@@ -51,7 +51,7 @@ final class NestableBlockCommentScanner extends Parser<Void> {
         level++;
         continue;
       }
-      if (!ParserInternals.stillThere(ctxt, at, step)) return false;
+      if (!ctxt.stillThere(at, step)) return false;
       if (commented.apply(ctxt)) {
         if (at == ctxt.at) {
           throw new IllegalStateException("commented scanner not consuming input.");

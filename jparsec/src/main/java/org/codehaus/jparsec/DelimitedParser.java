@@ -35,17 +35,17 @@ abstract class DelimitedParser<T, R> extends Parser<R> {
     for (;;) {
       final int step0 = ctxt.step;
       final int at0 = ctxt.at;
-      boolean r = ParserInternals.greedyRun(delim, ctxt);
+      boolean r = delim.apply(ctxt);
       if (!r) {
-        if (!ParserInternals.stillThere(ctxt, at0, step0)) return false;
+        if (!ctxt.stillThere(at0, step0)) return false;
         ctxt.result = result;
         return true;
       }
       final int step1 = ctxt.step;
       final int at1 = ctxt.at;
-      r = ParserInternals.greedyRun(parser, ctxt);
+      r = parser.apply(ctxt);
       if (!r) {
-        if (!ParserInternals.stillThere(ctxt, at1, step1)) return false;
+        if (!ctxt.stillThere(at1, step1)) return false;
         ctxt.result = result;
         return true;
       }

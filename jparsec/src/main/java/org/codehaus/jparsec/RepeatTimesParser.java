@@ -15,6 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import java.util.Collection;
 import java.util.List;
 
 final class RepeatTimesParser<T> extends Parser<List<T>> {
@@ -37,9 +38,9 @@ final class RepeatTimesParser<T> extends Parser<List<T>> {
 
   @Override boolean apply(ParseContext ctxt) {
     List<T> result = listFactory.newList();
-    if (!ParserInternals.repeat(parser, min, result, ctxt))
+    if (!ctxt.repeat(parser, min, result))
       return false;
-    if (ParserInternals.repeatAtMost(parser, max - min, result, ctxt)) {
+    if (repeatAtMost(max - min, result, ctxt)) {
       ctxt.result = result;
       return true;
     }
@@ -48,5 +49,16 @@ final class RepeatTimesParser<T> extends Parser<List<T>> {
   
   @Override public String toString() {
     return "times";
+  }
+
+  private boolean repeatAtMost(int times, Collection<T> collection, ParseContext ctxt) {
+    for (int i = 0; i < times; i++) {
+      int physical = ctxt.at;
+      int logical = ctxt.step;
+      if (!parser.apply(ctxt))
+        return ctxt.stillThere(physical, logical);
+      collection.add(parser.getReturn(ctxt));
+    }
+    return true;
   }
 }

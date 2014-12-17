@@ -34,7 +34,7 @@ final class IfElseParser<T, C> extends Parser<T> {
     final int step = ctxt.step;
     final int at = ctxt.at;
     final TreeNode node = ctxt.trace.getLatestChild();
-    if (ParserInternals.runWithoutRecordingError(cond, ctxt)) {
+    if (evaluate(ctxt)) {
       Parser<? extends T> parser = consequence.map(cond.getReturn(ctxt));
       return parser.apply(ctxt);
     }
@@ -44,5 +44,13 @@ final class IfElseParser<T, C> extends Parser<T> {
   
   @Override public String toString() {
     return "ifelse";
+  }
+
+  /** Runs {@code parser} with error recording suppressed. */
+  private boolean evaluate(ParseContext ctxt) {
+    boolean oldValue = ctxt.suppressError(true);
+    boolean ok = cond.apply(ctxt);
+    ctxt.suppressError(oldValue);
+    return ok;
   }
 }

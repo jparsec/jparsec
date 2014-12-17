@@ -32,7 +32,7 @@ final class BestParser<T> extends Parser<T> {
     for (int i = 0; i < parsers.length; i++) {
       Parser<? extends T> parser = parsers[i];
       if (parser.apply(ctxt)) {
-        ParserInternals.runForBestFit(order, parsers, i + 1, ctxt, result, step, at, node);
+        applyForBestFit(i + 1, ctxt, result, step, at, node);
         return true;
       }
       // in alternate, we do not care partial match.
@@ -43,5 +43,27 @@ final class BestParser<T> extends Parser<T> {
   
   @Override public String toString() {
     return order.toString();
+  }
+
+  private void applyForBestFit(
+      int from, ParseContext ctxt,
+      Object originalResult, int originalStep, int originalAt, TreeNode originalNode) {
+    int bestAt = ctxt.at;
+    int bestStep = ctxt.step;
+    Object bestResult = ctxt.result;
+    TreeNode bestNode = ctxt.trace.getLatestChild();
+    for (int i = from; i < parsers.length; i++) {
+      ctxt.set(originalStep, originalAt, originalResult, originalNode);
+      Parser<?> parser = parsers[i];
+      boolean ok = parser.apply(ctxt);
+      if (!ok) continue;
+      int at2 = ctxt.at;
+      if (order.compare(at2, bestAt)) {
+        bestAt = at2;
+        bestStep = ctxt.step;
+        bestResult = ctxt.result;
+      }
+    }
+    ctxt.set(bestStep, bestAt, bestResult, bestNode);
   }
 }

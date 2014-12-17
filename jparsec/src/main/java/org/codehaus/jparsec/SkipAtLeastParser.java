@@ -25,8 +25,8 @@ final class SkipAtLeastParser extends Parser<Void> {
   }
 
   @Override boolean apply(ParseContext ctxt) {
-    if (!ParserInternals.repeat(parser, min, ctxt)) return false;
-    if (ParserInternals.many(parser, ctxt)) {
+    if (!ctxt.repeat(parser, min)) return false;
+    if (applyMany(ctxt)) {
       ctxt.result = null;
       return true;
     }
@@ -35,5 +35,15 @@ final class SkipAtLeastParser extends Parser<Void> {
   
   @Override public String toString() {
     return "skipAtLeast";
+  }
+
+  private boolean applyMany(ParseContext ctxt) {
+    for (int physical = ctxt.at, logical = ctxt.step;;logical = ctxt.step) {
+      if (!parser.apply(ctxt))
+        return ctxt.stillThere(physical, logical);
+      int at2 = ctxt.at;
+      if (physical == at2) return true;
+      physical = at2;
+    }
   }
 }

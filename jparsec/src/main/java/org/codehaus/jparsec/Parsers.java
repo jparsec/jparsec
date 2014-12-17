@@ -502,18 +502,6 @@ public final class Parsers {
     return token(InternalFunctors.isTokenType(type, name));
   }
 
-  /**
-   * We always convert {@link Iterable} to an array to avoid the cost of creating
-   * a new {@Link java.util.Iterator} object each time the parser runs.
-   */
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  static <T> Parser<T>[] toArray(Iterable<? extends Parser<? extends T>> parsers) {
-    if (parsers instanceof Collection<?>) {
-      return toArray((Collection) parsers);
-    }
-    return toArrayWithIteration(parsers);
-  }
-
   @Private static <T> Parser<T>[] toArrayWithIteration(
       Iterable<? extends Parser<? extends T>> parsers) {
     ArrayList<Parser<? extends T>> list = Lists.arrayList();
@@ -523,15 +511,21 @@ public final class Parsers {
     return toArray(list);
   }
 
-  @SuppressWarnings("unchecked")
-  static <T> Parser<T>[] toArray(Collection<? extends Parser<? extends T>> parsers) {
-    return parsers.toArray(new Parser[parsers.size()]);
+  /**
+   * We always convert {@link Iterable} to an array to avoid the cost of creating
+   * a new {@Link java.util.Iterator} object each time the parser runs.
+   */
+  @SuppressWarnings({"unchecked", "rawtypes"})
+  @Private static <T> Parser<T>[] toArray(Iterable<? extends Parser<? extends T>> parsers) {
+    if (parsers instanceof Collection<?>) {
+      return toArray((Collection) parsers);
+    }
+    return toArrayWithIteration(parsers);
   }
-  
+
   @SuppressWarnings("unchecked")
-  static <From> boolean runNext(ParseContext state, Map<? super From, ? extends Parser<?>> next) {
-    Parser<?> parser = next.map((From) state.result);
-    return parser.apply(state);
+  private static <T> Parser<T>[] toArray(Collection<? extends Parser<? extends T>> parsers) {
+    return parsers.toArray(new Parser[parsers.size()]);
   }
 
   @SuppressWarnings("rawtypes")

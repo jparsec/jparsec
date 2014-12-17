@@ -15,6 +15,7 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import java.util.Collection;
 import java.util.List;
 
 final class RepeatAtLeastParser<T> extends Parser<List<T>> {
@@ -34,9 +35,9 @@ final class RepeatAtLeastParser<T> extends Parser<List<T>> {
 
   @Override boolean apply(ParseContext ctxt) {
     List<T> result = listFactory.newList();
-    if (!ParserInternals.repeat(parser, min, result, ctxt))
+    if (!ctxt.repeat(parser, min, result))
       return false;
-    if (ParserInternals.many(parser, result, ctxt)) {
+    if (applyMany(ctxt, result)) {
       ctxt.result = result;
       return true;
     }
@@ -45,5 +46,16 @@ final class RepeatAtLeastParser<T> extends Parser<List<T>> {
   
   @Override public String toString() {
     return "atLeast";
+  }
+
+  private boolean applyMany(ParseContext ctxt, Collection<T> collection) {
+    for (int physical = ctxt.at, logical = ctxt.step;;logical = ctxt.step) {
+      if (!parser.apply(ctxt))
+        return ctxt.stillThere(physical, logical);
+      int at2 = ctxt.at;
+      if (physical == at2) return true;
+      physical = at2;
+      collection.add(parser.getReturn(ctxt));
+    }
   }
 }

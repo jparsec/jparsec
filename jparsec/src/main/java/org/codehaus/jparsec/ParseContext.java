@@ -18,6 +18,7 @@ package org.codehaus.jparsec;
 import static org.codehaus.jparsec.internal.util.Checks.checkState;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.codehaus.jparsec.error.ParseErrorDetails;
@@ -79,6 +80,22 @@ abstract class ParseContext {
   
   // explicit suppresses error recording if true.
   private boolean errorSuppressed = false;
+  
+  //caller should not change input after it is passed in.
+  ParseContext(CharSequence source, int at, String module, SourceLocator locator) {
+    this(source, null, at, module, locator);
+  }
+  
+  ParseContext(
+      CharSequence source, Object ret, int at, String module, SourceLocator locator) {
+    this.source = source;
+    this.result = ret;
+    this.step = 0;
+    this.at = at;
+    this.module = module;
+    this.locator = locator;
+    this.currentErrorAt = at;
+  }
   
   /** Explicitly suppress or de-suppress error recording. */
   final boolean suppressError(boolean value) {
@@ -201,6 +218,45 @@ abstract class ParseContext {
   final void unexpected(String what) {
     raise(ErrorType.UNEXPECTED, what);
   }
+
+  final boolean repeat(Parser<?> parser, int n) {
+    for (int i = 0; i < n; i++) {
+      if (!parser.apply(this)) return false;
+    }
+    return true;
+  }
+
+  final <T> boolean repeat(
+      Parser<? extends T> parser, int n, Collection<T> collection) {
+    for (int i = 0; i < n; i++) {
+      if (!parser.apply(this)) return false;
+      collection.add(parser.getReturn(this));
+    }
+    return true;
+  }
+
+  final boolean applyNested(Parser<?> parser, ParseContext nestedState) {
+    if (parser.apply(nestedState))  {
+      set(nestedState.step, at, nestedState.result);
+      return true;
+    }
+    // index on token level is the "at" on character level
+    set(step, nestedState.getIndex(), null);
+    
+    // always copy error because there could be false alarms in the character level.
+    // For example, a "or" parser nested in a "many" failed in one of its branches.
+    copyErrorFrom(nestedState);
+    return false;
+  }
+
+  final boolean stillThere(int wasAt, int originalStep) {
+    if (step == originalStep) {
+      // logical step didn't change, so logically we are still there, undo any physical offset
+      setAt(originalStep, wasAt);
+      return true;
+    }
+    return false;
+  }
   
   final void set(int step, int at, Object ret, TreeNode children) {
     set(step, at, ret);
@@ -211,21 +267,6 @@ abstract class ParseContext {
     this.step = step;
     this.at = at;
     this.result = ret;
-  }
-  
-  final void setErrorState(
-      int errorAt, int errorIndex, ErrorType errorType, List<Object> errors) {
-    setErrorState(errorAt, errorIndex, errorType);
-    this.errors.addAll(errors);
-  }
-
-  private void setErrorState(int errorAt, int errorIndex, ErrorType errorType) {
-    this.currentErrorIndex = errorIndex;
-    this.currentErrorAt = errorAt;
-    this.currentErrorType = errorType;
-    this.currentErrorNode = trace.getLatestChild();
-    this.encountered = null;
-    this.errors.clear();
   }
   
   final void setAt(int step, int at) {
@@ -272,30 +313,29 @@ abstract class ParseContext {
       }
     };
   }
+  
+  private void setErrorState(
+      int errorAt, int errorIndex, ErrorType errorType, List<Object> errors) {
+    setErrorState(errorAt, errorIndex, errorType);
+    this.errors.addAll(errors);
+  }
 
-  final void copyErrorFrom(ParseContext that) {
+  private void setErrorState(int errorAt, int errorIndex, ErrorType errorType) {
+    this.currentErrorIndex = errorIndex;
+    this.currentErrorAt = errorAt;
+    this.currentErrorType = errorType;
+    this.currentErrorNode = trace.getLatestChild();
+    this.encountered = null;
+    this.errors.clear();
+  }
+
+  private void copyErrorFrom(ParseContext that) {
     int errorIndex = that.errorIndex();
     setErrorState(errorIndex, errorIndex, that.currentErrorType, that.errors);
     if (!that.isEof()) {
       this.encountered = that.getEncountered();
     }
     currentErrorNode = that.currentErrorNode;
-  }
-  
-  //caller should not change input after it is passed in.
-  ParseContext(CharSequence source, int at, String module, SourceLocator locator) {
-    this(source, null, at, module, locator);
-  }
-  
-  ParseContext(
-      CharSequence source, Object ret, int at, String module, SourceLocator locator) {
-    this.source = source;
-    this.result = ret;
-    this.step = 0;
-    this.at = at;
-    this.module = module;
-    this.locator = locator;
-    this.currentErrorAt = at;
   }
 
   /** Reads the characters as input. Only applicable to character level parsers. */

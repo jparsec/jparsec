@@ -644,20 +644,20 @@ public class ParserTest extends BaseMockTest {
     assertEquals(content, to.toString());
   }
 
-  @Test
-  public void emptyParseTreeInParserException() {
-    try {
-      Scanners.string("begin").enableTrace("root").parse("");
-      fail();
-    } catch (ParserException e) {
-      ParseTree tree = e.getParseTree();
-      assertEquals("root", tree.getName());
-      assertEquals(0, tree.getBeginIndex());
-      assertEquals(0, tree.getEndIndex());
-      assertEquals(null, tree.getValue());
-      assertEquals(tree.toString(), 0, tree.getChildren().size());
-    }
-  }
+//  @Test
+//  public void emptyParseTreeInParserException() {
+//    try {
+//      Scanners.string("begin").enableTrace("root").parse("");
+//      fail();
+//    } catch (ParserException e) {
+//      ParseTree tree = e.getParseTree();
+//      assertEquals("root", tree.getName());
+//      assertEquals(0, tree.getBeginIndex());
+//      assertEquals(0, tree.getEndIndex());
+//      assertEquals(null, tree.getValue());
+//      assertEquals(tree.toString(), 0, tree.getChildren().size());
+//    }
+//  }
   
   private static void assertListParser(
       Parser<? extends List<?>> parser, String source, Object... expected) {
