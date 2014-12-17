@@ -15,7 +15,6 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-
 /**
  * Represents {@link ParseContext} for token level parsing.
  * 
@@ -23,6 +22,11 @@ package org.codehaus.jparsec;
  */
 final class ParserState extends ParseContext {
   
+  private static final String USED_ON_TOKEN_INPUT = "Cannot scan characters on tokens."
+      + "\nThis normally happens when you are using a character-level parser on token input."
+      + " For example: Scanners.string(foo).from(tokenizer).parse(text) will result in this error"
+      + " because scanner works on characters while it's used as a token-level parser.";
+
   private final Token[] input;
   
   // in case a terminating eof token is not explicitly created, the implicit one is used.
@@ -49,11 +53,11 @@ final class ParserState extends ParseContext {
   }
   
   @Override char peekChar() {
-    throw new IllegalStateException("Cannot scan characters on tokens.");
+    throw new IllegalStateException(USED_ON_TOKEN_INPUT);
   }
   
   @Override CharSequence characters() {
-    throw new IllegalStateException("Cannot scan characters on tokens.");
+    throw new IllegalStateException(USED_ON_TOKEN_INPUT);
   }
 
   @Override String getInputName(int pos) {
