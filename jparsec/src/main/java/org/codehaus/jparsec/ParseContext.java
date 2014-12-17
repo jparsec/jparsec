@@ -114,15 +114,17 @@ abstract class ParseContext {
   }
 
   final ParseTree buildParseTree() {
-    return toParseTree(trace.getLatestChild());
+    return toCompletedParseTree(trace.getLatestChild());
   }
 
   final ParseTree buildErrorParseTree() {
-    return toParseTree(currentErrorNode);
+    return toCompletedParseTree(currentErrorNode);
   }
 
-  private static ParseTree toParseTree(TreeNode node) {
-    return node == null ? null : node.materialize().toParseTree();
+  private static ParseTree toCompletedParseTree(TreeNode node) {
+    // The current node is partially done because there was an error.
+    // So orphanize it.
+    return node == null ? null : node.orphanize().materialize().toParseTree();
   }
   
   /** Only called when rendering the error in {@link ParserException}. */

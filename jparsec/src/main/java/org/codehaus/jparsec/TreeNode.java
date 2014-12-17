@@ -42,6 +42,11 @@ final class TreeNode {
     this.latestChild = child;
   }
 
+  TreeNode orphanize() {
+    parent.latestChild = previous;
+    return parent;
+  }
+
   TreeNode materialize() {
     TreeNode node = this;
     while (node.parent != null) {
