@@ -7,6 +7,7 @@ import static org.junit.Assert.fail;
 import java.util.List;
 
 import org.codehaus.jparsec.error.ParserException;
+import org.codehaus.jparsec.pattern.CharPredicates;
 import org.junit.Test;
 
 public class DebugModeTest {
@@ -292,6 +293,53 @@ public class DebugModeTest {
       fail();
     } catch (ParserException e) {
       assertParseTree(rootNode("Ben", stringNode("id", "Ben", stringNode("name", "Ben"))),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void manyProducesListInParseTree() {
+    Parser<?> parser = Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many();
+    try {
+      parser.label("digits").parse("123 ", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("123", node("digits", asList("1", "2", "3"), "123",
+              stringNode("d", "1"),
+              stringNode("d", "2"),
+              stringNode("d", "3"))),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void atLeastProducesListInParseTree() {
+    Parser<?> parser = Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").atLeast(1);
+    try {
+      parser.label("digits").parse("123 ", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("123", node("digits", asList("1", "2", "3"), "123",
+              stringNode("d", "1"),
+              stringNode("d", "2"),
+              stringNode("d", "3"))),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void timesProducesListInParseTree() {
+    Parser<?> parser = Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").times(0, 2);
+    try {
+      parser.label("digits").parse("123", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("12", node("digits", asList("1", "2"), "12",
+              stringNode("d", "1"),
+              stringNode("d", "2"))),
           e.getParseTree());
     }
   }

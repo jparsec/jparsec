@@ -38,6 +38,7 @@ public final class Asserts {
     }
   }
   
+  @SuppressWarnings("deprecation")
   public static void assertFailure(
       Parser<?> parser, String source, int line, int column,
       String module, String expectedMessage) {
