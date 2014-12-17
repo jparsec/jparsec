@@ -641,6 +641,90 @@ public abstract class Parser<T> {
     return delim.optional().next(token().sepEndBy(delim));
   }
 
+  /**
+   * Parses {@code source}.
+   */
+  public final T parse(CharSequence source) {
+    return parse(source, Mode.PRODUCTION);
+  }
+
+  /**
+   * Parses source read from {@code readable}.
+   */
+  public final T parse(Readable readable) throws IOException {
+    return parse(read(readable));
+  }
+
+  /**
+   * Parses {@code source} under the given {@code mode}.
+   * @since 2.3
+   */
+  public final T parse(CharSequence source, Mode mode) {
+    return mode.run(this, source);
+  }
+
+  /**
+   * Parses source read from {@code readable} under the given {@code mode}.
+   * @since 2.3
+   */
+  public final T parse(Readable readable, Mode mode) throws IOException {
+    return parse(read(readable), mode);
+  }
+
+  /**
+   * Defines the mode that a parser should be run in.
+   *
+   * @since 2.3
+   */
+  public enum Mode {
+    /** Default mode. Used for production. */
+    PRODUCTION {
+      @Override <T> T run(Parser<T> parser, CharSequence source) {
+        return new ScannerState(source).run(parser.followedBy(Parsers.EOF));
+      }
+    },
+
+    /**
+     * Debug mode. {@link ParserException#getParseTree} can be used to inspect partial parse result.
+     */
+    DEBUG {
+      @Override <T> T run(Parser<T> parser, CharSequence source) {
+        return new ScannerState(source)
+            .enableTrace("root")
+            .run(parser.followedBy(Parsers.EOF));
+      }
+    }
+    ;
+    abstract <T> T run(Parser<T> parser, CharSequence source);
+  }
+
+  /**
+   * Parses {@code source}.
+   *
+   * @param source     the source string
+   * @param moduleName the name of the module, this name appears in error message
+   * @return the result
+   * @deprecated Please use {@link #parse(CharSequence)} instead.
+   */
+  @Deprecated
+  public final T parse(CharSequence source, String moduleName) {
+    return new ScannerState(moduleName, source, 0, new SourceLocator(source))
+        .run(followedBy(Parsers.EOF));
+  }
+
+  /**
+   * Parses source read from {@code readable}.
+   *
+   * @param readable   where the source is read from
+   * @param moduleName the name of the module, this name appears in error message
+   * @return the result
+   * @deprecated Please use {@link #parse(Readable)} instead.
+   */
+  @Deprecated
+  public final T parse(Readable readable, String moduleName) throws IOException {
+    return parse(read(readable), moduleName);
+  }
+
   /** Annotates this parser to construct a syntax node in the parse tree. */
   final Parser<T> asNode(final String name) {
     final Parser<T> delegate = this;
@@ -657,44 +741,6 @@ public abstract class Parser<T> {
       }
     };
   }
-
-  /**
-   * Parses {@code source}.
-   *
-   * @param source     the source string
-   * @param moduleName the name of the module, this name appears in error message
-   * @return the result
-   */
-  public final T parse(CharSequence source, String moduleName) {
-    return parse(source, moduleName, new DefaultSourceLocator(source));
-  }
-
-  /**
-   * Parses {@code source}.
-   */
-  public final T parse(CharSequence source) {
-    return parse(source, null);
-  }
-
-  /**
-   * Parses source read from {@code readable}.
-   */
-  public final T parse(Readable readable) throws IOException {
-    return parse(readable, null);
-  }
-
-  /**
-   * Parses source read from {@code readable}.
-   *
-   * @param readable   where the source is read from
-   * @param moduleName the name of the module, this name appears in error message
-   * @return the result
-   */
-  public final T parse(Readable readable, String moduleName) throws IOException {
-    StringBuilder builder = new StringBuilder();
-    copy(readable, builder);
-    return parse(builder, moduleName);
-  }
   
   abstract boolean apply(ParseContext ctxt);
 
@@ -702,14 +748,16 @@ public abstract class Parser<T> {
    * Copies all content from {@code from} to {@code to}.
    */
   @Private
-  static void copy(Readable from, Appendable to) throws IOException {
+  static StringBuilder read(Readable from) throws IOException {
+    StringBuilder builder = new StringBuilder();
     CharBuffer buf = CharBuffer.allocate(2048);
     for (; ; ) {
       int r = from.read(buf);
       if (r == -1) break;
       buf.flip();
-      to.append(buf, 0, r);
+      builder.append(buf, 0, r);
     }
+    return builder;
   }
 
   /**
@@ -718,24 +766,6 @@ public abstract class Parser<T> {
   final Parser<T> step(int n) {
     checkArgument(n >= 0, "step < 0");
     return new StepParser<T>(this, n);
-  }
-
-  /**
-   * Parses a source string.
-   *
-   * @param source        the source string
-   * @param moduleName    the name of the module, this name appears in error message
-   * @param sourceLocator maps an index of char into line and column numbers
-   * @return the result
-   */
-  final T parse(CharSequence source, String moduleName, SourceLocator sourceLocator) {
-    return new ScannerState(moduleName, source, 0, sourceLocator).run(followedBy(Parsers.EOF));
-  }
-
-  final T parseWithTrace(CharSequence source, String moduleName, SourceLocator sourceLocator) {
-    return new ScannerState(moduleName, source, 0, sourceLocator)
-        .enableTrace("root")
-        .run(followedBy(Parsers.EOF));
   }
 
   @SuppressWarnings("unchecked")

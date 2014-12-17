@@ -1,16 +1,5 @@
 package org.codehaus.jparsec;
 
-import org.codehaus.jparsec.easymock.BaseMockTest;
-import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
-import org.codehaus.jparsec.functors.Maps;
-import org.junit.Test;
-
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
-
 import static org.codehaus.jparsec.Asserts.assertFailure;
 import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.codehaus.jparsec.Parsers.constant;
@@ -18,7 +7,20 @@ import static org.codehaus.jparsec.Scanners.string;
 import static org.codehaus.jparsec.TestParsers.areChars;
 import static org.codehaus.jparsec.TestParsers.isChar;
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+
+import org.codehaus.jparsec.easymock.BaseMockTest;
+import org.codehaus.jparsec.error.ParserException;
+import org.codehaus.jparsec.functors.Map;
+import org.codehaus.jparsec.functors.Map2;
+import org.codehaus.jparsec.functors.Maps;
+import org.junit.Test;
 
 /**
  * Unit test for {@link Parser}.
@@ -32,6 +34,7 @@ public class ParserTest extends BaseMockTest {
   private static final Parser<String> FAILURE = Parsers.fail("failure");
   private static final Parser<Void> COMMA = Scanners.isChar(',');
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testParse() throws Exception {
     assertEquals("foo", FOO.parse(""));
@@ -639,15 +642,14 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void testCopy() throws Exception {
     String content = "foo bar and baz";
-    StringBuilder to = new StringBuilder();
-    Parser.copy(new StringReader(content), to);
+    StringBuilder to = Parser.read(new StringReader(content));
     assertEquals(content, to.toString());
   }
 
   @Test
   public void emptyParseTreeInParserException() {
     try {
-      Scanners.string("begin").enableTrace("root").parse("");
+      Scanners.string("begin").parse("", Parser.Mode.DEBUG);
       fail();
     } catch (ParserException e) {
       ParseTree tree = e.getParseTree();
@@ -662,7 +664,7 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void populatedParseTreeInParserException() {
     try {
-      Scanners.string("begin").enableTrace("root").parse("beginx");
+      Scanners.string("begin").parse("beginx", Parser.Mode.DEBUG);
       fail();
     } catch (ParserException e) {
       ParseTree tree = e.getParseTree();
@@ -671,6 +673,8 @@ public class ParserTest extends BaseMockTest {
       assertEquals(0, tree.getEndIndex());
       assertEquals(null, tree.getValue());
       assertEquals(tree.toString(), 1, tree.getChildren().size());
+      ParseTree child = tree.getChildren().get(0);
+      assertEquals("begin", child.getName());
     }
   }
   

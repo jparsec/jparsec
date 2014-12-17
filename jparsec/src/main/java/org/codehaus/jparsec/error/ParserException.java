@@ -27,8 +27,8 @@ public class ParserException extends RuntimeException {
   
   private final ParseErrorDetails error;
   private final Location location;
-  private final String module;
   private ParseTree parseTree = null;
+  @Deprecated private final String module;
   
   /**
    * Creates a {@link ParserException} object.
@@ -37,6 +37,18 @@ public class ParserException extends RuntimeException {
    * @param moduleName the module name.
    * @param location the error location.
    */
+  public ParserException(ParseErrorDetails details,  Location location) {
+    this(details, null, location);
+  }
+  
+  /**
+   * Creates a {@link ParserException} object.
+   * 
+   * @param details the {@link ParseErrorDetails} that describes the error details.
+   * @param moduleName the module name.
+   * @param location the error location.
+   */
+  @Deprecated
   public ParserException(ParseErrorDetails details,  String moduleName, Location location) {
     super(toErrorMessage(null, moduleName, details, location));
     this.error = details;
@@ -52,6 +64,7 @@ public class ParserException extends RuntimeException {
    * @param moduleName the module name.
    * @param location the location.
    */
+  @Deprecated
   public ParserException(
       Throwable cause, ParseErrorDetails details, String moduleName, Location location) {
     super(toErrorMessage(cause.getMessage(), moduleName, details, location), cause);
@@ -60,7 +73,9 @@ public class ParserException extends RuntimeException {
     this.module = moduleName;
   }
 
-  /** Returns the detailed description of the error, or {@code null} if none. */
+  /**
+   * Returns the detailed description of the error, or {@code null} if none.
+   */
   public ParseErrorDetails getErrorDetails() {
     return error;
   }
@@ -68,11 +83,14 @@ public class ParserException extends RuntimeException {
   /**
    * Returns the parse tree until the parse error happened. {@code null} if
    * {@link Parser#enableTrace()} isn't called.
+   *
+   * @since 2.3
    */
   public ParseTree getParseTree() {
     return parseTree;
   }
 
+  /** @since 2.3 */
   public void setParseTree(ParseTree parseTree) {
     this.parseTree = parseTree;
   }
@@ -91,6 +109,7 @@ public class ParserException extends RuntimeException {
   }
   
   /** Returns the module name, or {@code null} if none. */
+  @Deprecated
   public String getModuleName() {
     return module;
   }

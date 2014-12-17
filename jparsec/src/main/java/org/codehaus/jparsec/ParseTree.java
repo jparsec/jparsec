@@ -5,7 +5,11 @@ import java.util.List;
 
 import org.codehaus.jparsec.internal.util.Strings;
 
-/** Represents the parse tree of an unsuccessful parse attempt. */
+/**
+ * Represents the parse tree of an unsuccessful parse attempt.
+ *
+ * @since 2.3
+ */
 public final class ParseTree {
   private final String name;
   private final int beginIndex;

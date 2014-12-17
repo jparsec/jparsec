@@ -116,7 +116,7 @@ abstract class ParseContext {
   }
 
   final ParseTree buildErrorParseTree() {
-    return toCompletedParseTree(currentErrorNode == null ? trace.getCurrentNode() : currentErrorNode);
+    return toCompletedParseTree(currentErrorNode);
   }
 
   private static ParseTree toCompletedParseTree(TreeNode node) {

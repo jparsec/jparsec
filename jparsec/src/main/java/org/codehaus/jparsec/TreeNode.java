@@ -43,6 +43,11 @@ final class TreeNode {
   }
 
   TreeNode orphanize() {
+    if (parent == null) {
+      // Root node is provided free, without an explicit asNode() call.
+      // So there isn't a partially completed node.
+      return this;
+    }
     parent.latestChild = previous;
     return parent;
   }
@@ -63,5 +68,9 @@ final class TreeNode {
     }
     Collections.reverse(children);
     return new ParseTree(name, beginIndex, endIndex, result, children);
+  }
+
+  @Override public String toString() {
+    return name;
   }
 }

@@ -27,6 +27,10 @@ import org.codehaus.jparsec.error.ParserException;
 final class ScannerState extends ParseContext {
   private final int end;
   
+  ScannerState(CharSequence source) {
+    this(null, source, 0, new SourceLocator(source));
+  }
+  
   ScannerState(String module, CharSequence source, int from, SourceLocator locator) {
     super(source, from, module, locator);
     this.end = source.length();
@@ -104,6 +108,7 @@ final class ScannerState extends ParseContext {
 
   final <T> T run(Parser<T> parser) {
     if (!applyWithExceptionWrapped(parser)) {
+      @SuppressWarnings("deprecation")
       ParserException exception =  new ParserException(
           renderError(), module, locator.locate(errorIndex()));
       exception.setParseTree(buildErrorParseTree());
@@ -117,6 +122,7 @@ final class ScannerState extends ParseContext {
       return parser.apply(this);
     } catch (RuntimeException e) {
       if (e instanceof ParserException) throw (ParserException) e;
+      @SuppressWarnings("deprecation")
       ParserException wrapper =
           new ParserException(e, null, module, locator.locate(getIndex()));
       // Use the successful parse tree because we are interrupted abruptly by an exception
