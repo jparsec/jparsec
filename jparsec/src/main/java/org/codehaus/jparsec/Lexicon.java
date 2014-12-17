@@ -66,8 +66,7 @@ class Lexicon {
     @SuppressWarnings("unchecked")
     Parser<Token>[] ps = new Parser[tokenNames.length];
     for(int i = 0; i < tokenNames.length; i++) {
-      ps[i] = Parsers.token(InternalFunctors.tokenWithSameValue(word(tokenNames[i])))
-          .asNode(tokenNames[i]);
+      ps[i] = Parsers.token(InternalFunctors.tokenWithSameValue(word(tokenNames[i])));
     }
     return Parsers.or(ps);
   }

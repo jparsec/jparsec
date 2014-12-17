@@ -66,14 +66,18 @@ final class ScannerState extends ParseContext {
   }
 
   @Override Token getToken() {
-    throw new IllegalStateException("Parser not on token level");
+    throw new IllegalStateException("Parser not on token level."
+        + "\nThis normally happens when you are using a character-level parser (scanner or tokenizer)"
+        + " as a token level parser. For example, Terminals.identifier().parse(text) will result in"
+        + " this error because Terminals.identifier() is a token level parser that should have been"
+        + " hooked up with a tokenizer, typically like:"
+        + "\n    Terminals.identifier().from(terminals.tokenizer()).parse(text)");
   }
 
   final <T> T run(Parser<T> parser) {
     if (!applyWithExceptionWrapped(parser)) {
       ParserException exception =  new ParserException(
           renderError(), module, locator.locate(errorIndex()));
-      exception.setParseTree(buildErrorParseTree());
       throw exception;
     }
     return parser.getReturn(this);
@@ -86,7 +90,6 @@ final class ScannerState extends ParseContext {
       if (e instanceof ParserException) throw (ParserException) e;
       ParserException wrapper =
           new ParserException(e, null, module, locator.locate(getIndex()));
-      wrapper.setParseTree(buildParseTree());
       throw wrapper;
     }
   }

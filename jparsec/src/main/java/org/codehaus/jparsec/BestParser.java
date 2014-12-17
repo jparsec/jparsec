@@ -28,15 +28,14 @@ final class BestParser<T> extends Parser<T> {
     final Object result = ctxt.result;
     final int step = ctxt.step;
     final int at = ctxt.at;
-    final TreeNode node = ctxt.trace.getLatestChild();
     for (int i = 0; i < parsers.length; i++) {
       Parser<? extends T> parser = parsers[i];
       if (parser.apply(ctxt)) {
-        applyForBestFit(i + 1, ctxt, result, step, at, node);
+        applyForBestFit(i + 1, ctxt, result, step, at);
         return true;
       }
       // in alternate, we do not care partial match.
-      ctxt.set(step, at, result, node);
+      ctxt.set(step, at, result);
     }
     return false;
   }
@@ -47,13 +46,12 @@ final class BestParser<T> extends Parser<T> {
 
   private void applyForBestFit(
       int from, ParseContext ctxt,
-      Object originalResult, int originalStep, int originalAt, TreeNode originalNode) {
+      Object originalResult, int originalStep, int originalAt) {
     int bestAt = ctxt.at;
     int bestStep = ctxt.step;
     Object bestResult = ctxt.result;
-    TreeNode bestNode = ctxt.trace.getLatestChild();
     for (int i = from; i < parsers.length; i++) {
-      ctxt.set(originalStep, originalAt, originalResult, originalNode);
+      ctxt.set(originalStep, originalAt, originalResult);
       Parser<?> parser = parsers[i];
       boolean ok = parser.apply(ctxt);
       if (!ok) continue;
@@ -64,6 +62,6 @@ final class BestParser<T> extends Parser<T> {
         bestResult = ctxt.result;
       }
     }
-    ctxt.set(bestStep, bestAt, bestResult, bestNode);
+    ctxt.set(bestStep, bestAt, bestResult);
   }
 }

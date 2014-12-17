@@ -216,7 +216,7 @@ public final class Scanners {
    */
   @Deprecated
   public static Parser<Void> pattern(Pattern pattern, String name) {
-    return new PatternScanner(name, pattern).asNode(name);
+    return new PatternScanner(name, pattern);
   }
 
   /**
