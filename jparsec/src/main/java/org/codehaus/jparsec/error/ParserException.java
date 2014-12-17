@@ -25,7 +25,7 @@ public class ParserException extends RuntimeException {
   
   private final ParseErrorDetails error;
   private final Location location;
-  private final String module;
+  @Deprecated private final String module;
   
   /**
    * Creates a {@link ParserException} object.
@@ -34,6 +34,18 @@ public class ParserException extends RuntimeException {
    * @param moduleName the module name.
    * @param location the error location.
    */
+  public ParserException(ParseErrorDetails details,  Location location) {
+    this(details, null, location);
+  }
+  
+  /**
+   * Creates a {@link ParserException} object.
+   * 
+   * @param details the {@link ParseErrorDetails} that describes the error details.
+   * @param moduleName the module name.
+   * @param location the error location.
+   */
+  @Deprecated
   public ParserException(ParseErrorDetails details,  String moduleName, Location location) {
     super(toErrorMessage(null, moduleName, details, location));
     this.error = details;
@@ -49,6 +61,7 @@ public class ParserException extends RuntimeException {
    * @param moduleName the module name.
    * @param location the location.
    */
+  @Deprecated
   public ParserException(
       Throwable cause, ParseErrorDetails details, String moduleName, Location location) {
     super(toErrorMessage(cause.getMessage(), moduleName, details, location), cause);
@@ -76,6 +89,7 @@ public class ParserException extends RuntimeException {
   }
   
   /** Returns the module name, or {@code null} if none. */
+  @Deprecated
   public String getModuleName() {
     return module;
   }
