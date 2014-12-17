@@ -10,7 +10,6 @@ import static org.codehaus.jparsec.TestParsers.isChar;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -743,36 +742,6 @@ public class ParserTest extends BaseMockTest {
     assertEquals(content, to.toString());
   }
 
-  @Test
-  public void emptyParseTreeInParserException() {
-    try {
-      Scanners.string("begin").parse("", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(rootNode("root", ""), e.getParseTree());
-    }
-  }
-
-  @Test
-  public void nonLabeledParserDoesNotPopulateParseTree() {
-    try {
-      Scanners.string("begin").source().parse("beginx", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(rootNode("root", "begin"), e.getParseTree());
-    }
-  }
-
-  @Test
-  public void explicitLabelPopulatesParseTree() {
-    try {
-      Scanners.string("begin").source().label("go").parse("beginx", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(rootNode("root", "begin", stringNode("go", "begin")), e.getParseTree());
-    }
-  }
-  
   private static void assertListParser(
       Parser<? extends List<?>> parser, String source, Object... expected) {
     assertList(parser.parse(source), expected);
@@ -780,51 +749,5 @@ public class ParserTest extends BaseMockTest {
   
   private static void assertList(Object actual, Object... expected) {
     assertEquals(Arrays.asList(expected), actual);
-  }
-
-  private static void assertParseTree(MatchNode expected, ParseTree actual) {
-    assertParseTree(0, expected, actual);
-  }
-
-  private static void assertParseTree(int offset, MatchNode expected, ParseTree actual) {
-    assertEquals(actual.toString(), expected.name, actual.getName());
-    assertEquals(actual.toString(), offset, actual.getBeginIndex());
-    assertEquals(actual.toString(),
-        offset + expected.skipped + expected.matched.length(), actual.getEndIndex());
-    assertEquals(actual.toString(), expected.value, actual.getValue());
-    assertEquals(actual.toString(), expected.children.size(), actual.getChildren().size());
-    for (int i = 0; i < expected.children.size(); i++) {
-      MatchNode expectedChild = expected.children.get(i);
-      assertParseTree(offset, expectedChild, actual.getChildren().get(i));
-      offset += expectedChild.skipped + expectedChild.matched.length();
-    }
-  }
-
-  private static MatchNode stringNode(String name, String matched) {
-    return node(name, matched, matched);
-  }
-
-  private static MatchNode rootNode(String name, String matched, MatchNode... children) {
-    return node(name, null, matched, children);
-  }
-
-  private static MatchNode node(String name, Object value, String matched, MatchNode... children) {
-    return new MatchNode(0, name, value, matched, asList(children));
-  }
-
-  private static final class MatchNode {
-    final int skipped;
-    final String name;
-    final String matched;
-    final Object value;
-    final List<MatchNode> children;
-
-    MatchNode(int skipped, String name, Object value, String matched, List<MatchNode> children) {
-      this.skipped = skipped;
-      this.name = name;
-      this.matched = matched;
-      this.value = value;
-      this.children = children;
-    }
   }
 }

@@ -88,11 +88,11 @@ final class ScannerState extends ParseContext {
           current.setEndIndex(getIndex());
           this.current = current.parent();
         }
-        @Override public TreeNode getParentNode() {
-          return current.parent();
-        }
         @Override public TreeNode getCurrentNode() {
           return current;
+        }
+        @Override public TreeNode getLatestChild() {
+          return current.latestChild;
         }
         @Override public void setLatestChild(TreeNode latest) {
           checkState(latest == null || latest.parent() == current,
