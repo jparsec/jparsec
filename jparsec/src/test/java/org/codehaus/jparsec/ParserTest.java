@@ -1,16 +1,5 @@
 package org.codehaus.jparsec;
 
-import org.codehaus.jparsec.easymock.BaseMockTest;
-import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
-import org.codehaus.jparsec.functors.Maps;
-import org.junit.Test;
-
-import java.io.StringReader;
-import java.util.Arrays;
-import java.util.List;
-
 import static org.codehaus.jparsec.Asserts.assertFailure;
 import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.codehaus.jparsec.Parsers.constant;
@@ -18,7 +7,21 @@ import static org.codehaus.jparsec.Scanners.string;
 import static org.codehaus.jparsec.TestParsers.areChars;
 import static org.codehaus.jparsec.TestParsers.isChar;
 import static org.easymock.EasyMock.expect;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import java.io.StringReader;
+import java.util.Arrays;
+import java.util.List;
+
+import org.codehaus.jparsec.easymock.BaseMockTest;
+import org.codehaus.jparsec.error.ParserException;
+import org.codehaus.jparsec.functors.Map;
+import org.codehaus.jparsec.functors.Map2;
+import org.codehaus.jparsec.functors.Maps;
+import org.junit.Test;
 
 /**
  * Unit test for {@link Parser}.
@@ -32,6 +35,7 @@ public class ParserTest extends BaseMockTest {
   private static final Parser<String> FAILURE = Parsers.fail("failure");
   private static final Parser<Void> COMMA = Scanners.isChar(',');
 
+  @SuppressWarnings("deprecation")
   @Test
   public void testParse() throws Exception {
     assertEquals("foo", FOO.parse(""));
