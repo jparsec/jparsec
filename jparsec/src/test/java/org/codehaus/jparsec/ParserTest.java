@@ -9,6 +9,7 @@ import static org.codehaus.jparsec.TestParsers.isChar;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -676,13 +677,11 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void nonLabeledParserDoesNotPopulateParseTree() {
     try {
-      Scanners.string("begin").parse("beginx", Parser.Mode.DEBUG);
+      Scanners.string("begin").source().parse("beginx", Parser.Mode.DEBUG);
       fail();
     } catch (ParserException e) {
       ParseTree tree = e.getParseTree();
-      assertEquals("root", tree.getName());
-      assertEquals(0, tree.getBeginIndex());
-      assertEquals("begin".length(), tree.getEndIndex());
+      assertRootNode(tree, "begin");
       assertEquals(null, tree.getValue());
       assertEquals(tree.toString(), 0, tree.getChildren().size());
     }
@@ -695,18 +694,32 @@ public class ParserTest extends BaseMockTest {
       fail();
     } catch (ParserException e) {
       ParseTree tree = e.getParseTree();
-      assertEquals("root", tree.getName());
-      assertEquals(0, tree.getBeginIndex());
-      assertEquals("begin".length(), tree.getEndIndex());
-      assertEquals(null, tree.getValue());
+      assertRootNode(tree, "begin");
+      assertNull(tree.getValue());
       assertEquals(tree.toString(), 1, tree.getChildren().size());
-      ParseTree child = tree.getChildren().get(0);
-      assertEquals("go", child.getName());
-      assertEquals(0, child.getBeginIndex());
-      assertEquals("begin".length(), child.getEndIndex());
-      assertEquals("begin", child.getValue());
-      assertEquals(child.toString(), 0, child.getChildren().size());
+      assertLeafNode(tree.getChildren().get(0), "go", 0, "begin");
     }
+  }
+
+  private static void assertNonLeafNode(ParseTree node, String name, int beginIndex, int endIndex) {
+    assertEquals(name, node.getName());
+    assertEquals(beginIndex, node.getBeginIndex());
+    assertEquals(endIndex, node.getEndIndex());
+    assertNull(node.getValue());
+  }
+
+  private static void assertLeafNode(ParseTree node, String name, int beginIndex, String source) {
+    assertEquals(name, node.getName());
+    assertEquals(beginIndex, node.getBeginIndex());
+    assertEquals(beginIndex + source.length(), node.getEndIndex());
+    assertEquals(source, node.getValue());
+    assertEquals(node.toString(), 0, node.getChildren().size());
+  }
+
+  private static void assertRootNode(ParseTree node, String matchedString) {
+    assertEquals("root", node.getName());
+    assertEquals(0, node.getBeginIndex());
+    assertEquals(matchedString.length(), node.getEndIndex());
   }
   
   private static void assertListParser(
