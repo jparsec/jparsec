@@ -6,7 +6,7 @@ import java.util.List;
 import org.codehaus.jparsec.internal.util.Strings;
 
 /**
- * Represents the parse tree of an unsuccessful parse attempt.
+ * Represents the partial parse tree of an unsuccessful parse attempt.
  *
  * @since 2.3
  */
@@ -30,22 +30,30 @@ public final class ParseTree {
     this.children = Collections.unmodifiableList(children);
   }
 
+  /** Returns the node name, which is specified in {@link Parser#label}. */
   public String getName() {
     return name;
   }
 
+  /** Returns the index in source where this node starts. */
   public int getBeginIndex() {
     return beginIndex;
   }
 
+  /** Returns the index in source where this node ends. */
   public int getEndIndex() {
     return endIndex;
   }
 
+  /** Returns the parsed value of this node, or {@code null} if it's a failed node. */
   public Object getValue() {
     return value;
   }
 
+  /**
+   * Returns the immutable list of child nodes that correspond to {@link Parser#label labeled}
+   * parsers syntactically enclosed inside parent parser.
+   */
   public List<ParseTree> getChildren() {
     return children;
   }
