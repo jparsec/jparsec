@@ -1,5 +1,6 @@
 package org.codehaus.jparsec;
 
+import static java.util.Arrays.asList;
 import static org.codehaus.jparsec.Asserts.assertFailure;
 import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.codehaus.jparsec.Parsers.constant;
@@ -361,6 +362,89 @@ public class ParserTest extends BaseMockTest {
   }
 
   @Test
+  public void labelShouldOverrideLabelMessage() {
+    try {
+      Scanners.string("foo").label("bar").label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossAtomic() {
+    try {
+      Scanners.string("foo").label("bar").atomic().label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossCast() {
+    try {
+      Scanners.string("foo").label("bar").cast().label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossPeek() {
+    try {
+      Scanners.string("foo").label("bar").peek().label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossAtomicAndPeek() {
+    try {
+      Scanners.string("foo").label("bar").atomic().peek().label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossStep() {
+    try {
+      Scanners.string("foo").label("bar").step(1).label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void succeedsShouldNotLeaveErrorBehind() {
+    try {
+      Scanners.string("foo").succeeds().parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("EOF"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+    }
+  }
+
+  @Test
   public void testCast() {
     Parser<String> parser = Parsers.<CharSequence>constant("chars").<String>cast();
     assertEquals("chars", parser.toString());
@@ -665,12 +749,7 @@ public class ParserTest extends BaseMockTest {
       Scanners.string("begin").parse("", Parser.Mode.DEBUG);
       fail();
     } catch (ParserException e) {
-      ParseTree tree = e.getParseTree();
-      assertEquals("root", tree.getName());
-      assertEquals(0, tree.getBeginIndex());
-      assertEquals(0, tree.getEndIndex());
-      assertEquals(null, tree.getValue());
-      assertEquals(tree.toString(), 0, tree.getChildren().size());
+      assertParseTree(rootNode("root", ""), e.getParseTree());
     }
   }
 
@@ -680,10 +759,7 @@ public class ParserTest extends BaseMockTest {
       Scanners.string("begin").source().parse("beginx", Parser.Mode.DEBUG);
       fail();
     } catch (ParserException e) {
-      ParseTree tree = e.getParseTree();
-      assertRootNode(tree, "begin");
-      assertEquals(null, tree.getValue());
-      assertEquals(tree.toString(), 0, tree.getChildren().size());
+      assertParseTree(rootNode("root", "begin"), e.getParseTree());
     }
   }
 
@@ -693,33 +769,8 @@ public class ParserTest extends BaseMockTest {
       Scanners.string("begin").source().label("go").parse("beginx", Parser.Mode.DEBUG);
       fail();
     } catch (ParserException e) {
-      ParseTree tree = e.getParseTree();
-      assertRootNode(tree, "begin");
-      assertNull(tree.getValue());
-      assertEquals(tree.toString(), 1, tree.getChildren().size());
-      assertLeafNode(tree.getChildren().get(0), "go", 0, "begin");
+      assertParseTree(rootNode("root", "begin", stringNode("go", "begin")), e.getParseTree());
     }
-  }
-
-  private static void assertNonLeafNode(ParseTree node, String name, int beginIndex, int endIndex) {
-    assertEquals(name, node.getName());
-    assertEquals(beginIndex, node.getBeginIndex());
-    assertEquals(endIndex, node.getEndIndex());
-    assertNull(node.getValue());
-  }
-
-  private static void assertLeafNode(ParseTree node, String name, int beginIndex, String source) {
-    assertEquals(name, node.getName());
-    assertEquals(beginIndex, node.getBeginIndex());
-    assertEquals(beginIndex + source.length(), node.getEndIndex());
-    assertEquals(source, node.getValue());
-    assertEquals(node.toString(), 0, node.getChildren().size());
-  }
-
-  private static void assertRootNode(ParseTree node, String matchedString) {
-    assertEquals("root", node.getName());
-    assertEquals(0, node.getBeginIndex());
-    assertEquals(matchedString.length(), node.getEndIndex());
   }
   
   private static void assertListParser(
@@ -729,5 +780,51 @@ public class ParserTest extends BaseMockTest {
   
   private static void assertList(Object actual, Object... expected) {
     assertEquals(Arrays.asList(expected), actual);
+  }
+
+  private static void assertParseTree(MatchNode expected, ParseTree actual) {
+    assertParseTree(0, expected, actual);
+  }
+
+  private static void assertParseTree(int offset, MatchNode expected, ParseTree actual) {
+    assertEquals(actual.toString(), expected.name, actual.getName());
+    assertEquals(actual.toString(), offset, actual.getBeginIndex());
+    assertEquals(actual.toString(),
+        offset + expected.skipped + expected.matched.length(), actual.getEndIndex());
+    assertEquals(actual.toString(), expected.value, actual.getValue());
+    assertEquals(actual.toString(), expected.children.size(), actual.getChildren().size());
+    for (int i = 0; i < expected.children.size(); i++) {
+      MatchNode expectedChild = expected.children.get(i);
+      assertParseTree(offset, expectedChild, actual.getChildren().get(i));
+      offset += expectedChild.skipped + expectedChild.matched.length();
+    }
+  }
+
+  private static MatchNode stringNode(String name, String matched) {
+    return node(name, matched, matched);
+  }
+
+  private static MatchNode rootNode(String name, String matched, MatchNode... children) {
+    return node(name, null, matched, children);
+  }
+
+  private static MatchNode node(String name, Object value, String matched, MatchNode... children) {
+    return new MatchNode(0, name, value, matched, asList(children));
+  }
+
+  private static final class MatchNode {
+    final int skipped;
+    final String name;
+    final String matched;
+    final Object value;
+    final List<MatchNode> children;
+
+    MatchNode(int skipped, String name, Object value, String matched, List<MatchNode> children) {
+      this.skipped = skipped;
+      this.name = name;
+      this.matched = matched;
+      this.value = value;
+      this.children = children;
+    }
   }
 }

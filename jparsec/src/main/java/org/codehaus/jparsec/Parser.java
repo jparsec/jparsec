@@ -359,8 +359,8 @@ public abstract class Parser<T> {
    * A {@link Parser} that reports reports an error about {@code name} expected, if {@code this} fails with no partial
    * match.
    */
-  public final Parser<T> label(String name) {
-    return Parsers.plus(this, Parsers.<T>expect(name)).asNode(name);
+  public Parser<T> label(String name) {
+    return new LabeledParser<T>(this, name);
   }
 
   /**
@@ -723,23 +723,6 @@ public abstract class Parser<T> {
   @Deprecated
   public final T parse(Readable readable, String moduleName) throws IOException {
     return parse(read(readable), moduleName);
-  }
-
-  /** Annotates this parser to construct a syntax node in the parse tree. */
-  final Parser<T> asNode(final String name) {
-    final Parser<T> delegate = this;
-    return new Parser<T>() {
-      @Override boolean apply(ParseContext ctxt) {
-        ctxt.trace.push(name);
-        boolean ok = delegate.apply(ctxt);
-        if (ok) ctxt.traceCurrentResult();
-        ctxt.trace.pop();
-        return ok;
-      }
-      @Override public String toString() {
-        return name;
-      }
-    };
   }
   
   abstract boolean apply(ParseContext ctxt);
