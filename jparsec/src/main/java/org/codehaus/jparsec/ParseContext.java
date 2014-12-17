@@ -122,10 +122,11 @@ abstract class ParseContext {
     return toCompletedParseTree(currentErrorNode);
   }
 
-  private static ParseTree toCompletedParseTree(TreeNode node) {
+  private ParseTree toCompletedParseTree(TreeNode node) {
     // The current node is partially done because there was an error.
-    // So orphanize it.
-    return node == null ? null : node.orphanize().materialize().toParseTree();
+    // So orphanize it. But at the same time, all ancestor nodes should have their endIndex set to
+    // where we are now.
+    return (node == null) ? null : node.orphanize().materialize(getIndex()).toParseTree();
   }
   
   /** Only called when rendering the error in {@link ParserException}. */

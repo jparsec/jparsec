@@ -52,11 +52,24 @@ final class TreeNode {
     return parent;
   }
 
-  TreeNode materialize() {
+  /**
+   * Materializes the current tree node to make it the latest child of its parent
+   * (discarding nodes that have been tacked on after it in the same hierarchy level); and
+   * recursively apply to all of its ancestors.
+   *
+   * <p>This is because it's only called at time of error. If an ancestor node has a child node that
+   * was added during the process of trying other alternatives and then failed, those paths don't
+   * matter. So we should restore the tree back to when this most relevant error happened.
+   *
+   * <p>Returns the root node, which can then be used to {@link #toParseTree()}.
+   */
+  TreeNode materialize(int index) {
     TreeNode node = this;
+    node.setEndIndex(index);
     while (node.parent != null) {
       node.parent.latestChild = node;
       node = node.parent;
+      node.setEndIndex(index);
     }
     return node;
   }

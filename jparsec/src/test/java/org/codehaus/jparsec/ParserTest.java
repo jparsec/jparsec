@@ -21,7 +21,6 @@ import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Maps;
-import org.junit.Assert;
 import org.junit.Test;
 
 /**
@@ -675,7 +674,7 @@ public class ParserTest extends BaseMockTest {
   }
 
   @Test
-  public void populatedParseTreeInParserException() {
+  public void nonLabeledParserDoesNotPopulateParseTree() {
     try {
       Scanners.string("begin").parse("beginx", Parser.Mode.DEBUG);
       fail();
@@ -683,35 +682,29 @@ public class ParserTest extends BaseMockTest {
       ParseTree tree = e.getParseTree();
       assertEquals("root", tree.getName());
       assertEquals(0, tree.getBeginIndex());
-      assertEquals(0, tree.getEndIndex());
+      assertEquals("begin".length(), tree.getEndIndex());
       assertEquals(null, tree.getValue());
-      assertEquals(tree.toString(), 1, tree.getChildren().size());
-      ParseTree child = tree.getChildren().get(0);
-      assertEquals("begin", child.getName());
-      assertEquals(0, child.getBeginIndex());
-      assertEquals("begin".length(), child.getEndIndex());
-      assertEquals(null, tree.getValue());
-      assertEquals(child.toString(), 0, child.getChildren().size());
+      assertEquals(tree.toString(), 0, tree.getChildren().size());
     }
   }
 
   @Test
-  public void populatedParseTreeWithExplicitLabelInParserException() {
+  public void explicitLabelPopulatesParseTree() {
     try {
-      Scanners.string("begin").label("go").parse("beginx", Parser.Mode.DEBUG);
+      Scanners.string("begin").source().label("go").parse("beginx", Parser.Mode.DEBUG);
       fail();
     } catch (ParserException e) {
       ParseTree tree = e.getParseTree();
       assertEquals("root", tree.getName());
       assertEquals(0, tree.getBeginIndex());
-      assertEquals(0, tree.getEndIndex());
+      assertEquals("begin".length(), tree.getEndIndex());
       assertEquals(null, tree.getValue());
       assertEquals(tree.toString(), 1, tree.getChildren().size());
       ParseTree child = tree.getChildren().get(0);
       assertEquals("go", child.getName());
       assertEquals(0, child.getBeginIndex());
       assertEquals("begin".length(), child.getEndIndex());
-      assertEquals(null, tree.getValue());
+      assertEquals("begin", child.getValue());
       assertEquals(child.toString(), 0, child.getChildren().size());
     }
   }
