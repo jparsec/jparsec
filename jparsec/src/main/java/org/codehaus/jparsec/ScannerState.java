@@ -74,7 +74,6 @@ final class ScannerState extends ParseContext {
     if (!applyWithExceptionWrapped(parser)) {
       ParserException exception =  new ParserException(
           renderError(), module, locator.locate(errorIndex()));
-      exception.setParseTree(buildErrorParseTree());
       throw exception;
     }
     return parser.getReturn(this);
@@ -87,7 +86,6 @@ final class ScannerState extends ParseContext {
       if (e instanceof ParserException) throw (ParserException) e;
       ParserException wrapper =
           new ParserException(e, null, module, locator.locate(getIndex()));
-      wrapper.setParseTree(buildParseTree());
       throw wrapper;
     }
   }

@@ -360,7 +360,7 @@ public abstract class Parser<T> {
    * match.
    */
   public final Parser<T> label(String name) {
-    return Parsers.plus(this, Parsers.<T>expect(name)).asNode(name);
+    return Parsers.plus(this, Parsers.<T>expect(name));
   }
 
   /**
@@ -639,49 +639,6 @@ public abstract class Parser<T> {
    */
   public Parser<List<Token>> lexer(Parser<?> delim) {
     return delim.optional().next(token().sepEndBy(delim));
-  }
-
-  /**
-   * Returns a new {@link Parser} that enables trace. When any parsing error happens inside the
-   * parser, the trace of all succeeded sub-parsers are reported in the {@link ParserException}.
-   * For example: <pre>   {@code
-   *   try {
-   *     parser.enableTrace("root").parse(text);
-   *   } catch (ParserException e) {
-   *     System.out.println(e.getParseTree().toJson());
-   *   }
-   * }</pre>
-   */
-  public final Parser<T> enableTrace(final String name) {
-    final Parser<T> traced = this;
-    return new Parser<T>() {
-      @Override boolean apply(ParseContext ctxt) {
-        ParserTrace oldTrace = ctxt.trace;
-        try {
-          ctxt.trace = ctxt.newTrace(name);
-          return traced.apply(ctxt);
-        } finally {
-          ctxt.trace = oldTrace;
-        }
-      }
-    };
-  }
-
-  /** Annotates this parser to construct a syntax node in the parse tree. */
-  final Parser<T> asNode(final String name) {
-    final Parser<T> delegate = this;
-    return new Parser<T>() {
-      @Override boolean apply(ParseContext ctxt) {
-        ctxt.trace.push(name);
-        boolean ok = delegate.apply(ctxt);
-        if (ok) ctxt.traceCurrentResult();
-        ctxt.trace.pop();
-        return ok;
-      }
-      @Override public String toString() {
-        return name;
-      }
-    };
   }
 
   /**
