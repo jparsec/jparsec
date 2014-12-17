@@ -34,7 +34,7 @@ public class OperatorsTest {
       assertEquals(Tokens.reserved(op), lexicon.word(op));
     }
     for (String op : ops) {
-      Asserts.assertParser(lexicon.tokenizer, op, Tokens.reserved(op));
+      assertEquals(Tokens.reserved(op), lexicon.tokenizer.parse(op));
     }
   }
 

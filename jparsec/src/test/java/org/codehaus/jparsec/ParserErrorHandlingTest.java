@@ -21,18 +21,35 @@ import static org.codehaus.jparsec.Asserts.assertFailure;
 import static org.codehaus.jparsec.Scanners.isChar;
 import static org.codehaus.jparsec.TestParsers.areChars;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import org.codehaus.jparsec.Parser.Mode;
 import org.codehaus.jparsec.functors.Unary;
 import org.codehaus.jparsec.internal.util.Lists;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 /**
  * Unit test for error handling of {@link Parser}.
  * 
  * @author benyu
  */
+@RunWith(Parameterized.class)
 public class ParserErrorHandlingTest {
+
+  @Parameterized.Parameters
+  public static Collection<Object[]> data() {
+    return Arrays.asList(new Object[] {Mode.PRODUCTION}, new Object[] {Mode.DEBUG});
+  }
+
+  private final Mode mode;
+
+  public ParserErrorHandlingTest(Mode mode) {
+    this.mode = mode;
+  }
 
   @Test
   public void testNotOverridesNever() {
@@ -75,29 +92,29 @@ public class ParserErrorHandlingTest {
 
   @Test
   public void testFirstNotWins() {
-    assertFailure(
+    assertFailure(mode,
         Parsers.or(isChar('x').not("xxx"), isChar('x').not("X")), "x", 1, 1, "unexpected xxx.");
   }
 
   @Test
   public void testFirstFailureWins() {
-    assertFailure(
+    assertFailure(mode,
         Parsers.or(Parsers.fail("foo"), Parsers.fail("bar")), "x", 1, 1, "foo");
   }
 
   @Test
   public void testExpectMerged() {
-    assertFailure(
+    assertFailure(mode,
         Parsers.or(Parsers.expect("foo"), Parsers.expect("bar")), "x",
         1, 1, "foo or bar expected, x encountered.");
-    assertFailure(
+    assertFailure(mode,
         Parsers.or(Parsers.expect("foo").label("foo"), Parsers.expect("foo")), "x",
         1, 1, "foo expected, x encountered.");
   }
 
   @Test
   public void testExpectedMerged() {
-    assertFailure(
+    assertFailure(mode,
         Parsers.or(isChar('a'), isChar('b')), "x",
         1, 1, "a or b expected, x encountered.");
   }
@@ -156,7 +173,7 @@ public class ParserErrorHandlingTest {
 
   @Test
   public void testOuterExpectWins() {
-    assertFailure(Parsers.expect("foo").label("bar"), "", 1, 1, "bar expected, EOF encountered.");
+    assertFailure(mode,Parsers.expect("foo").label("bar"), "", 1, 1, "bar expected, EOF encountered.");
   }
 
   @Test
@@ -169,13 +186,13 @@ public class ParserErrorHandlingTest {
     Parser<?> lexer = terminals.tokenizer();
     Parser<List<Token>> foobar =
         terminals.token("foo", "bar").times(2).from(lexer, Scanners.WHITESPACES);
-    assertFailure(foobar, "foo+", 1, 4, "foo or bar expected, + encountered.");
-    assertFailure(foobar, "foo", 1, 4, "foo or bar expected, EOF encountered.");
-    assertFailure(Parsers.or(areChars("foo bar"), foobar), "foo baz",
+    assertFailure(mode,foobar, "foo+", 1, 4, "foo or bar expected, + encountered.");
+    assertFailure(mode,foobar, "foo", 1, 4, "foo or bar expected, EOF encountered.");
+    assertFailure(mode,Parsers.or(areChars("foo bar"), foobar), "foo baz",
         1, 5, "foo or bar expected, baz encountered.");
-    assertFailure(Parsers.or(foobar, areChars("foo bar")), "foo baz",
+    assertFailure(mode,Parsers.or(foobar, areChars("foo bar")), "foo baz",
         1, 7, "r expected, z encountered.");
-    assertFailure(Parsers.or(areChars("foox"), foobar), "foo baz",
+    assertFailure(mode,Parsers.or(areChars("foox"), foobar), "foo baz",
         1, 5, "foo or bar expected, baz encountered.");
     Parser<List<Token>> foobar2 =
       terminals.token("foo", "bar").times(2).from(lexer.next(lexer), Scanners.WHITESPACES);
@@ -205,22 +222,22 @@ public class ParserErrorHandlingTest {
     Parser<?> parser = Parsers.or(
         Parsers.sequence(LPAREN, terminals.token("foo"), terminals.token("bar")),
         Parsers.sequence(LPAREN, terminals.token("foo"), RPAREN, terminals.token("bar")));
-    assertFailure(parser.from(lexeme), "foo baz", 1, 5, "bar expected, ( encountered.");
+    assertFailure(mode,parser.from(lexeme), "foo baz", 1, 5, "bar expected, ( encountered.");
   }
   
-  private static void assertError(
+  private void assertError(
       Parser<?> a, Parser<?> b, String source, int line, int column, String message) {
-    assertFailure(
+    assertFailure(mode,
         Parsers.or(a, b), source, line, column, message);
-    assertFailure(
+    assertFailure(mode,
         Parsers.or(b, a), source, line, column, message);
-    assertFailure(
+    assertFailure(mode,
         Parsers.longer(a, b), source, line, column, message);
-    assertFailure(
+    assertFailure(mode,
         Parsers.longer(b, a), source, line, column, message);
-    assertFailure(
+    assertFailure(mode,
         Parsers.shorter(a, b), source, line, column, message);
-    assertFailure(
+    assertFailure(mode,
         Parsers.shorter(b, a), source, line, column, message);
   }
 }

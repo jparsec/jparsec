@@ -1,7 +1,6 @@
 package org.codehaus.jparsec;
 
 import static org.codehaus.jparsec.Asserts.assertFailure;
-import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.codehaus.jparsec.Parsers.always;
 import static org.codehaus.jparsec.TestParsers.areChars;
 import static org.codehaus.jparsec.TestParsers.isChar;
@@ -10,8 +9,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import org.codehaus.jparsec.Parser.Mode;
 import org.codehaus.jparsec.easymock.BaseMockTest;
 import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Map3;
@@ -19,42 +20,58 @@ import org.codehaus.jparsec.functors.Map4;
 import org.codehaus.jparsec.functors.Map5;
 import org.codehaus.jparsec.functors.Tuples;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 /**
  * Unit test for {@link Parsers}.
  * 
  * @author Ben Yu
  */
+@RunWith(Parameterized.class)
 public class ParsersTest extends BaseMockTest {
+
+  @Parameterized.Parameters
+  public static Collection<Object[]> data() {
+    return Arrays.asList(new Object[] {Mode.PRODUCTION}, new Object[] {Mode.DEBUG});
+  }
+
+  private final Mode mode;
+
+  public ParsersTest(Mode mode) {
+    this.mode = mode;
+  }
 
   @Test
   public void testAlways() {
-    assertParser(always(), "", null);
+    assertEquals(null, always().parse("", mode));
   }
 
   @Test
   public void testNever() {
-    assertFailure(Parsers.never(), "", 1, 1);
+    assertFailure(mode, Parsers.never(), "", 1, 1);
     assertEquals("never", Parsers.never().toString());
   }
 
   @Test
   public void testBetween() {
-    assertParser(Parsers.between(isChar('('), Scanners.string("foo"), isChar(')')), "(foo)", null);
+    assertEquals(null,
+        Parsers.between(isChar('('), Scanners.string("foo"), isChar(')')).parse("(foo)", mode));
   }
 
   @Test
   public void testEof() {
-    Parsers.EOF.parse("");
-    assertFailure(Parsers.EOF, "a", 1, 1, "EOF");
-    Parsers.eof("END").parse("");
-    assertFailure(Parsers.eof("END"), "a", 1, 1, "END");
+    Parsers.EOF.parse("", mode);
+    assertFailure(mode, Parsers.EOF, "a", 1, 1, "EOF");
+    Parsers.eof("END").parse("", mode);
+    assertFailure(mode, Parsers.eof("END"), "a", 1, 1, "END");
     assertEquals("EOF", Parsers.EOF.toString());
   }
 
   @Test
   public void testConstant() {
-    assertParser(Parsers.constant("foo").followedBy(Scanners.string("bar")), "bar", "foo");
+    assertEquals("foo",
+        Parsers.constant("foo").followedBy(Scanners.string("bar")).parse("bar", mode));
     assertEquals("foo", Parsers.constant("foo").toString());
   }
 
@@ -64,7 +81,7 @@ public class ParsersTest extends BaseMockTest {
     Runnable runnable = mock(Runnable.class);
     runnable.run();
     replay();
-    assertParser(Parsers.runnable(runnable), "", null);
+    assertEquals(null, Parsers.runnable(runnable).parse("", mode));
     assertEquals(runnable.toString(), Parsers.runnable(runnable).toString());
   }
 
@@ -72,9 +89,9 @@ public class ParsersTest extends BaseMockTest {
   public void testSequence_2Parsers() {
     Parser<Void> parser = Parsers.sequence(Scanners.isChar('a'), Scanners.isChar('b'));
     assertEquals("sequence", parser.toString());
-    assertParser(parser, "ab", null);
-    assertFailure(parser, "xb", 1, 1);
-    assertFailure(parser, "ax", 1, 2);
+    assertEquals(null, parser.parse("ab", mode));
+    assertFailure(mode, parser, "xb", 1, 1);
+    assertFailure(mode, parser, "ax", 1, 2);
   }
 
   @Test
@@ -82,10 +99,10 @@ public class ParsersTest extends BaseMockTest {
     Parser<Void> parser =
         Parsers.sequence(Scanners.isChar('a'), Scanners.isChar('b'), Scanners.isChar('c'));
     assertEquals("sequence", parser.toString());
-    assertParser(parser, "abc", null);
-    assertFailure(parser, "xbc", 1, 1);
-    assertFailure(parser, "axc", 1, 2);
-    assertFailure(parser, "abx", 1, 3);
+    assertEquals(null, parser.parse("abc", mode));
+    assertFailure(mode, parser, "xbc", 1, 1);
+    assertFailure(mode, parser, "axc", 1, 2);
+    assertFailure(mode, parser, "abx", 1, 3);
   }
 
   @Test
@@ -93,11 +110,11 @@ public class ParsersTest extends BaseMockTest {
     Parser<Void> parser = Parsers.sequence(
         Scanners.isChar('a'), Scanners.isChar('b'), Scanners.isChar('c'), Scanners.isChar('d'));
     assertEquals("sequence", parser.toString());
-    assertParser(parser, "abcd", null);
-    assertFailure(parser, "xbcd", 1, 1);
-    assertFailure(parser, "axcd", 1, 2);
-    assertFailure(parser, "abxd", 1, 3);
-    assertFailure(parser, "abcx", 1, 4);
+    assertEquals(null, parser.parse("abcd", mode));
+    assertFailure(mode, parser, "xbcd", 1, 1);
+    assertFailure(mode, parser, "axcd", 1, 2);
+    assertFailure(mode, parser, "abxd", 1, 3);
+    assertFailure(mode, parser, "abcx", 1, 4);
   }
 
   @Test
@@ -106,12 +123,12 @@ public class ParsersTest extends BaseMockTest {
         Scanners.isChar('a'), Scanners.isChar('b'), Scanners.isChar('c'),
         Scanners.isChar('d'), Scanners.isChar('e'));
     assertEquals("sequence", parser.toString());
-    assertParser(parser, "abcde", null);
-    assertFailure(parser, "bbcde", 1, 1);
-    assertFailure(parser, "aacde", 1, 2);
-    assertFailure(parser, "abbde", 1, 3);
-    assertFailure(parser, "abcce", 1, 4);
-    assertFailure(parser, "abcdd", 1, 5);
+    assertEquals(null, parser.parse("abcde", mode));
+    assertFailure(mode, parser, "bbcde", 1, 1);
+    assertFailure(mode, parser, "aacde", 1, 2);
+    assertFailure(mode, parser, "abbde", 1, 3);
+    assertFailure(mode, parser, "abcce", 1, 4);
+    assertFailure(mode, parser, "abcdd", 1, 5);
   }
 
   @Test
@@ -119,10 +136,10 @@ public class ParsersTest extends BaseMockTest {
     Parser<?> parser =
         Parsers.sequence(Scanners.isChar('a'), Scanners.isChar('b'), Scanners.isChar('c'));
     assertEquals("sequence", parser.toString());
-    assertParser(parser, "abc", null);
-    assertFailure(parser, "xbc", 1, 1);
-    assertFailure(parser, "axc", 1, 2);
-    assertFailure(parser, "abx", 1, 3);
+    assertEquals(null, parser.parse("abc", mode));
+    assertFailure(mode, parser, "xbc", 1, 1);
+    assertFailure(mode, parser, "axc", 1, 2);
+    assertFailure(mode, parser, "abx", 1, 3);
   }
 
   @Test
@@ -131,62 +148,62 @@ public class ParsersTest extends BaseMockTest {
     Parser<?> parser =
         Parsers.sequence(Arrays.asList(Scanners.isChar('a'), Scanners.isChar('b')));
     assertEquals("sequence", parser.toString());
-    assertParser(parser, "ab", null);
-    assertFailure(parser, "xb", 1, 1);
-    assertFailure(parser, "ax", 1, 2);
+    assertEquals(null, parser.parse("ab", mode));
+    assertFailure(mode, parser, "xb", 1, 1);
+    assertFailure(mode, parser, "ax", 1, 2);
   }
 
   @Test
   public void testSequence_0Parser() {
     Parser<?> parser = Parsers.sequence();
     assertEquals("sequence", parser.toString());
-    assertParser(parser, "", null);
+    assertEquals(null, parser.parse("", mode));
   }
 
   @Test
   public void testSequence_1Parser() {
     Parser<?> parser = Parsers.sequence(Scanners.isChar('a'));
     assertEquals("sequence", parser.toString());
-    assertParser(parser, "a", null);
+    assertEquals(null, parser.parse("a", mode));
   }
 
   @Test
   public void testPair() {
     Parser<?> parser = Parsers.pair(isChar('a'), isChar('b'));
     assertEquals("pair", parser.toString());
-    assertParser(parser, "ab", Tuples.pair('a', 'b'));
-    assertFailure(parser, "xb", 1, 1);
-    assertFailure(parser, "ax", 1, 2);
+    assertEquals(Tuples.pair('a', 'b'), parser.parse("ab", mode));
+    assertFailure(mode, parser, "xb", 1, 1);
+    assertFailure(mode, parser, "ax", 1, 2);
   }
 
   @Test
   public void testTuple_2Parsers() {
     Parser<?> parser = Parsers.tuple(isChar('a'), isChar('b'));
     assertEquals("pair", parser.toString());
-    assertParser(parser, "ab", Tuples.pair('a', 'b'));
-    assertFailure(parser, "xb", 1, 1);
-    assertFailure(parser, "ax", 1, 2);
+    assertEquals(Tuples.pair('a', 'b'), parser.parse("ab", mode));
+    assertFailure(mode, parser, "xb", 1, 1);
+    assertFailure(mode, parser, "ax", 1, 2);
   }
 
   @Test
   public void testTuple_3Parsers() {
     Parser<?> parser = Parsers.tuple(isChar('a'), isChar('b'), isChar('c'));
     assertEquals("tuple", parser.toString());
-    assertParser(parser, "abc", Tuples.tuple('a', 'b', 'c'));
-    assertFailure(parser, "xbc", 1, 1);
-    assertFailure(parser, "axc", 1, 2);
-    assertFailure(parser, "abx", 1, 3);
+    assertEquals(Tuples.tuple('a', 'b', 'c'), parser.parse("abc", mode));
+    assertFailure(mode, parser, "xbc", 1, 1);
+    assertFailure(mode, parser, "axc", 1, 2);
+    assertFailure(mode, parser, "abx", 1, 3);
   }
 
   @Test
   public void testTuple_4Parsers() {
     Parser<?> parser = Parsers.tuple(isChar('a'), isChar('b'), isChar('c'), isChar('d'));
     assertEquals("tuple", parser.toString());
-    assertParser(parser, "abcd", Tuples.tuple('a', 'b', 'c', 'd'));
-    assertFailure(parser, "xbcd", 1, 1);
-    assertFailure(parser, "axcd", 1, 2);
-    assertFailure(parser, "abxd", 1, 3);
-    assertFailure(parser, "abcx", 1, 4);
+    assertEquals(Tuples.tuple('a', 'b', 'c', 'd'), parser.parse("abcd", mode));
+    assertFailure(mode, parser, "xbcd", 1, 1);
+    assertFailure(mode, parser, "axcd", 1, 2);
+    assertFailure(mode, parser, "abxd", 1, 3);
+    assertFailure(mode, parser, "abcx", 1, 4);
   }
 
   @Test
@@ -194,21 +211,21 @@ public class ParsersTest extends BaseMockTest {
     Parser<?> parser =
         Parsers.tuple(isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'));
     assertEquals("tuple", parser.toString());
-    assertParser(parser, "abcde", Tuples.tuple('a', 'b', 'c', 'd', 'e'));
-    assertFailure(parser, "xbcde", 1, 1);
-    assertFailure(parser, "axcde", 1, 2);
-    assertFailure(parser, "abxde", 1, 3);
-    assertFailure(parser, "abcxe", 1, 4);
-    assertFailure(parser, "abcdx", 1, 5);
+    assertEquals(Tuples.tuple('a', 'b', 'c', 'd', 'e'), parser.parse("abcde", mode));
+    assertFailure(mode, parser, "xbcde", 1, 1);
+    assertFailure(mode, parser, "axcde", 1, 2);
+    assertFailure(mode, parser, "abxde", 1, 3);
+    assertFailure(mode, parser, "abcxe", 1, 4);
+    assertFailure(mode, parser, "abcdx", 1, 5);
   }
 
   @Test
   public void testArray() {
     Parser<Object[]> parser = Parsers.array(isChar('a'), isChar('b'));
     assertEquals("array", parser.toString());
-    assertEquals(Arrays.asList('a', 'b'), Arrays.asList(parser.parse("ab")));
-    assertFailure(parser, "xb", 1, 1);
-    assertFailure(parser, "ax", 1, 2);
+    assertEquals(Arrays.asList('a', 'b'), Arrays.asList(parser.parse("ab", mode)));
+    assertFailure(mode, parser, "xb", 1, 1);
+    assertFailure(mode, parser, "ax", 1, 2);
   }
 
   @Test
@@ -216,14 +233,14 @@ public class ParsersTest extends BaseMockTest {
     @SuppressWarnings("unchecked")
     Parser<List<Character>> parser = Parsers.list(Arrays.asList(isChar('a'), isChar('b')));
     assertEquals("list", parser.toString());
-    assertEquals(Arrays.asList('a', 'b'), parser.parse("ab"));
-    assertFailure(parser, "xb", 1, 1);
-    assertFailure(parser, "ax", 1, 2);
+    assertEquals(Arrays.asList('a', 'b'), parser.parse("ab", mode));
+    assertFailure(mode, parser, "xb", 1, 1);
+    assertFailure(mode, parser, "ax", 1, 2);
   }
 
   @Test
   public void testFail() {
-    assertFailure(Parsers.fail("foo"), "a", 1, 1, "foo");
+    assertFailure(mode, Parsers.fail("foo"), "a", 1, 1, "foo");
     assertEquals("foo", Parsers.fail("foo").toString());
   }
 
@@ -244,20 +261,20 @@ public class ParsersTest extends BaseMockTest {
   public void testPlus_2Parsers() {
     Parser<Character> parser = Parsers.plus(isChar('a'), isChar('b'));
     assertEquals("plus", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertFailure(Parsers.plus(areChars("ab"), isChar('b')), "a", 1, 2);
-    assertFailure(Parsers.plus(areChars("ax"), areChars("abc")), "abx", 1, 2);
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertFailure(mode, Parsers.plus(areChars("ab"), isChar('b')), "a", 1, 2);
+    assertFailure(mode, Parsers.plus(areChars("ax"), areChars("abc")), "abx", 1, 2);
   }
 
   @Test
   public void testPlus_3Parsers() {
     Parser<Character> parser = Parsers.plus(isChar('a'), isChar('b'), isChar('c'));
     assertEquals("plus", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(parser, "c", 'c');
-    assertFailure(Parsers.plus(areChars("ab"), isChar('b'), isChar('c')), "a", 1, 2);
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'c', parser.parse("c", mode));
+    assertFailure(mode, Parsers.plus(areChars("ab"), isChar('b'), isChar('c')), "a", 1, 2);
   }
 
   @SuppressWarnings("unchecked")
@@ -278,44 +295,43 @@ public class ParsersTest extends BaseMockTest {
   public void testOr_withIterable() {
     Parser<Character> parser = Parsers.or(Arrays.asList(isChar('a'), isChar('b')));
     assertEquals("or", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(Parsers.or(areChars("ab"), isChar('a')), "a", 'a');
-    assertFailure(Parsers.or(areChars("abc"), areChars("ax")), "abx", 1, 3);
-    assertFailure(Parsers.or(areChars("ax"), areChars("abc")), "abx", 1, 3);
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'a', Parsers.or(areChars("ab"), isChar('a')).parse("a", mode));
+    assertFailure(mode, Parsers.or(areChars("abc"), areChars("ax")), "abx", 1, 3);
+    assertFailure(mode, Parsers.or(areChars("ax"), areChars("abc")), "abx", 1, 3);
   }
 
   @Test
   public void testOr_2Parsers() {
     Parser<Character> parser = Parsers.or(isChar('a'), isChar('b'));
     assertEquals("or", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(Parsers.or(areChars("ab"), isChar('a')), "a", 'a');
-    assertFailure(Parsers.or(areChars("abc"), areChars("ax")), "abx", 1, 3);
-    assertFailure(Parsers.or(areChars("ax"), areChars("abc")), "abx", 1, 3);
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'a', Parsers.or(areChars("ab"), isChar('a')).parse("a", mode));
+    assertFailure(mode, Parsers.or(areChars("abc"), areChars("ax")), "abx", 1, 3);
+    assertFailure(mode, Parsers.or(areChars("ax"), areChars("abc")), "abx", 1, 3);
   }
 
   @Test
   public void testOr_3Parsers() {
     Parser<Character> parser = Parsers.or(isChar('a'), isChar('b'), isChar('c'));
     assertEquals("or", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(parser, "c", 'c');
-    assertParser(Parsers.or(areChars("ab"), isChar('b'), isChar('a')), "a", 'a');
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'c', parser.parse("c", mode));
+    assertEquals((Object) 'a', Parsers.or(areChars("ab"), isChar('b'), isChar('a')).parse("a", mode));
   }
 
   @Test
   public void testOr_4Parsers() {
     Parser<Character> parser = Parsers.or(isChar('a'), isChar('b'), isChar('c'), isChar('d'));
     assertEquals("or", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(parser, "c", 'c');
-    assertParser(parser, "d", 'd');
-    assertParser(Parsers.or(areChars("ab"), isChar('b'), isChar('c'), isChar('a')),
-        "a", 'a');
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'c', parser.parse("c", mode));
+    assertEquals((Object) 'd', parser.parse("d", mode));
+    assertEquals((Object) 'a', Parsers.or(areChars("ab"), isChar('b'), isChar('c'), isChar('a')).parse("a", mode));
   }
 
   @Test
@@ -323,14 +339,13 @@ public class ParsersTest extends BaseMockTest {
     Parser<Character> parser =
         Parsers.or(isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'));
     assertEquals("or", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(parser, "c", 'c');
-    assertParser(parser, "d", 'd');
-    assertParser(parser, "e", 'e');
-    assertParser(Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
-            isChar('d'), isChar('a')),
-        "a", 'a');
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'c', parser.parse("c", mode));
+    assertEquals((Object) 'd', parser.parse("d", mode));
+    assertEquals((Object) 'e', parser.parse("e", mode));
+    assertEquals((Object) 'a', Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
+    isChar('d'), isChar('a')).parse("a", mode));
   }
 
   @Test
@@ -338,15 +353,14 @@ public class ParsersTest extends BaseMockTest {
     Parser<Character> parser =
         Parsers.or(isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'), isChar('f'));
     assertEquals("or", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(parser, "c", 'c');
-    assertParser(parser, "d", 'd');
-    assertParser(parser, "e", 'e');
-    assertParser(parser, "f", 'f');
-    assertParser(Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
-            isChar('d'), isChar('e'), isChar('a')),
-        "a", 'a');
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'c', parser.parse("c", mode));
+    assertEquals((Object) 'd', parser.parse("d", mode));
+    assertEquals((Object) 'e', parser.parse("e", mode));
+    assertEquals((Object) 'f', parser.parse("f", mode));
+    assertEquals((Object) 'a', Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
+    isChar('d'), isChar('e'), isChar('a')).parse("a", mode));
   }
 
   @Test
@@ -354,16 +368,15 @@ public class ParsersTest extends BaseMockTest {
     Parser<Character> parser = Parsers.or(
         isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'), isChar('f'), isChar('g'));
     assertEquals("or", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(parser, "c", 'c');
-    assertParser(parser, "d", 'd');
-    assertParser(parser, "e", 'e');
-    assertParser(parser, "f", 'f');
-    assertParser(parser, "g", 'g');
-    assertParser(Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
-            isChar('d'), isChar('e'), isChar('f'), isChar('a')),
-        "a", 'a');
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'c', parser.parse("c", mode));
+    assertEquals((Object) 'd', parser.parse("d", mode));
+    assertEquals((Object) 'e', parser.parse("e", mode));
+    assertEquals((Object) 'f', parser.parse("f", mode));
+    assertEquals((Object) 'g', parser.parse("g", mode));
+    assertEquals((Object) 'a', Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
+    isChar('d'), isChar('e'), isChar('f'), isChar('a')).parse("a", mode));
   }
 
   @Test
@@ -372,17 +385,16 @@ public class ParsersTest extends BaseMockTest {
         isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'), isChar('f'), isChar('g'),
         isChar('h'));
     assertEquals("or", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(parser, "c", 'c');
-    assertParser(parser, "d", 'd');
-    assertParser(parser, "e", 'e');
-    assertParser(parser, "f", 'f');
-    assertParser(parser, "g", 'g');
-    assertParser(parser, "h", 'h');
-    assertParser(Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
-            isChar('d'), isChar('e'), isChar('f'), isChar('g'), isChar('a')),
-        "a", 'a');
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'c', parser.parse("c", mode));
+    assertEquals((Object) 'd', parser.parse("d", mode));
+    assertEquals((Object) 'e', parser.parse("e", mode));
+    assertEquals((Object) 'f', parser.parse("f", mode));
+    assertEquals((Object) 'g', parser.parse("g", mode));
+    assertEquals((Object) 'h', parser.parse("h", mode));
+    assertEquals((Object) 'a', Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
+    isChar('d'), isChar('e'), isChar('f'), isChar('g'), isChar('a')).parse("a", mode));
   }
 
   @Test
@@ -391,18 +403,17 @@ public class ParsersTest extends BaseMockTest {
         isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'), isChar('f'), isChar('g'),
         isChar('h'), isChar('i'));
     assertEquals("or", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(parser, "c", 'c');
-    assertParser(parser, "d", 'd');
-    assertParser(parser, "e", 'e');
-    assertParser(parser, "f", 'f');
-    assertParser(parser, "g", 'g');
-    assertParser(parser, "h", 'h');
-    assertParser(parser, "i", 'i');
-    assertParser(Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
-            isChar('d'), isChar('e'), isChar('f'), isChar('g'), isChar('h'), isChar('a')),
-        "a", 'a');
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'c', parser.parse("c", mode));
+    assertEquals((Object) 'd', parser.parse("d", mode));
+    assertEquals((Object) 'e', parser.parse("e", mode));
+    assertEquals((Object) 'f', parser.parse("f", mode));
+    assertEquals((Object) 'g', parser.parse("g", mode));
+    assertEquals((Object) 'h', parser.parse("h", mode));
+    assertEquals((Object) 'i', parser.parse("i", mode));
+    assertEquals((Object) 'a', Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
+    isChar('d'), isChar('e'), isChar('f'), isChar('g'), isChar('h'), isChar('a')).parse("a", mode));
   }
 
   @SuppressWarnings("unchecked")
@@ -412,40 +423,39 @@ public class ParsersTest extends BaseMockTest {
         isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'), isChar('f'), isChar('g'),
         isChar('h'), isChar('i'), isChar('j'));
     assertEquals("or", parser.toString());
-    assertParser(parser, "a", 'a');
-    assertParser(parser, "b", 'b');
-    assertParser(parser, "c", 'c');
-    assertParser(parser, "d", 'd');
-    assertParser(parser, "e", 'e');
-    assertParser(parser, "f", 'f');
-    assertParser(parser, "g", 'g');
-    assertParser(parser, "h", 'h');
-    assertParser(parser, "i", 'i');
-    assertParser(Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
-            isChar('d'), isChar('e'), isChar('f'), isChar('g'), isChar('h'), isChar('i'),
-            isChar('a')),
-        "a", 'a');
+    assertEquals((Object) 'a', parser.parse("a", mode));
+    assertEquals((Object) 'b', parser.parse("b", mode));
+    assertEquals((Object) 'c', parser.parse("c", mode));
+    assertEquals((Object) 'd', parser.parse("d", mode));
+    assertEquals((Object) 'e', parser.parse("e", mode));
+    assertEquals((Object) 'f', parser.parse("f", mode));
+    assertEquals((Object) 'g', parser.parse("g", mode));
+    assertEquals((Object) 'h', parser.parse("h", mode));
+    assertEquals((Object) 'i', parser.parse("i", mode));
+    assertEquals((Object) 'a', Parsers.or(areChars("ab"), isChar('b'), isChar('c'),
+    isChar('d'), isChar('e'), isChar('f'), isChar('g'), isChar('h'), isChar('i'),
+    isChar('a')).parse("a", mode));
   }
 
   @Test
   public void testLonger() {
-    assertParser(Parsers.longer(isChar('a'), areChars("ab")), "ab", 'b');
-    assertParser(Parsers.longer(areChars("ab"), isChar('a')), "ab", 'b');
-    assertParser(Parsers.longer(areChars("ab"), areChars("abc")), "abc", 'c');
-    assertParser(Parsers.longer(areChars("abc"), areChars("ab")), "abc", 'c');
+    assertEquals((Object) 'b', Parsers.longer(isChar('a'), areChars("ab")).parse("ab", mode));
+    assertEquals((Object) 'b', Parsers.longer(areChars("ab"), isChar('a')).parse("ab", mode));
+    assertEquals((Object) 'c', Parsers.longer(areChars("ab"), areChars("abc")).parse("abc", mode));
+    assertEquals((Object) 'c', Parsers.longer(areChars("abc"), areChars("ab")).parse("abc", mode));
     assertEquals("longest", Parsers.longer(isChar('a'), isChar('b')).toString());
   }
 
   @Test
   public void testShorter() {
-    assertParser(Parsers.shorter(isChar('a'), areChars("ab")).followedBy(Scanners.isChar('b')),
-        "ab", 'a');
-    assertParser(Parsers.shorter(areChars("ab"), isChar('a')).followedBy(Scanners.isChar('b')),
-        "ab", 'a');
-    assertParser(Parsers.shorter(areChars("ab"), areChars("abc")).followedBy(Scanners.isChar('c')),
-        "abc", 'b');
-    assertParser(Parsers.shorter(areChars("abc"), areChars("ab")).followedBy(Scanners.isChar('c')),
-        "abc", 'b');
+    assertEquals((Object) 'a',
+        Parsers.shorter(isChar('a'), areChars("ab")).followedBy(Scanners.isChar('b')).parse("ab", mode));
+    assertEquals((Object) 'a',
+        Parsers.shorter(areChars("ab"), isChar('a')).followedBy(Scanners.isChar('b')).parse("ab", mode));
+    assertEquals((Object) 'b',
+        Parsers.shorter(areChars("ab"), areChars("abc")).followedBy(Scanners.isChar('c')).parse("abc", mode));
+    assertEquals((Object) 'b',
+        Parsers.shorter(areChars("abc"), areChars("ab")).followedBy(Scanners.isChar('c')).parse("abc", mode));
     assertEquals("shortest", Parsers.shorter(isChar('a'), isChar('b')).toString());
   }
 
@@ -465,11 +475,11 @@ public class ParsersTest extends BaseMockTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testLongest() {
-    assertParser(Parsers.longest(isChar('a'), isChar('b'), areChars("ab")), "ab", 'b');
-    assertParser(Parsers.longest(areChars("ab"), isChar('a')), "ab", 'b');
-    assertParser(Parsers.longest(areChars("ab"), areChars("abc")), "abc", 'c');
-    assertParser(Parsers.longest(areChars("abc"), areChars("ab")), "abc", 'c');
-    assertParser(Parsers.longest(Arrays.asList(areChars("abc"), areChars("ab"))), "abc", 'c');
+    assertEquals((Object) 'b', Parsers.longest(isChar('a'), isChar('b'), areChars("ab")).parse("ab", mode));
+    assertEquals((Object) 'b', Parsers.longest(areChars("ab"), isChar('a')).parse("ab", mode));
+    assertEquals((Object) 'c', Parsers.longest(areChars("ab"), areChars("abc")).parse("abc", mode));
+    assertEquals((Object) 'c', Parsers.longest(areChars("abc"), areChars("ab")).parse("abc", mode));
+    assertEquals((Object) 'c', Parsers.longest(Arrays.asList(areChars("abc"), areChars("ab"))).parse("abc", mode));
     assertEquals("longest", Parsers.longest(isChar('a'), isChar('b')).toString());
   }
 
@@ -489,29 +499,24 @@ public class ParsersTest extends BaseMockTest {
   @SuppressWarnings("unchecked")
   @Test
   public void testShortest() {
-    assertParser(Parsers.shortest(isChar('a'), areChars("ab")).followedBy(Scanners.isChar('b')),
-        "ab", 'a');
-    assertParser(Parsers.shortest(areChars("ab"), isChar('a')).followedBy(Scanners.isChar('b')),
-        "ab", 'a');
-    assertParser(Parsers.shortest(areChars("ab"), areChars("abc")).followedBy(Scanners.isChar('c')),
-        "abc", 'b');
-    assertParser(Parsers.shortest(areChars("abc"), areChars("ab")).followedBy(Scanners.isChar('c')),
-        "abc", 'b');
-    assertParser(Parsers.shortest(Arrays.asList(areChars("abc"), areChars("ab")))
-            .followedBy(Scanners.isChar('c')),
-        "abc", 'b');
+    assertEquals((Object) 'a', Parsers.shortest(isChar('a'), areChars("ab")).followedBy(Scanners.isChar('b')).parse("ab", mode));
+    assertEquals((Object) 'a', Parsers.shortest(areChars("ab"), isChar('a')).followedBy(Scanners.isChar('b')).parse("ab", mode));
+    assertEquals((Object) 'b', Parsers.shortest(areChars("ab"), areChars("abc")).followedBy(Scanners.isChar('c')).parse("abc", mode));
+    assertEquals((Object) 'b', Parsers.shortest(areChars("abc"), areChars("ab")).followedBy(Scanners.isChar('c')).parse("abc", mode));
+    assertEquals((Object) 'b', Parsers.shortest(Arrays.asList(areChars("abc"), areChars("ab")))
+    .followedBy(Scanners.isChar('c')).parse("abc", mode));
     assertEquals("shortest", Parsers.shortest(isChar('a'), isChar('b')).toString());
   }
 
   @Test
   public void testExpect() {
-    assertFailure(Parsers.expect("foo"), "", 1, 1, "foo expected");
+    assertFailure(mode, Parsers.expect("foo"), "", 1, 1, "foo expected");
     assertEquals("foo", Parsers.expect("foo").toString());
   }
 
   @Test
   public void testUnexpected() {
-    assertFailure(Parsers.unexpected("foo"), "", 1, 1, "unexpected foo");
+    assertFailure(mode, Parsers.unexpected("foo"), "", 1, 1, "unexpected foo");
     assertEquals("foo", Parsers.unexpected("foo").toString());
   }
   
@@ -523,15 +528,15 @@ public class ParsersTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = Parsers.sequence(isChar('a'), isChar('b'), map2);
     assertEquals(map2.toString(), parser.toString());
-    assertParser(parser, "ab", 1);
+    assertEquals((Object) 1, parser.parse("ab", mode));
   }
 
   @Test
   public void testSequence_withMap2_fails() {
     replay();
     Parser<Integer> parser = Parsers.sequence(isChar('a'), isChar('b'), map2);
-    assertFailure(parser, "xb", 1, 1);
-    assertFailure(parser, "ax", 1, 2);
+    assertFailure(mode, parser, "xb", 1, 1);
+    assertFailure(mode, parser, "ax", 1, 2);
   }
   
   @Mock Map3<Character, Character, Character, Integer> map3;
@@ -542,16 +547,16 @@ public class ParsersTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = Parsers.sequence(isChar('a'), isChar('b'), isChar('c'), map3);
     assertEquals(map3.toString(), parser.toString());
-    assertParser(parser, "abc", 1);
+    assertEquals((Object) 1, parser.parse("abc", mode));
   }
 
   @Test
   public void testSequence_withMap3_fails() {
     replay();
     Parser<Integer> parser = Parsers.sequence(isChar('a'), isChar('b'),isChar('c'), map3);
-    assertFailure(parser, "xbc", 1, 1);
-    assertFailure(parser, "axc", 1, 2);
-    assertFailure(parser, "abx", 1, 3);
+    assertFailure(mode, parser, "xbc", 1, 1);
+    assertFailure(mode, parser, "axc", 1, 2);
+    assertFailure(mode, parser, "abx", 1, 3);
   }
   
   @Mock Map4<Character, Character, Character, Character, Integer> map4;
@@ -563,7 +568,7 @@ public class ParsersTest extends BaseMockTest {
     Parser<Integer> parser =
         Parsers.sequence(isChar('a'), isChar('b'), isChar('c'), isChar('d'), map4);
     assertEquals(map4.toString(), parser.toString());
-    assertParser(parser, "abcd", 1);
+    assertEquals((Object) 1, parser.parse("abcd", mode));
   }
 
   @Test
@@ -571,10 +576,10 @@ public class ParsersTest extends BaseMockTest {
     replay();
     Parser<Integer> parser =
         Parsers.sequence(isChar('a'), isChar('b'),isChar('c'), isChar('d'), map4);
-    assertFailure(parser, "xbcd", 1, 1);
-    assertFailure(parser, "axcd", 1, 2);
-    assertFailure(parser, "abxd", 1, 3);
-    assertFailure(parser, "abcx", 1, 4);
+    assertFailure(mode, parser, "xbcd", 1, 1);
+    assertFailure(mode, parser, "axcd", 1, 2);
+    assertFailure(mode, parser, "abxd", 1, 3);
+    assertFailure(mode, parser, "abcx", 1, 4);
   }
   
   @Mock Map5<Character, Character, Character, Character, Character, Integer> map5;
@@ -586,7 +591,7 @@ public class ParsersTest extends BaseMockTest {
     Parser<Integer> parser =
         Parsers.sequence(isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'), map5);
     assertEquals(map5.toString(), parser.toString());
-    assertParser(parser, "abcde", 1);
+    assertEquals((Object) 1, parser.parse("abcde", mode));
   }
 
   @Test
@@ -594,11 +599,11 @@ public class ParsersTest extends BaseMockTest {
     replay();
     Parser<Integer> parser =
         Parsers.sequence(isChar('a'), isChar('b'),isChar('c'), isChar('d'), isChar('e'), map5);
-    assertFailure(parser, "xbcde", 1, 1);
-    assertFailure(parser, "axcde", 1, 2);
-    assertFailure(parser, "abxde", 1, 3);
-    assertFailure(parser, "abcxe", 1, 4);
-    assertFailure(parser, "abcdx", 1, 5);
+    assertFailure(mode, parser, "xbcde", 1, 1);
+    assertFailure(mode, parser, "axcde", 1, 2);
+    assertFailure(mode, parser, "abxde", 1, 3);
+    assertFailure(mode, parser, "abcxe", 1, 4);
+    assertFailure(mode, parser, "abcdx", 1, 5);
   }
   
   @Mock TokenMap<Integer> fromToken;
@@ -610,7 +615,7 @@ public class ParsersTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = Parsers.token(fromToken);
     assertEquals(fromToken.toString(), parser.toString());
-    assertParser(parser.from(Parsers.constant(token).times(1)), "", 2);
+    assertEquals((Object) 2, parser.from(Parsers.constant(token).times(1)).parse("", mode));
   }
 
   @Test
@@ -618,7 +623,7 @@ public class ParsersTest extends BaseMockTest {
     Token token = new Token(1, 1, 'a');
     expect(fromToken.map(token)).andReturn(null);
     replay();
-    assertFailure(
+    assertFailure(mode, 
         Parsers.token(fromToken).from(Parsers.constant(token).times(1)),
         "n", 1, 2);
   }
@@ -628,23 +633,22 @@ public class ParsersTest extends BaseMockTest {
     Token token = new Token(0, 1, 'a');
     Parser<Character> parser = Parsers.tokenType(Character.class, "character");
     assertEquals("character", parser.toString());
-    assertParser(parser.from(Parsers.constant(token).times(1)), "", 'a');
+    assertEquals((Object) 'a', parser.from(Parsers.constant(token).times(1)).parse("", mode));
   }
 
   @Test
   public void testAnyToken() {
     assertEquals("any token", Parsers.ANY_TOKEN.toString());
     Token token = new Token(0, 1, 'a');
-    assertParser(
-        Parsers.ANY_TOKEN.from(Parsers.constant(token).times(1)),
-        "", 'a');
-    assertFailure(
+    assertEquals(Character.valueOf('a'),
+        Parsers.ANY_TOKEN.from(Parsers.constant(token).times(1)).parse("", mode));
+    assertFailure(mode, 
         Parsers.ANY_TOKEN.from(Parsers.constant(token).times(0)), "", 1, 1);
   }
 
   @Test
   public void testIndex() {
-    assertParser(isChar('a').next(Parsers.INDEX), "a", 1);
+    assertEquals((Object) 1, isChar('a').next(Parsers.INDEX).parse("a", mode));
     assertEquals("getIndex", Parsers.INDEX.toString());
   }
 

@@ -14,20 +14,25 @@ import static org.junit.Assert.fail;
 
 import java.io.StringReader;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
+import org.codehaus.jparsec.Parser.Mode;
 import org.codehaus.jparsec.easymock.BaseMockTest;
 import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Maps;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 /**
  * Unit test for {@link Parser}.
  * 
  * @author Ben Yu
  */
+@RunWith(Parameterized.class)
 public class ParserTest extends BaseMockTest {
   
   private static final Parser<Integer> INTEGER = Scanners.INTEGER.source().map(Maps.TO_INTEGER);
@@ -35,13 +40,24 @@ public class ParserTest extends BaseMockTest {
   private static final Parser<String> FAILURE = Parsers.fail("failure");
   private static final Parser<Void> COMMA = Scanners.isChar(',');
 
+  @Parameterized.Parameters
+  public static Collection<Object[]> data() {
+          return Arrays.asList(new Object[] {Mode.PRODUCTION}, new Object[] {Mode.DEBUG});
+  }
+
+  private final Mode mode;
+
+  public ParserTest(Mode mode) {
+    this.mode = mode;
+  }
+
   @SuppressWarnings("deprecation")
   @Test
   public void testParse() throws Exception {
-    assertEquals("foo", FOO.parse(""));
-    assertFailure(FOO, "a", 1, 1, "EOF expected, a encountered.");
+    assertEquals("foo", FOO.parse("", mode));
+    assertFailure(mode, FOO, "a", 1, 1, "EOF expected, a encountered.");
     assertFailure(FOO, "a", 1, 1, "test module", "EOF expected, a encountered.");
-    assertEquals(new Integer(123), INTEGER.parse(new StringReader("123")));
+    assertEquals(new Integer(123), INTEGER.parse(new StringReader("123"), mode));
     try {
       INTEGER.parse(new StringReader("x"), "test module");
       fail();
@@ -56,28 +72,29 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void testSource() {
     assertEquals("source", FOO.source().toString());
-    assertParser(FOO.source(), "", "");
-    assertParser(COMMA.source(), ", ", ",", " ");
-    assertParser(Terminals.IntegerLiteral.TOKENIZER.label("INTEGER").source(), "123 ", "123", " ");
-    assertParser(
-        Parsers.tokenType(Integer.class, "int").from(INTEGER, Scanners.WHITESPACES).source(),
-        "123", "123");
+    assertEquals("", FOO.source().parse("", mode));
+    assertParser(mode, COMMA.source(), ", ", ",", " ");
+    assertParser(mode, Terminals.IntegerLiteral.TOKENIZER.label("INTEGER").source(), "123 ", "123", " ");
+    assertEquals("123",
+        Parsers.tokenType(Integer.class, "int")
+            .from(INTEGER, Scanners.WHITESPACES).source()
+            .parse("123", mode));
   }
 
   @Test
   public void testToken() {
     assertEquals("foo", FOO.token().toString());
-    assertParser(FOO.token(), "", new Token(0, 0, "foo"));
-    assertParser(INTEGER.token(), "123", new Token(0, 3, 123));
-    assertFailure(INTEGER.token(), "a", 1, 1);
+    assertEquals(new Token(0, 0, "foo"), FOO.token().parse("", mode));
+    assertEquals(new Token(0, 3, 123), INTEGER.token().parse("123", mode));
+    assertFailure(mode, INTEGER.token(), "a", 1, 1);
   }
 
   @Test
   public void testWithSource() {
     assertEquals("foo", FOO.withSource().toString());
-    assertParser(FOO.withSource(), "", new WithSource<String>("foo", ""));
-    assertParser(INTEGER.withSource(), "123", new WithSource<Integer>(123, "123"));
-    assertFailure(INTEGER.withSource(), "a", 1, 1);
+    assertEquals(new WithSource<String>("foo", ""), FOO.withSource().parse("", mode));
+    assertEquals(new WithSource<Integer>(123, "123"), INTEGER.withSource().parse("123", mode));
+    assertFailure(mode, INTEGER.withSource(), "a", 1, 1);
   }
   
   @Mock Map<Object, Parser<String>> next;
@@ -86,35 +103,35 @@ public class ParserTest extends BaseMockTest {
   public void testNext_withMap() {
     expect(next.map(1)).andReturn(FOO);
     replay();
-    assertParser(INTEGER.next(next), "1", "foo");
+    assertEquals("foo", INTEGER.next(next).parse("1", mode));
     assertEquals(next.toString(), INTEGER.next(next).toString());
   }
 
   @Test
   public void testNext_firstParserFails() {
     replay();
-    assertFailure(FAILURE.next(next), "", 1, 1, "failure");
+    assertFailure(mode, FAILURE.next(next), "", 1, 1, "failure");
   }
 
   @Test
   public void testNext_nextParserFails() {
     expect(next.map(123)).andReturn(FAILURE);
     replay();
-    assertFailure(INTEGER.next(next), "123", 1, 4, "failure");
+    assertFailure(mode, INTEGER.next(next), "123", 1, 4, "failure");
   }
 
   @Test
   public void testNext() {
     assertEquals("sequence", COMMA.next(INTEGER).toString());
-    assertParser(COMMA.next(INTEGER), ",123", 123);
-    assertFailure(FAILURE.next(FOO), "", 1, 1, "failure");
-    assertFailure(INTEGER.next(COMMA), "123", 1, 4);
+    assertEquals((Object) 123, COMMA.next(INTEGER).parse(",123", mode));
+    assertFailure(mode, FAILURE.next(FOO), "", 1, 1, "failure");
+    assertFailure(mode, INTEGER.next(COMMA), "123", 1, 4);
   }
 
   @Test
   public void testRetn() {
-    assertParser(COMMA.retn(1), ",", 1);
-    assertFailure(FAILURE.retn(1), "", 1, 1, "failure");
+    assertEquals((Object) 1, COMMA.retn(1).parse(",", mode));
+    assertFailure(mode, FAILURE.retn(1), "", 1, 1, "failure");
   }
 
   @Test
@@ -122,64 +139,65 @@ public class ParserTest extends BaseMockTest {
     Parser<String> comma = Scanners.isChar(',').source();
     Parser<?> dot = Scanners.isChar('.');
     Parser<List<Object>> parser = INTEGER.cast().or(comma).until(dot);
-    assertParser(parser, "123,456.", Arrays.<Object>asList(123, ",", 456), ".");
-    assertFailure(parser, "", 1, 1);
-    assertParser(parser, ".", Arrays.asList(), ".");
+    assertParser(mode, parser, "123,456.", Arrays.<Object>asList(123, ",", 456), ".");
+    assertFailure(mode, parser, "", 1, 1);
+    assertParser(mode, parser, ".", Arrays.asList(), ".");
   }
 
   @Test
   public void testFollowedBy() {
-    assertParser(INTEGER.followedBy(COMMA), "123,", 123);
-    assertFailure(FAILURE.followedBy(FOO), "", 1, 1, "failure");
-    assertFailure(INTEGER.followedBy(COMMA), "123", 1, 4, ", expected, EOF encountered.");
+    assertEquals((Object) 123, INTEGER.followedBy(COMMA).parse("123,", mode));
+    assertFailure(mode, FAILURE.followedBy(FOO), "", 1, 1, "failure");
+    assertFailure(mode, INTEGER.followedBy(COMMA), "123", 1, 4, ", expected, EOF encountered.");
   }
 
   @Test
   public void testNotFollowedBy() {
-    assertParser(INTEGER.notFollowedBy(COMMA), "123", 123);
-    assertParser(INTEGER.notFollowedBy(COMMA.times(2)).followedBy(COMMA), "123,", 123);
-    assertFailure(FAILURE.notFollowedBy(FOO), "", 1, 1, "failure");
-    assertFailure(INTEGER.notFollowedBy(COMMA), "123,", 1, 4, "unexpected ,.");
+    assertEquals((Object) 123, INTEGER.notFollowedBy(COMMA).parse("123", mode));
+    assertEquals((Object) 123,
+        INTEGER.notFollowedBy(COMMA.times(2)).followedBy(COMMA).parse("123,", mode));
+    assertFailure(mode, FAILURE.notFollowedBy(FOO), "", 1, 1, "failure");
+    assertFailure(mode, INTEGER.notFollowedBy(COMMA), "123,", 1, 4, "unexpected ,.");
   }
 
   @Test
   public void testSkipTimes() {
-    assertParser(isChar('a').skipTimes(3), "aaa", null);
-    assertFailure(isChar('a').skipTimes(3), "aa", 1, 3);
-    assertParser(areChars("ab").skipTimes(3), "ababab", null);
-    assertParser(FOO.skipTimes(3), "", null);
-    assertFailure(areChars("ab").skipTimes(3), "aba", 1, 4);
+    assertEquals(null, isChar('a').skipTimes(3).parse("aaa", mode));
+    assertFailure(mode, isChar('a').skipTimes(3), "aa", 1, 3);
+    assertEquals(null, areChars("ab").skipTimes(3).parse("ababab", mode));
+    assertEquals(null, FOO.skipTimes(3).parse("", mode));
+    assertFailure(mode, areChars("ab").skipTimes(3), "aba", 1, 4);
     assertEquals("skipTimes", INTEGER.skipTimes(1).toString());
   }
 
   @Test
   public void testTimes() {
     assertListParser(isChar('a').times(3), "aaa", 'a', 'a', 'a');
-    assertFailure(isChar('a').times(3), "aa", 1, 3);
+    assertFailure(mode, isChar('a').times(3), "aa", 1, 3);
     assertListParser(areChars("ab").times(3), "ababab", 'b', 'b', 'b');
     assertListParser(FOO.times(2), "", "foo", "foo");
-    assertFailure(areChars("ab").times(3), "aba", 1, 4);
+    assertFailure(mode, areChars("ab").times(3), "aba", 1, 4);
     assertEquals("times", INTEGER.times(1).toString());
   }
 
   @Test
   public void skipTimes_range() {
-    assertParser(isChar('a').skipTimes(0, 1), "", null);
-    assertFailure(isChar('a').skipTimes(1, 2), "", 1, 1);
-    assertFailure(areChars("ab").skipTimes(1, 2), "aba", 1, 4);
-    assertFailure(areChars("ab").skipTimes(1, 2), "aba", 1, 4);
-    assertParser(FOO.skipTimes(0, 1), "", null);
-    assertParser(FOO.skipTimes(1, 2), "", null);
-    assertParser(isChar('a').step(0).next(isChar('b')).skipTimes(1, 2), "aba", null, "a");
+    assertEquals(null, isChar('a').skipTimes(0, 1).parse("", mode));
+    assertFailure(mode, isChar('a').skipTimes(1, 2), "", 1, 1);
+    assertFailure(mode, areChars("ab").skipTimes(1, 2), "aba", 1, 4);
+    assertFailure(mode, areChars("ab").skipTimes(1, 2), "aba", 1, 4);
+    assertEquals(null, FOO.skipTimes(0, 1).parse("", mode));
+    assertEquals(null, FOO.skipTimes(1, 2).parse("", mode));
+    assertParser(mode, isChar('a').step(0).next(isChar('b')).skipTimes(1, 2), "aba", null, "a");
     assertEquals("skipTimes", isChar('a').skipTimes(1, 2).toString());
   }
 
   @Test
   public void testTimes_range() {
     assertListParser(isChar('a').times(0, 1), "");
-    assertFailure(isChar('a').times(1, 2), "", 1, 1);
-    assertFailure(areChars("ab").times(1, 2), "aba", 1, 4);
-    assertFailure(areChars("ab").times(1, 2), "aba", 1, 4);
+    assertFailure(mode, isChar('a').times(1, 2), "", 1, 1);
+    assertFailure(mode, areChars("ab").times(1, 2), "aba", 1, 4);
+    assertFailure(mode, areChars("ab").times(1, 2), "aba", 1, 4);
     assertListParser(FOO.times(0, 1), "", "foo");
     assertListParser(FOO.times(2, 3), "", "foo", "foo", "foo");
     assertListParser(isChar('a').step(0).next(isChar('b')).times(1, 2).followedBy(isChar('a')),
@@ -189,39 +207,39 @@ public class ParserTest extends BaseMockTest {
 
   @Test
   public void testSkipMany() {
-    assertParser(isChar('a').skipMany(), "", null);
-    assertParser(isChar('a').skipMany(), "a", null);
-    assertParser(isChar('a').skipMany(), "aaa", null);
-    assertFailure(areChars("ab").skipMany(), "aba", 1, 4);
-    assertParser(FOO.skipMany(), "", null);
-    assertParser(isChar('a').skipAtLeast(0), "", null);
-    assertFailure(isChar('a').skipAtLeast(1), "", 1, 1);
-    assertFailure(areChars("ab").skipAtLeast(1), "aba", 1, 4);
-    assertFailure(areChars("ab").skipAtLeast(2), "aba", 1, 4);
-    assertParser(FOO.skipAtLeast(0), "", null);
-    assertParser(FOO.skipAtLeast(2), "", null);
-    assertParser(isChar('a').step(0).next(isChar('b')).skipMany(), "a", null, "a");
+    assertEquals(null, isChar('a').skipMany().parse("", mode));
+    assertEquals(null, isChar('a').skipMany().parse("a", mode));
+    assertEquals(null, isChar('a').skipMany().parse("aaa", mode));
+    assertFailure(mode, areChars("ab").skipMany(), "aba", 1, 4);
+    assertEquals(null, FOO.skipMany().parse("", mode));
+    assertEquals(null, isChar('a').skipAtLeast(0).parse("", mode));
+    assertFailure(mode, isChar('a').skipAtLeast(1), "", 1, 1);
+    assertFailure(mode, areChars("ab").skipAtLeast(1), "aba", 1, 4);
+    assertFailure(mode, areChars("ab").skipAtLeast(2), "aba", 1, 4);
+    assertEquals(null, FOO.skipAtLeast(0).parse("", mode));
+    assertEquals(null, FOO.skipAtLeast(2).parse("", mode));
+    assertParser(mode, isChar('a').step(0).next(isChar('b')).skipMany(), "a", null, "a");
     assertEquals("skipAtLeast", isChar('a').skipMany().toString());
     assertEquals("skipAtLeast", isChar('a').skipAtLeast(2).toString());
   }
 
   @Test
   public void testSkipMany1() {
-    assertFailure(isChar('a').skipMany1(), "", 1, 1);
-    assertParser(isChar('a').skipMany1(), "a", null);
-    assertParser(isChar('a').skipMany1(), "aaa", null);
-    assertFailure(areChars("ab").skipMany1(), "aba", 1, 4);
-    assertParser(FOO.skipMany1(), "", null);
-    assertParser(isChar('a').step(0).next(isChar('b')).skipMany1(), "aba", null, "a");
+    assertFailure(mode, isChar('a').skipMany1(), "", 1, 1);
+    assertEquals(null, isChar('a').skipMany1().parse("a", mode));
+    assertEquals(null, isChar('a').skipMany1().parse("aaa", mode));
+    assertFailure(mode, areChars("ab").skipMany1(), "aba", 1, 4);
+    assertEquals(null, FOO.skipMany1().parse("", mode));
+    assertParser(mode, isChar('a').step(0).next(isChar('b')).skipMany1(), "aba", null, "a");
     assertEquals("skipAtLeast", isChar('a').skipMany1().toString());
   }
 
   @Test
   public void testMany1() {
-    assertFailure(isChar('a').many1(), "", 1, 1);
+    assertFailure(mode, isChar('a').many1(), "", 1, 1);
     assertListParser(isChar('a').many1(), "a", 'a');
     assertListParser(isChar('a').many1(), "aaa", 'a', 'a', 'a');
-    assertFailure(areChars("ab").many1(), "aba", 1, 4);
+    assertFailure(mode, areChars("ab").many1(), "aba", 1, 4);
     assertListParser(FOO.many1(), "", "foo");
     assertListParser(isChar('a').step(0).next(isChar('b')).many1().followedBy(isChar('a')),
         "aba", 'b');
@@ -233,12 +251,12 @@ public class ParserTest extends BaseMockTest {
     assertListParser(isChar('a').many(), "");
     assertListParser(isChar('a').many(), "a", 'a');
     assertListParser(isChar('a').many(), "aaa", 'a', 'a', 'a');
-    assertFailure(areChars("ab").many(), "aba", 1, 4);
+    assertFailure(mode, areChars("ab").many(), "aba", 1, 4);
     assertListParser(FOO.many(), "");
     assertListParser(isChar('a').atLeast(0), "");
-    assertFailure(isChar('a').atLeast(1), "", 1, 1);
-    assertFailure(areChars("ab").atLeast(1), "aba", 1, 4);
-    assertFailure(areChars("ab").atLeast(2), "aba", 1, 4);
+    assertFailure(mode, isChar('a').atLeast(1), "", 1, 1);
+    assertFailure(mode, areChars("ab").atLeast(1), "aba", 1, 4);
+    assertFailure(mode, areChars("ab").atLeast(2), "aba", 1, 4);
     assertListParser(FOO.atLeast(0), "");
     assertListParser(FOO.atLeast(2), "", "foo", "foo");
     assertListParser(isChar('a').step(0).next(isChar('b')).many().followedBy(isChar('a')), "a");
@@ -249,57 +267,59 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void testOr() {
     assertEquals("or", INTEGER.or(INTEGER).toString());
-    assertParser(INTEGER.or(constant(456)), "123", 123);
-    assertParser(isChar('a').or(constant('b')), "", 'b');
-    assertParser(areChars("ab").or(isChar('a')), "a", 'a');
+    assertEquals((Object) 123, INTEGER.or(constant(456)).parse("123", mode));
+    assertEquals((Object) 'b', isChar('a').or(constant('b')).parse("", mode));
+    assertEquals((Object) 'a', areChars("ab").or(isChar('a')).parse("a", mode));
     assertListParser(areChars("ab").or(isChar('a')).many(), "a", 'a');
-    assertFailure(areChars("ab").or(isChar('a')), "x", 1, 1);
+    assertFailure(mode, areChars("ab").or(isChar('a')), "x", 1, 1);
   }
 
   @Test
   public void testOptional() {
-    assertParser(INTEGER.optional(), "12", 12);
-    assertParser(INTEGER.optional(), "", null);
-    assertFailure(areChars("ab").optional(), "a", 1, 2);
+    assertEquals((Object) 12, INTEGER.optional().parse("12", mode));
+    assertEquals(null, INTEGER.optional().parse("", mode));
+    assertFailure(mode, areChars("ab").optional(), "a", 1, 2);
   }
 
   @Test
   public void testOptional_withDefaultValue() {
-    assertParser(INTEGER.optional(0), "12", 12);
-    assertParser(INTEGER.optional(0), "", 0);
-    assertFailure(areChars("ab").optional('x'), "a", 1, 2);
+    assertEquals((Object) 12, INTEGER.optional(0).parse("12", mode));
+    assertEquals((Object) 0, INTEGER.optional(0).parse("", mode));
+    assertFailure(mode, areChars("ab").optional('x'), "a", 1, 2);
   }
 
   @Test
   public void testNot() {
-    assertParser(INTEGER.not(), "", null);
-    assertFailure(INTEGER.not(), "12", 1, 1);
-    assertParser(areChars("ab").not(), "a", null, "a");
-    assertParser(INTEGER.not("num"), "", null);
-    assertFailure(INTEGER.not("num"), "12", 1, 1, "unexpected num");
+    assertEquals(null, INTEGER.not().parse("", mode));
+    assertFailure(mode, INTEGER.not(), "12", 1, 1);
+    assertParser(mode, areChars("ab").not(), "a", null, "a");
+    assertEquals(null, INTEGER.not("num").parse("", mode));
+    assertFailure(mode, INTEGER.not("num"), "12", 1, 1, "unexpected num");
   }
 
   @Test
   public void testPeek() {
-    assertParser(INTEGER.peek(), "12", 12, "12");
-    assertFailure(INTEGER.peek(), "a", 1, 1);
-    assertFailure(areChars("ab").peek(), "a", 1, 2);
-    assertFailure(Parsers.plus(areChars("ab").peek(), isChar('a')), "a", 1, 2);
+    assertParser(mode, INTEGER.peek(), "12", 12, "12");
+    assertFailure(mode, INTEGER.peek(), "a", 1, 1);
+    assertFailure(mode, areChars("ab").peek(), "a", 1, 2);
+    assertFailure(mode, Parsers.plus(areChars("ab").peek(), isChar('a')), "a", 1, 2);
     assertEquals("peek", INTEGER.peek().toString());
   }
 
   @Test
   public void testAtomic() {
     assertEquals("integer", INTEGER.atomic().toString());
-    assertParser(areChars("ab").atomic(), "ab", 'b');
-    assertParser(Parsers.plus(areChars("ab").atomic(), isChar('a')), "a", 'a');
-    assertFailure(areChars("ab").atomic(), "a", 1, 2);
+    assertEquals((Object) 'b', areChars("ab").atomic().parse("ab", mode));
+    assertEquals((Object) 'a',
+        Parsers.plus(areChars("ab").atomic(), isChar('a')).parse("a", mode));
+    assertFailure(mode, areChars("ab").atomic(), "a", 1, 2);
   }
 
   @Test
   public void testStep() {
     assertEquals(INTEGER.toString(), INTEGER.step(0).toString());
-    assertParser(Parsers.plus(areChars("ab").step(0).next(isChar('c')), areChars("ab")), "ab", 'b');
+    assertEquals((Object) 'b',
+        Parsers.plus(areChars("ab").step(0).next(isChar('c')), areChars("ab")).parse("ab", mode));
   }
 
   @Test
@@ -314,44 +334,44 @@ public class ParserTest extends BaseMockTest {
 
   @Test
   public void testSucceeds() {
-    assertParser(isChar('a').succeeds(), "ab", true, "b");
-    assertParser(isChar('a').succeeds(), "xb", false, "xb");
-    assertParser(areChars("ab").succeeds(), "ax", false, "ax");
+    assertParser(mode, isChar('a').succeeds(), "ab", true, "b");
+    assertParser(mode, isChar('a').succeeds(), "xb", false, "xb");
+    assertParser(mode, areChars("ab").succeeds(), "ax", false, "ax");
   }
 
   @Test
   public void testFails() {
-    assertParser(isChar('a').fails(), "ab", false, "b");
-    assertParser(isChar('a').fails(), "xb", true, "xb");
-    assertParser(areChars("ab").fails(), "ax", true, "ax");
+    assertParser(mode, isChar('a').fails(), "ab", false, "b");
+    assertParser(mode, isChar('a').fails(), "xb", true, "xb");
+    assertParser(mode, areChars("ab").fails(), "ax", true, "ax");
   }
 
   @Test
   public void testIfElse() {
     Parser<Integer> parser = areChars("ab").ifelse(INTEGER, constant(0));
     assertEquals("ifelse", parser.toString());
-    assertParser(parser, "ab12", 12);
-    assertParser(parser, "", 0);
-    assertParser(parser, "a", 0, "a");
+    assertEquals((Object) 12, parser.parse("ab12", mode));
+    assertEquals((Object) 0, parser.parse("", mode));
+    assertParser(mode, parser, "a", 0, "a");
   }
 
   @Test
   public void testIfElse_withNext() {
     expect(next.map('b')).andReturn(FOO);
     replay();
-    assertParser(areChars("ab").ifelse(next, constant("bar")), "ab", "foo");
+    assertEquals("foo", areChars("ab").ifelse(next, constant("bar")).parse("ab", mode));
   }
 
   @Test
   public void testLabel() {
-    assertParser(FOO.label("the foo"), "", "foo");
-    assertFailure(INTEGER.label("number"), "", 1, 1, "number");
+    assertEquals("foo", FOO.label("the foo").parse("", mode));
+    assertFailure(mode, INTEGER.label("number"), "", 1, 1, "number");
   }
 
   @Test
   public void labelShouldOverrideImplicitErrorMessage() {
     try {
-      Scanners.string("foo").label("bar").parse("fo");
+      Scanners.string("foo").label("bar").parse("fo", mode);
       fail();
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("bar"));
@@ -362,7 +382,7 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void labelShouldOverrideLabelMessage() {
     try {
-      Scanners.string("foo").label("bar").label("override").parse("fo");
+      Scanners.string("foo").label("bar").label("override").parse("fo", mode);
       fail();
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("override"));
@@ -374,7 +394,7 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void labelShouldOverrideFromAcrossAtomic() {
     try {
-      Scanners.string("foo").label("bar").atomic().label("override").parse("fo");
+      Scanners.string("foo").label("bar").atomic().label("override").parse("fo", mode);
       fail();
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("override"));
@@ -386,7 +406,7 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void labelShouldOverrideFromAcrossCast() {
     try {
-      Scanners.string("foo").label("bar").cast().label("override").parse("fo");
+      Scanners.string("foo").label("bar").cast().label("override").parse("fo", mode);
       fail();
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("override"));
@@ -398,7 +418,7 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void labelShouldOverrideFromAcrossPeek() {
     try {
-      Scanners.string("foo").label("bar").peek().label("override").parse("fo");
+      Scanners.string("foo").label("bar").peek().label("override").parse("fo", mode);
       fail();
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("override"));
@@ -410,7 +430,7 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void labelShouldOverrideFromAcrossAtomicAndPeek() {
     try {
-      Scanners.string("foo").label("bar").atomic().peek().label("override").parse("fo");
+      Scanners.string("foo").label("bar").atomic().peek().label("override").parse("fo", mode);
       fail();
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("override"));
@@ -422,7 +442,7 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void labelShouldOverrideFromAcrossStep() {
     try {
-      Scanners.string("foo").label("bar").step(1).label("override").parse("fo");
+      Scanners.string("foo").label("bar").step(1).label("override").parse("fo", mode);
       fail();
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("override"));
@@ -434,7 +454,7 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void succeedsShouldNotLeaveErrorBehind() {
     try {
-      Scanners.string("foo").succeeds().parse("fo");
+      Scanners.string("foo").succeeds().parse("fo", mode);
       fail();
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("EOF"));
@@ -446,12 +466,12 @@ public class ParserTest extends BaseMockTest {
   public void testCast() {
     Parser<String> parser = Parsers.<CharSequence>constant("chars").<String>cast();
     assertEquals("chars", parser.toString());
-    assertParser(parser, "", "chars");
+    assertEquals("chars", parser.parse("", mode));
   }
 
   @Test
   public void testBetween() {
-    assertParser(INTEGER.between(isChar('('), isChar(')')), "(123)", 123);
+    assertEquals((Object) 123, INTEGER.between(isChar('('), isChar(')')).parse("(123)", mode));
   }
   
   @Mock Map<Integer, String> map;
@@ -460,14 +480,14 @@ public class ParserTest extends BaseMockTest {
   public void testMap() {
     expect(map.map(12)).andReturn("foo");
     replay();
-    assertParser(INTEGER.map(map), "12", "foo");
+    assertEquals("foo", INTEGER.map(map).parse("12", mode));
     assertEquals(map.toString(), INTEGER.map(map).toString());
   }
 
   @Test
   public void testMap_fails() {
     replay();
-    assertFailure(INTEGER.map(map), "", 1, 1, "integer expected, EOF encountered.");
+    assertFailure(mode, INTEGER.map(map), "", 1, 1, "integer expected, EOF encountered.");
   }
 
   @Test
@@ -477,8 +497,8 @@ public class ParserTest extends BaseMockTest {
     assertListParser(parser, "123,45", 123, 45);
     assertListParser(parser.followedBy(Scanners.isChar(' ')), "1 ", 1);
     assertListParser(parser.followedBy(isChar(',')), "1,", 1);
-    assertFailure(parser, "", 1, 1);
-    assertFailure(areChars("ab").sepBy1(isChar(',')), "ab,a", 1, 5);
+    assertFailure(mode, parser, "", 1, 1);
+    assertFailure(mode, areChars("ab").sepBy1(isChar(',')), "ab,a", 1, 5);
   }
 
   @Test
@@ -489,7 +509,7 @@ public class ParserTest extends BaseMockTest {
     assertListParser(parser.followedBy(isChar(' ')), "1 ", 1);
     assertListParser(parser, "");
     assertListParser(parser.followedBy(isChar(',')), "1,", 1);
-    assertFailure(areChars("ab").sepBy(isChar(',')), "ab,a", 1, 5);
+    assertFailure(mode, areChars("ab").sepBy(isChar(',')), "ab,a", 1, 5);
   }
 
   @Test
@@ -499,8 +519,8 @@ public class ParserTest extends BaseMockTest {
     assertListParser(parser, "1;", 1);
     assertListParser(parser, "12;3;", 12, 3);
     assertListParser(parser.followedBy(isChar(';')), ";");
-    assertFailure(parser, "1", 1, 2);
-    assertFailure(areChars("ab").endBy(isChar(';')), "ab;a", 1, 5);
+    assertFailure(mode, parser, "1", 1, 2);
+    assertFailure(mode, areChars("ab").endBy(isChar(';')), "ab;a", 1, 5);
   }
 
   @Test
@@ -508,10 +528,10 @@ public class ParserTest extends BaseMockTest {
     Parser<List<Integer>> parser = INTEGER.endBy1(isChar(';'));
     assertListParser(parser, "1;", 1);
     assertListParser(parser, "12;3;", 12, 3);
-    assertFailure(parser, "", 1, 1);
-    assertFailure(parser, ";", 1, 1);
-    assertFailure(parser, "1", 1, 2);
-    assertFailure(areChars("ab").endBy1(isChar(';')), "ab;a", 1, 5);
+    assertFailure(mode, parser, "", 1, 1);
+    assertFailure(mode, parser, ";", 1, 1);
+    assertFailure(mode, parser, "1", 1, 2);
+    assertFailure(mode, areChars("ab").endBy1(isChar(';')), "ab;a", 1, 5);
   }
 
   @Test
@@ -520,10 +540,10 @@ public class ParserTest extends BaseMockTest {
     assertListParser(parser, "1,2", 1, 2);
     assertListParser(parser, "1", 1);
     assertListParser(parser, "1,", 1);
-    assertFailure(parser, ",", 1, 1);
-    assertFailure(parser, "", 1, 1);
-    assertFailure(parser.next(Parsers.EOF), "1,,", 1, 3);
-    assertFailure(areChars("ab").sepEndBy1(isChar(';')), "ab;a", 1, 5);
+    assertFailure(mode, parser, ",", 1, 1);
+    assertFailure(mode, parser, "", 1, 1);
+    assertFailure(mode, parser.next(Parsers.EOF), "1,,", 1, 3);
+    assertFailure(mode, areChars("ab").sepEndBy1(isChar(';')), "ab;a", 1, 5);
     
     // atomize on delimiter
     assertListParser(INTEGER.sepEndBy1(COMMA.next(COMMA).atomic()).followedBy(COMMA),
@@ -534,13 +554,13 @@ public class ParserTest extends BaseMockTest {
         "1,", 1);
     
     // partial delimiter consumption
-    assertFailure(INTEGER.sepEndBy1(COMMA.next(COMMA)), "1,", 1, 3, ", expected, EOF encountered.");
+    assertFailure(mode, INTEGER.sepEndBy1(COMMA.next(COMMA)), "1,", 1, 3, ", expected, EOF encountered.");
     
     // infinite loop.
     assertListParser(Parsers.always().sepEndBy1(Parsers.always()), "", (Integer) null);
     
     // partial consumption on delimited.
-    assertFailure(INTEGER.followedBy(COMMA).sepEndBy1(COMMA),
+    assertFailure(mode, INTEGER.followedBy(COMMA).sepEndBy1(COMMA),
         "1,,1", 1, 5, ", expected, EOF encountered.");
     
     // 0 step partial delimited consumption
@@ -556,8 +576,8 @@ public class ParserTest extends BaseMockTest {
     assertListParser(parser, "1,", 1);
     assertListParser(parser.followedBy(isChar(',')), ",");
     assertListParser(parser, "");
-    assertFailure(parser.next(Parsers.EOF), "1,,", 1, 3);
-    assertFailure(areChars("ab").sepEndBy(isChar(';')), "ab;a", 1, 5);
+    assertFailure(mode, parser.next(Parsers.EOF), "1,,", 1, 3);
+    assertFailure(mode, areChars("ab").sepEndBy(isChar(';')), "ab;a", 1, 5);
     
     // atomize on delimiter
     assertListParser(INTEGER.sepEndBy(COMMA.next(COMMA).atomic()).followedBy(COMMA),
@@ -568,13 +588,13 @@ public class ParserTest extends BaseMockTest {
         "1,", 1);
     
     // partial delimiter consumption
-    assertFailure(INTEGER.sepEndBy(COMMA.next(COMMA)), "1,", 1, 3, ", expected, EOF encountered.");
+    assertFailure(mode, INTEGER.sepEndBy(COMMA.next(COMMA)), "1,", 1, 3, ", expected, EOF encountered.");
     
     // infinite loop.
     assertListParser(Parsers.always().sepEndBy(Parsers.always()), "", (Integer) null);
     
     // partial consumption on delimited.
-    assertFailure(INTEGER.followedBy(COMMA).sepEndBy(COMMA),
+    assertFailure(mode, INTEGER.followedBy(COMMA).sepEndBy(COMMA),
         "1,,1", 1, 5, ", expected, EOF encountered.");
     
     // 0 step partial delimited consumption
@@ -594,7 +614,7 @@ public class ParserTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = INTEGER.prefix(isChar('-').retn(unaryOp));
     assertEquals("prefix", parser.toString());
-    assertParser(parser, "123", 123);
+    assertEquals((Object) 123, parser.parse("123", mode));
   }
 
   @Test
@@ -605,7 +625,7 @@ public class ParserTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = INTEGER.prefix(isChar('-').retn(unaryOp));
     assertEquals("prefix", parser.toString());
-    assertParser(parser, "---1", -1);
+    assertEquals(Integer.valueOf(-1), parser.parse("---1", mode));
   }
 
   @Test
@@ -613,7 +633,7 @@ public class ParserTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = INTEGER.postfix(isChar('^').retn(unaryOp));
     assertEquals("postfix", parser.toString());
-    assertParser(parser, "123", 123);
+    assertEquals((Object) 123, parser.parse("123", mode));
   }
 
   @Test
@@ -623,7 +643,7 @@ public class ParserTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = INTEGER.postfix(isChar('^').retn(unaryOp));
     assertEquals("postfix", parser.toString());
-    assertParser(parser, "2^^", 256);
+    assertEquals((Object) 256, parser.parse("2^^", mode));
   }
   
   @Mock Map2<Integer, Integer, Integer> binaryOp;
@@ -633,7 +653,7 @@ public class ParserTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = INTEGER.infixn(isChar('+').retn(binaryOp));
     assertEquals("infixn", parser.toString());
-    assertParser(parser, "1", 1);
+    assertEquals((Object) 1, parser.parse("1", mode));
   }
 
   @Test
@@ -642,7 +662,7 @@ public class ParserTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = INTEGER.infixn(isChar('+').retn(binaryOp));
     assertEquals("infixn", parser.toString());
-    assertParser(parser, "1+2+3", 3, "+3");
+    assertParser(mode, parser, "1+2+3", 3, "+3");
   }
 
   @Test
@@ -650,7 +670,7 @@ public class ParserTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = INTEGER.infixl(isChar('+').retn(binaryOp));
     assertEquals("infixl", parser.toString());
-    assertParser(parser, "1", 1);
+    assertEquals((Object) 1, parser.parse("1", mode));
   }
 
   @Test
@@ -660,13 +680,13 @@ public class ParserTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = INTEGER.infixl(isChar('-').retn(binaryOp));
     assertEquals("infixl", parser.toString());
-    assertParser(parser, "4-1-2", 1);
+    assertEquals((Object) 1, parser.parse("4-1-2", mode));
   }
 
   @Test
   public void testInfixl_fails() {
     replay();
-    assertFailure(INTEGER.infixl(isChar('-').retn(binaryOp)), "4-1-", 1, 5);
+    assertFailure(mode, INTEGER.infixl(isChar('-').retn(binaryOp)), "4-1-", 1, 5);
   }
 
   @Test
@@ -674,7 +694,7 @@ public class ParserTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = INTEGER.infixr(isChar('+').retn(binaryOp));
     assertEquals("infixr", parser.toString());
-    assertParser(parser, "1", 1);
+    assertEquals((Object) 1, parser.parse("1", mode));
   }
 
   @Test
@@ -684,13 +704,13 @@ public class ParserTest extends BaseMockTest {
     replay();
     Parser<Integer> parser = INTEGER.infixr(string("->").retn(binaryOp));
     assertEquals("infixr", parser.toString());
-    assertParser(parser, "4->1->2", 412);
+    assertEquals((Object) 412, parser.parse("4->1->2", mode));
   }
 
   @Test
   public void testInfixr_fails() {
     replay();
-    assertFailure(INTEGER.infixr(isChar('-').retn(binaryOp)), "4-1-", 1, 5);
+    assertFailure(mode, INTEGER.infixr(isChar('-').retn(binaryOp)), "4-1-", 1, 5);
   }
 
   @Test
@@ -698,21 +718,21 @@ public class ParserTest extends BaseMockTest {
     List<Token> tokenList = Arrays.asList(new Token(0, 2, 'a'), new Token(2, 3, 4L));
     Parser<Long> parser = Terminals.CharLiteral.PARSER.next(Terminals.LongLiteral.PARSER);
     Parser<List<Token>> lexeme = constant(tokenList);
-    assertParser(parser.from(lexeme), "", 4L);
-    assertFailure(Terminals.CharLiteral.PARSER.from(constant(Arrays.<Token>asList())),
+    assertEquals((Object) 4L, parser.from(lexeme).parse("", mode));
+    assertFailure(mode, Terminals.CharLiteral.PARSER.from(constant(Arrays.<Token>asList())),
         "", 1, 1, "character literal expected, EOF encountered.");
     assertListParser(Parsers.ANY_TOKEN.many().from(lexeme), "", 'a', 4L);
-    assertFailure(Parsers.ANY_TOKEN.from(lexeme), "abcde", 1, 3);
-    assertFailure(Parsers.always().from(Parsers.<List<Token>>fail("foo")), "", 1, 1);
+    assertFailure(mode, Parsers.ANY_TOKEN.from(lexeme), "abcde", 1, 3);
+    assertFailure(mode, Parsers.always().from(Parsers.<List<Token>>fail("foo")), "", 1, 1);
     Parser<String> badParser = Terminals.CharLiteral.PARSER.next(Terminals.Identifier.PARSER);
-    assertFailure(badParser.from(lexeme), "aabbb", 1, 3);
+    assertFailure(mode, badParser.from(lexeme), "aabbb", 1, 3);
   }
 
   @Test
   public void testFrom_throwsOnScanners() {
-    assertFailure(string("foo").from(constant(Arrays.asList(new Token(0, 3, "foo")))),
+    assertFailure(mode, string("foo").from(constant(Arrays.asList(new Token(0, 3, "foo")))),
         "foo", 1, 1, "Cannot scan characters on tokens.");
-    assertFailure(isChar('f').from(constant(Arrays.asList(new Token(0, 1, 'f')))),
+    assertFailure(mode, isChar('f').from(constant(Arrays.asList(new Token(0, 1, 'f')))),
         "f", 1, 1, "Cannot scan characters on tokens.");
   }
 
@@ -728,10 +748,11 @@ public class ParserTest extends BaseMockTest {
   @Test
   public void testLexer() {
     Parser<List<Token>> parser = Terminals.LongLiteral.DEC_TOKENIZER.lexer(Scanners.WHITESPACES);
-    assertParser(parser, "", Arrays.<Token>asList());
-    assertParser(parser, "  ", Arrays.<Token>asList());
-    assertParser(parser, " 12  ", Arrays.<Token>asList(new Token(1, 2, 12L)));
-    assertParser(parser, "12 3  ", Arrays.<Token>asList(new Token(0, 2, 12L), new Token(3, 1, 3L)));
+    assertEquals(Arrays.<Token>asList(), parser.parse("", mode));
+    assertEquals(Arrays.<Token>asList(), parser.parse("  ", mode));
+    assertEquals(Arrays.<Token>asList(new Token(1, 2, 12L)), parser.parse(" 12  ", mode));
+    assertEquals(Arrays.<Token>asList(new Token(0, 2, 12L), new Token(3, 1, 3L)),
+        parser.parse("12 3  ", mode));
   }
 
   @Test
@@ -741,9 +762,9 @@ public class ParserTest extends BaseMockTest {
     assertEquals(content, to.toString());
   }
 
-  private static void assertListParser(
+  private void assertListParser(
       Parser<? extends List<?>> parser, String source, Object... expected) {
-    assertList(parser.parse(source), expected);
+    assertList(parser.parse(source, mode), expected);
   }
   
   private static void assertList(Object actual, Object... expected) {

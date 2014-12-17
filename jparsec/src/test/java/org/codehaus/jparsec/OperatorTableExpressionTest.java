@@ -1,7 +1,7 @@
 package org.codehaus.jparsec;
 
-import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.easymock.EasyMock.expect;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
 import org.codehaus.jparsec.easymock.BaseMockTest;
@@ -47,7 +47,7 @@ public class OperatorTableExpressionTest extends BaseMockTest {
     expect(multiply.map("-20", "3")).andReturn("-60");
     expect(plus.map("2.0", "-60")).andReturn("-58.0");
     replay();
-    assertParser(parser(), source, "-58.0");
+    assertEquals("-58.0", parser().parse(source));
   }
 
   @Test

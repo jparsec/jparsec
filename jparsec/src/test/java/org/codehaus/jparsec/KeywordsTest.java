@@ -1,7 +1,6 @@
 package org.codehaus.jparsec;
 
 import static java.util.Arrays.asList;
-import static org.codehaus.jparsec.Asserts.assertParser;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
@@ -24,10 +23,10 @@ public class KeywordsTest {
       assertEquals(Tokens.reserved(keyword), lexicon.word(keyword));
     }
     for (String keyword : keywords) {
-      assertParser(lexicon.tokenizer, keyword, Tokens.reserved(keyword));
+      assertEquals(Tokens.reserved(keyword), lexicon.tokenizer.parse(keyword));
     }
-    assertParser(lexicon.tokenizer, "FOO", Tokens.identifier("FOO"));
-    assertParser(lexicon.tokenizer, "baz", Tokens.identifier("baz"));
+    assertEquals(Tokens.identifier("FOO"), lexicon.tokenizer.parse("FOO"));
+    assertEquals(Tokens.identifier("baz"), lexicon.tokenizer.parse("baz"));
   }
 
   @Test
@@ -40,11 +39,10 @@ public class KeywordsTest {
       assertEquals(Tokens.reserved(keyword), lexicon.word(keyword.toUpperCase()));
     }
     for (String keyword : keywords) {
-      assertParser(lexicon.tokenizer, keyword, Tokens.reserved(keyword));
-      assertParser(
-          lexicon.tokenizer, keyword.toUpperCase(), Tokens.reserved(keyword));
+      assertEquals(Tokens.reserved(keyword), lexicon.tokenizer.parse(keyword));
+      assertEquals(Tokens.reserved(keyword), lexicon.tokenizer.parse(keyword.toUpperCase()));
     }
-    assertParser(lexicon.tokenizer, "baz", Tokens.identifier("baz"));
+    assertEquals(Tokens.identifier("baz"), lexicon.tokenizer.parse("baz"));
   }
 
   @Test
