@@ -22,6 +22,10 @@ final class AtomicParser<T> extends Parser<T> {
     this.p = p;
   }
 
+  @Override public Parser<T> label(String name) {
+    return p.label(name).atomic();
+  }
+
   @Override boolean apply(ParseContext ctxt) {
     int at = ctxt.at;
     int step = ctxt.step;

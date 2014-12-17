@@ -17,12 +17,15 @@ package org.codehaus.jparsec;
 
 final class StepParser<T> extends Parser<T> {
   private final Parser<T> parser;
-
   private final int n;
 
   StepParser(Parser<T> parser, int n) {
     this.parser = parser;
     this.n = n;
+  }
+
+  @Override public Parser<T> label(String name) {
+    return parser.label(name).step(n);
   }
 
   @Override boolean apply(ParseContext ctxt) {

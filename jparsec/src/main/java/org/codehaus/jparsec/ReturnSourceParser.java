@@ -29,6 +29,10 @@ final class ReturnSourceParser extends Parser<String> {
     this.parser = parser;
   }
 
+  @Override public Parser<String> label(String name) {
+    return parser.label(name).source();
+  }
+
   @Override boolean apply(ParseContext ctxt) {
     int begin = ctxt.getIndex();
     if (!parser.apply(ctxt)) {

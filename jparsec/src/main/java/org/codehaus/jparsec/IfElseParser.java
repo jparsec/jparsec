@@ -33,7 +33,7 @@ final class IfElseParser<T, C> extends Parser<T> {
     final Object ret = ctxt.result;
     final int step = ctxt.step;
     final int at = ctxt.at;
-    if (evaluate(ctxt)) {
+    if (evaluate(cond, ctxt)) {
       Parser<? extends T> parser = consequence.map(cond.getReturn(ctxt));
       return parser.apply(ctxt);
     }
@@ -46,9 +46,9 @@ final class IfElseParser<T, C> extends Parser<T> {
   }
 
   /** Runs {@code parser} with error recording suppressed. */
-  private boolean evaluate(ParseContext ctxt) {
+  private static boolean evaluate(Parser<?> parser, ParseContext ctxt) {
     boolean oldValue = ctxt.suppressError(true);
-    boolean ok = cond.apply(ctxt);
+    boolean ok = parser.apply(ctxt);
     ctxt.suppressError(oldValue);
     return ok;
   }

@@ -22,6 +22,10 @@ final class PeekParser<T> extends Parser<T> {
     this.parser = parser;
   }
 
+  @Override public Parser<T> label(String name) {
+    return parser.label(name).peek();
+  }
+
   @Override boolean apply(ParseContext ctxt) {
     int step = ctxt.step;
     int at = ctxt.at;

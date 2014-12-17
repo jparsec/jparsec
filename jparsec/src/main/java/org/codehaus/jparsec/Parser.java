@@ -359,8 +359,8 @@ public abstract class Parser<T> {
    * A {@link Parser} that reports reports an error about {@code name} expected, if {@code this} fails with no partial
    * match.
    */
-  public final Parser<T> label(String name) {
-    return Parsers.plus(this, Parsers.<T>expect(name));
+  public Parser<T> label(String name) {
+    return new LabeledParser<T>(this, name);
   }
 
   /**

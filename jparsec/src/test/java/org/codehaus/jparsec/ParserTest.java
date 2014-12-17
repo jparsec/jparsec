@@ -360,6 +360,101 @@ public class ParserTest extends BaseMockTest {
   }
 
   @Test
+  public void labelShouldOverrideLabelMessage() {
+    try {
+      Scanners.string("foo").label("bar").label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossAtomic() {
+    try {
+      Scanners.string("foo").label("bar").atomic().label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossCast() {
+    try {
+      Scanners.string("foo").label("bar").cast().label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossPeek() {
+    try {
+      Scanners.string("foo").label("bar").peek().label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossSource() {
+    try {
+      Scanners.string("foo").label("bar").source().label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossSourceAndPeek() {
+    try {
+      Scanners.string("foo").label("bar").source().peek().label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void labelShouldOverrideFromAcrossStep() {
+    try {
+      Scanners.string("foo").label("bar").step(1).label("override").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("override"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+      assertFalse(e.getMessage(), e.getMessage().contains("bar"));
+    }
+  }
+
+  @Test
+  public void succeedsShouldNotLeaveErrorBehind() {
+    try {
+      Scanners.string("foo").succeeds().parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("EOF"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+    }
+  }
+
+  @Test
   public void testCast() {
     Parser<String> parser = Parsers.<CharSequence>constant("chars").<String>cast();
     assertEquals("chars", parser.toString());
