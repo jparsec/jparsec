@@ -17,7 +17,6 @@ package org.codehaus.jparsec;
 
 import org.codehaus.jparsec.error.ParserException;
 
-
 /**
  * Parser state for scanner.
  * 
