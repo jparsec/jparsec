@@ -29,7 +29,7 @@ final class EofParser extends Parser<Object> {
 
   @Override boolean apply(ParseContext ctxt) {
     if (ctxt.isEof()) return true;
-    ctxt.expected(name);
+    ctxt.missing(name);
     return false;
   }
   

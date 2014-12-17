@@ -24,13 +24,13 @@ final class IsTokenParser<T> extends Parser<T> {
 
   @Override boolean apply(final ParseContext ctxt) {
     if (ctxt.isEof()) {
-      ctxt.expected(fromToken);
+      ctxt.missing(fromToken);
       return false;
     }
     Token token = ctxt.getToken();
     Object v = fromToken.map(token);
     if (v == null) {
-      ctxt.expected(fromToken);
+      ctxt.missing(fromToken);
       return false;
     }
     ctxt.result = v;
