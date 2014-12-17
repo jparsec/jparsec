@@ -348,6 +348,17 @@ public class ParserTest extends BaseMockTest {
   }
 
   @Test
+  public void labelShouldOverrideImplicitErrorMessage() {
+    try {
+      Scanners.string("foo").label("bar").parse("fo");
+      fail();
+    } catch (ParserException e) {
+      assertTrue(e.getMessage(), e.getMessage().contains("bar"));
+      assertFalse(e.getMessage(), e.getMessage().contains("foo"));
+    }
+  }
+
+  @Test
   public void testCast() {
     Parser<String> parser = Parsers.<CharSequence>constant("chars").<String>cast();
     assertEquals("chars", parser.toString());

@@ -33,7 +33,7 @@ final class IsCharScanner extends Parser<Void> {
 
   @Override boolean apply(ParseContext ctxt) {
     if (ctxt.isEof()) {
-      ctxt.expected(name);
+      ctxt.missing(name);
       return false;
     }
     char c = ctxt.peekChar();
@@ -42,7 +42,7 @@ final class IsCharScanner extends Parser<Void> {
       ctxt.result = null;
       return true;
     }
-    ctxt.expected(name);
+    ctxt.missing(name);
     return false;
   }
 

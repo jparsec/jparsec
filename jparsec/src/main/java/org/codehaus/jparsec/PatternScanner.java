@@ -37,7 +37,7 @@ final class PatternScanner extends Parser<Void> {
     CharSequence src = ctxt.characters();
     int matchLength = pattern.match(src, at, src.length());
     if (matchLength < 0) {
-      ctxt.expected(name);
+      ctxt.missing(name);
       return false;
     }
     ctxt.next(matchLength);

@@ -57,6 +57,9 @@ abstract class ParseContext {
     UNEXPECTED(false),
     
     /** When any expected input isn't found. */
+    MISSING(true),
+    
+    /** When {@link Parser#label()} is called. Signals that a logical stuff isn't found. */
     EXPECTED(true),
     
     /** When {@link Parsers#fail(String)} is called. Signals a serious problem. */
@@ -147,6 +150,7 @@ abstract class ParseContext {
         }
       };
     case EXPECTED:
+    case MISSING:
       return new EmptyParseError(errorIndex, encounteredName) {
         @Override public List<String> getExpected() {
           return errorStrings;
@@ -209,6 +213,10 @@ abstract class ParseContext {
   
   final void fail(String message) {
     raise(ErrorType.FAILURE, message);
+  }
+  
+  final void missing(Object what) {
+    raise(ErrorType.MISSING, what);
   }
   
   final void expected(Object what) {
