@@ -24,7 +24,7 @@ final class RepeatAtLeastParser<T> extends Parser<List<T>> {
   private final ListFactory<T> listFactory;
 
   RepeatAtLeastParser(Parser<? extends T> parser, int min) {
-    this(parser, min, ListFactories.<T>arrayListFactory());
+    this(parser, min, ListFactory.<T>arrayListFactory());
   }
 
   RepeatAtLeastParser(Parser<? extends T> parser, int min, ListFactory<T> listFactory) {

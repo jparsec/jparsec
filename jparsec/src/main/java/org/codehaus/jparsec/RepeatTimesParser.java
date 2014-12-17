@@ -25,7 +25,7 @@ final class RepeatTimesParser<T> extends Parser<List<T>> {
   private final ListFactory<T> listFactory;
   
   RepeatTimesParser(Parser<? extends T> parser, int min, int max) {
-    this(parser, min, max, ListFactories.<T>arrayListFactory());
+    this(parser, min, max, ListFactory.<T>arrayListFactory());
   }
 
   RepeatTimesParser(

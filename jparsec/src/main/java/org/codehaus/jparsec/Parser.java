@@ -420,7 +420,8 @@ public abstract class Parser<T> {
     final Parser<T> afterFirst = delim.step(0).next(this);
     Map<T, Parser<List<T>>> binder = new Map<T, Parser<List<T>>>() {
       @Override public Parser<List<T>> map(T firstValue) {
-        return new RepeatAtLeastParser<T>(afterFirst, 0, ListFactories.arrayListFactoryWithFirstElement(firstValue));
+        return new RepeatAtLeastParser<T>(
+            afterFirst, 0, ListFactory.arrayListFactoryWithFirstElement(firstValue));
       }
     };
     return next(binder);
@@ -462,7 +463,8 @@ public abstract class Parser<T> {
   public final Parser<List<T>> sepEndBy1(final Parser<?> delim) {
     return next(new Map<T, Parser<List<T>>>() {
       @Override public Parser<List<T>> map(T first) {
-        return new DelimitedListParser<T>(Parser.this, delim, ListFactories.arrayListFactoryWithFirstElement(first));
+        return new DelimitedListParser<T>(
+            Parser.this, delim, ListFactory.arrayListFactoryWithFirstElement(first));
       }
     });
   }
