@@ -15,6 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import static org.codehaus.jparsec.internal.util.Checks.checkState;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -45,6 +47,8 @@ abstract class ParseContext {
   
   /** The current parse result. */
   Object result;
+
+  ParserTrace trace = ParserTrace.DISABLED;
   
   enum ErrorType {
     
@@ -71,7 +75,8 @@ abstract class ParseContext {
   private int currentErrorAt;
   private int currentErrorIndex = 0; // TODO: is it necessary to set this to the starting index?
   private final ArrayList<Object> errors = Lists.arrayList();
-  private String encountered = null; // for explicitly setting encountered token into ScannerStat
+  private String encountered = null; // for explicitly setting encountered token into ScannerState.
+  private TreeNode currentErrorNode = null;
   
   // explicit suppresses error recording if true.
   private boolean errorSuppressed = false;
@@ -102,6 +107,22 @@ abstract class ParseContext {
   /** The physical index of the current most relevant error, {@code 0} if none. */
   final int errorIndex() {
     return currentErrorIndex;
+  }
+
+  final void traceCurrentResult() {
+    trace.setCurrentResult(result);
+  }
+
+  final ParseTree buildParseTree() {
+    return toParseTree(trace.getLatestChild());
+  }
+
+  final ParseTree buildErrorParseTree() {
+    return toParseTree(currentErrorNode);
+  }
+
+  private static ParseTree toParseTree(TreeNode node) {
+    return node == null ? null : node.materialize().toParseTree();
   }
   
   /** Only called when rendering the error in {@link ParserException}. */
@@ -237,6 +258,11 @@ abstract class ParseContext {
     return false;
   }
   
+  final void set(int step, int at, Object ret, TreeNode latestChild) {
+    set(step, at, ret);
+    trace.setLatestChild(latestChild);
+  }
+  
   final void set(int step, int at, Object ret) {
     this.step = step;
     this.at = at;
@@ -257,6 +283,36 @@ abstract class ParseContext {
     at += n;
     if (n > 0) step++;
   }
+
+  final ParserTrace newTrace(final String rootName) {
+    return new ParserTrace() {
+      private TreeNode current = new TreeNode(rootName, getIndex());
+  
+      @Override public void push(String name) {
+        TreeNode newChild = new TreeNode(name, getIndex());
+        current.addChild(newChild);
+        this.current = newChild;
+      }
+      @Override public void pop() {
+        current.setEndIndex(getIndex());
+        this.current = current.parent();
+      }
+      @Override public TreeNode getParentNode() {
+        return current.parent();
+      }
+      @Override public TreeNode getLatestChild() {
+        return current.latestChild;
+      }
+      @Override public void setLatestChild(TreeNode latest) {
+        checkState(latest == null || latest.parent() == current,
+            "Trying to set a child node not owned by the parent node");
+        current.latestChild = latest;
+      }
+      @Override public void setCurrentResult(Object result) {
+        current.setResult(result);
+      }
+    };
+  }
   
   private void setErrorState(
       int errorAt, int errorIndex, ErrorType errorType, List<Object> errors) {
@@ -268,6 +324,7 @@ abstract class ParseContext {
     this.currentErrorIndex = errorIndex;
     this.currentErrorAt = errorAt;
     this.currentErrorType = errorType;
+    this.currentErrorNode = trace.getLatestChild();
     this.encountered = null;
     this.errors.clear();
   }
@@ -278,6 +335,7 @@ abstract class ParseContext {
     if (!that.isEof()) {
       this.encountered = that.getEncountered();
     }
+    currentErrorNode = that.currentErrorNode;
   }
 
   /** Reads the characters as input. Only applicable to character level parsers. */
