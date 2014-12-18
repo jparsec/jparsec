@@ -17,14 +17,14 @@ final class LabeledParser<T> extends Parser<T> {
   @Override boolean apply(ParseContext ctxt) {
     int at = ctxt.at;
     int step = ctxt.step;
-    ctxt.trace.push(name);
+    ctxt.getTrace().push(name);
     if (parser.apply(ctxt)) {
       ctxt.traceCurrentResult();
-      ctxt.trace.pop();
+      ctxt.getTrace().pop();
       return true;
     }
     if (ctxt.stillThere(at, step)) ctxt.expected(name);
-    ctxt.trace.pop();
+    ctxt.getTrace().pop();
     return false;
   }
 

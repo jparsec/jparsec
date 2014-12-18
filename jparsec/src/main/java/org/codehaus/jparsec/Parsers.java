@@ -166,7 +166,7 @@ public final class Parsers {
         Token[] tokens = lexer.getReturn(ctxt);
         ParserState parserState = new ParserState(
             ctxt.module, ctxt.source, tokens, 0, ctxt.locator, ctxt.getIndex(), tokens);
-        ctxt.trace.startFresh(parserState);
+        ctxt.getTrace().startFresh(parserState);
         return ctxt.applyNested(parser, parserState);
       }
       
@@ -573,7 +573,7 @@ public final class Parsers {
         final Object result = ctxt.result;
         final int at = ctxt.at;
         final int step = ctxt.step;
-        final TreeNode latestChild = ctxt.trace.getLatestChild();
+        final TreeNode latestChild = ctxt.getTrace().getLatestChild();
         for(Parser<? extends T> p : alternatives) {
           if (p.apply(ctxt)) {
             return true;

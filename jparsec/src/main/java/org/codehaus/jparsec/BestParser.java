@@ -28,7 +28,7 @@ final class BestParser<T> extends Parser<T> {
     final Object result = ctxt.result;
     final int step = ctxt.step;
     final int at = ctxt.at;
-    final TreeNode latestChild = ctxt.trace.getLatestChild();
+    final TreeNode latestChild = ctxt.getTrace().getLatestChild();
     for (int i = 0; i < parsers.length; i++) {
       Parser<? extends T> parser = parsers[i];
       if (parser.apply(ctxt)) {
@@ -51,7 +51,7 @@ final class BestParser<T> extends Parser<T> {
     int bestAt = ctxt.at;
     int bestStep = ctxt.step;
     Object bestResult = ctxt.result;
-    TreeNode bestChild = ctxt.trace.getLatestChild();
+    TreeNode bestChild = ctxt.getTrace().getLatestChild();
     for (int i = from; i < parsers.length; i++) {
       ctxt.set(originalStep, originalAt, originalResult, originalLatestChild);
       Parser<?> parser = parsers[i];
@@ -62,7 +62,7 @@ final class BestParser<T> extends Parser<T> {
         bestAt = at2;
         bestStep = ctxt.step;
         bestResult = ctxt.result;
-        bestChild = ctxt.trace.getLatestChild();
+        bestChild = ctxt.getTrace().getLatestChild();
       }
     }
     ctxt.set(bestStep, bestAt, bestResult, bestChild);

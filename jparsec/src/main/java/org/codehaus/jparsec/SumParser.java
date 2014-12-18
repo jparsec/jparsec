@@ -26,7 +26,7 @@ final class SumParser<T> extends Parser<T> {
     Object result = ctxt.result;
     int at = ctxt.at;
     int step = ctxt.step;
-    TreeNode latestChild = ctxt.trace.getLatestChild();
+    TreeNode latestChild = ctxt.getTrace().getLatestChild();
     for (Parser<? extends T> p : alternatives) {
       if (p.apply(ctxt)) {
         return true;

@@ -48,7 +48,7 @@ abstract class ParseContext {
   /** The current parse result. */
   Object result;
 
-  ParserTrace trace = ParserTrace.DISABLED;
+  private ParserTrace trace = ParserTrace.DISABLED;
   
   enum ErrorType {
     
@@ -110,6 +110,10 @@ abstract class ParseContext {
   /** The physical index of the current most relevant error, {@code 0} if none. */
   final int errorIndex() {
     return currentErrorIndex;
+  }
+
+  final ParserTrace getTrace() {
+    return trace;
   }
 
   final void traceCurrentResult() {
@@ -247,18 +251,21 @@ abstract class ParseContext {
 
   final boolean applyNested(Parser<?> parser, ParseContext nestedState) {
     // nested is either the token-level parser, or the inner scanner of a subpattern.
-    if (parser.apply(nestedState))  {
-      set(nestedState.step, at, nestedState.result);
-      trace.setCurrentNode(nestedState.trace.getCurrentNode());
-      return true;
+    try {
+      if (parser.apply(nestedState))  {
+        set(nestedState.step, at, nestedState.result);
+        return true;
+      }
+      // index on token level is the "at" on character level
+      set(step, nestedState.getIndex(), null);
+      
+      // always copy error because there could be false alarms in the character level.
+      // For example, a "or" parser nested in a "many" failed in one of its branches.
+      copyErrorFrom(nestedState);
+      return false;
+    } finally {
+      trace.setCurrentNodeAs(nestedState.trace);
     }
-    // index on token level is the "at" on character level
-    set(step, nestedState.getIndex(), null);
-    
-    // always copy error because there could be false alarms in the character level.
-    // For example, a "or" parser nested in a "many" failed in one of its branches.
-    copyErrorFrom(nestedState);
-    return false;
   }
 
   final boolean stillThere(int wasAt, int originalStep) {
@@ -313,8 +320,8 @@ abstract class ParseContext {
         @Override public TreeNode getCurrentNode() {
           return current;
         }
-        @Override public void setCurrentNode(TreeNode node) {
-          current = node;
+        @Override public void setCurrentNodeAs(ParserTrace that) {
+          current = that.getCurrentNode();
         }
         @Override public TreeNode getLatestChild() {
           return current.latestChild;

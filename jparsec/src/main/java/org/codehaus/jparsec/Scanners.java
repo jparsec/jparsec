@@ -536,15 +536,11 @@ public final class Scanners {
       @Override boolean apply(ParseContext ctxt) {
         int from = ctxt.at;
         if (!outer.apply(ctxt)) return false;
-        ScannerState scannerState = new ScannerState(
+        ScannerState innerState = new ScannerState(
             ctxt.module, ctxt.characters(), from, ctxt.at, ctxt.locator, ctxt.result);
-        ctxt.trace.startFresh(scannerState);
-        scannerState.trace.setCurrentNode(ctxt.trace.getCurrentNode());
-        try {
-          return ctxt.applyNested(inner, scannerState);
-        } finally {
-          ctxt.trace.setCurrentNode(scannerState.trace.getCurrentNode());
-        }
+        ctxt.getTrace().startFresh(innerState);
+        innerState.getTrace().setCurrentNodeAs(ctxt.getTrace());
+        return ctxt.applyNested(inner, innerState);
       }
       
       @Override public String toString() {

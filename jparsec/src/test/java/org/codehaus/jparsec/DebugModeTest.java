@@ -494,6 +494,24 @@ public class DebugModeTest {
   }
 
   @Test
+  public void parseToTreeWithTreePopulatedAtCharacterLevelWithNestedScanner() {
+    Parser<?> expr = Parsers.sequence(
+        Scanners.INTEGER.label("lhs"),
+        Scanners.isChar('+').source().label("plus"),
+        Scanners.INTEGER.label("rhs"));
+    Parser<?> parser = Scanners.nestedScanner(expr, Scanners.ANY_CHAR.skipMany())
+        .source()
+        .label("expr");
+    assertParseTree(
+        rootNode("1+2",
+            stringNode("expr", "1+2",
+                stringNode("lhs", "1"),
+                stringNode("plus", "+"),
+                stringNode("rhs", "2"))),
+            parser.parseTree("1+2"));
+  }
+
+  @Test
   public void parseToTreeWithEmptyTree() {
     Parser<?> expr = Parsers.sequence(
         Scanners.INTEGER,
