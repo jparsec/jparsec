@@ -264,7 +264,7 @@ abstract class ParseContext {
       copyErrorFrom(nestedState);
       return false;
     } finally {
-      trace.setCurrentNodeAs(nestedState.trace);
+      trace.setStateAs(nestedState.trace);
     }
   }
 
@@ -320,7 +320,7 @@ abstract class ParseContext {
         @Override public TreeNode getCurrentNode() {
           return current;
         }
-        @Override public void setCurrentNodeAs(ParserTrace that) {
+        @Override public void setStateAs(ParserTrace that) {
           current = that.getCurrentNode();
         }
         @Override public TreeNode getLatestChild() {

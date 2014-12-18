@@ -7,7 +7,7 @@ interface ParserTrace {
     @Override public void push(String name) {}
     @Override public void pop() {}
     @Override public TreeNode getCurrentNode() { return null; }
-    @Override public void setCurrentNodeAs(ParserTrace that) {}
+    @Override public void setStateAs(ParserTrace that) {}
     @Override public TreeNode getLatestChild() { return null; }
     @Override public void setLatestChild(TreeNode node) {}
     @Override public void setCurrentResult(Object result) {}
@@ -33,7 +33,7 @@ interface ParserTrace {
    * Called by {@link Scanners#nestedScanner} to set the enclosing parser's tree state into
    * the nested parser's state.
    */
-  void setCurrentNodeAs(ParserTrace that);
+  void setStateAs(ParserTrace that);
 
   /**
    * Called by branching parsers, to save the current state of tree, before trying parsers that
