@@ -15,6 +15,10 @@
  *****************************************************************************/
 package org.codehaus.jparsec.misc;
 
+import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
+import static org.codehaus.jparsec.internal.util.Checks.checkNotNullState;
+import static org.codehaus.jparsec.internal.util.Checks.checkState;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -33,7 +37,6 @@ import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.functors.Binary;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Unary;
-import org.codehaus.jparsec.internal.util.Checks;
 import org.codehaus.jparsec.internal.util.Lists;
 
 /**
@@ -133,7 +136,7 @@ public abstract class Mapper<T> {
     parsers = toArray(mergeSkipped(parsers));
     int providedParameters = parsers.length;
     int expectedParameters = expectedParams();
-    Checks.checkArgument(providedParameters == expectedParameters,
+    checkArgument(providedParameters == expectedParameters,
         "%s parameters expected for sequencing, %s provided.",
         expectedParameters, providedParameters);
     return Parsers.array(parsers).map(asMap());
@@ -437,7 +440,7 @@ public abstract class Mapper<T> {
 
   final void checkFutureParameters(
       int expectedParameters, Class<?> targetType, int providedParameters) {
-    Checks.checkArgument(providedParameters == expectedParameters,
+    checkArgument(providedParameters == expectedParameters,
         "Invalid curry: %s parameters expected by %s," +
         " %s will be provided by curried and explicit parameters of %s",
         expectedParameters, invokable, providedParameters, targetType.getName());
@@ -536,11 +539,11 @@ public abstract class Mapper<T> {
   
   private static FastMethod introspectMapperMethod(Class<?> type) {
     Method method = findMapMethod(type);
-    Checks.checkNotNullState(method,
+    checkNotNullState(method,
         "A method named as 'map' should be defined in %s", type.getName());
     Class<?> targetType = getTargetType(type);
     if (targetType != null) {
-      Checks.checkState(
+      checkState(
           targetType.isAssignableFrom(Reflection.wrapperClass(method.getReturnType())),
           "%s should return a subtype of %s", method, targetType.getName());
     }
@@ -573,7 +576,7 @@ public abstract class Mapper<T> {
     Method mapMethod = null;
     for (Method method : type.getDeclaredMethods()) {
       if (method.getName().equals("map")) {
-        Checks.checkState(mapMethod == null,
+        checkState(mapMethod == null,
             "only one map method can be defined: %s", type.getName());
         mapMethod = method;
       }
@@ -626,7 +629,7 @@ public abstract class Mapper<T> {
   }
 
   private static void checkNotSkipped(Parser<?> operator) {
-    Checks.checkArgument(!isSkipped(operator), "Cannot skip the only parser parameter.");
+    checkArgument(!isSkipped(operator), "Cannot skip the only parser parameter.");
   }
   
   private static List<Parser<?>> mergeSkipped(Parser<?>... parsers) {
@@ -640,7 +643,7 @@ public abstract class Mapper<T> {
         for (i++; i < parsers.length && isSkipped(parsers[i]); i++) {}
         if (i == parsers.length) {
           // we are at the end of the array
-          Checks.checkArgument(!result.isEmpty(), "Cannot skip all parser parameters.");
+          checkArgument(!result.isEmpty(), "Cannot skip all parser parameters.");
           Parser<?> skippedSequence = Parsers.sequence(all.subList(from, i));
           int lastIndex = result.size() - 1;
           result.set(lastIndex, result.get(lastIndex).followedBy(skippedSequence));

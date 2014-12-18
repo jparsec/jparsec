@@ -1,5 +1,7 @@
 package org.codehaus.jparsec.misc;
 
+import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -68,13 +70,13 @@ final class Curry<T> extends Mapper<T> {
    * with {@code curryArgs} by matching parameter types.
    */
   public static <T> Curry<T> of(Class<? extends T> clazz, Object... curryArgs) {
-    Checks.checkArgument(!Modifier.isAbstract(clazz.getModifiers()),
+    checkArgument(!Modifier.isAbstract(clazz.getModifiers()),
         "Cannot curry abstract class: %s", clazz.getName());
     Constructor<?>[] constructors = clazz.getConstructors();
-    Checks.checkArgument(constructors.length == 1,
+    checkArgument(constructors.length == 1,
         "Expecting 1 public constructor in %s, %s encountered.",
         clazz.getName(), constructors.length);
-    Checks.checkArgument(!constructors[0].isVarArgs(),
+    checkArgument(!constructors[0].isVarArgs(),
         "Cannot curry for constructor with varargs: %s", constructors[0]);
     Constructor<?> constructor = constructors[0];
     Class<?>[] parameterTypes = constructor.getParameterTypes();
