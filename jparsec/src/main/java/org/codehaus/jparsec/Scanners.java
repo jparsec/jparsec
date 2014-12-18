@@ -542,7 +542,6 @@ public final class Scanners {
         innerState.getTrace().setCurrentNodeAs(ctxt.getTrace());
         return ctxt.applyNested(inner, innerState);
       }
-      
       @Override public String toString() {
         return "nested scanner";
       }
