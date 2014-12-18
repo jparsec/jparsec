@@ -229,8 +229,24 @@ public final class Scanners {
    * @deprecated Use {@code pattern.toScanner(name)}.
    */
   @Deprecated
-  public static Parser<Void> pattern(Pattern pattern, String name) {
-    return new PatternScanner(name, pattern);
+  public static Parser<Void> pattern(final Pattern pattern, final String name) {
+    return new Parser<Void>() {
+      @Override boolean apply(final ParseContext ctxt) {
+        int at = ctxt.at;
+        CharSequence src = ctxt.characters();
+        int matchLength = pattern.match(src, at, src.length());
+        if (matchLength < 0) {
+          ctxt.missing(name);
+          return false;
+        }
+        ctxt.next(matchLength);
+        ctxt.result = null;
+        return true;
+      }
+      @Override public String toString() {
+        return name;
+      }
+    };
   }
 
   /**

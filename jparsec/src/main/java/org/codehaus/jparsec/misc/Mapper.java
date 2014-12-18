@@ -83,7 +83,7 @@ public abstract class Mapper<T> {
   protected Mapper() {
     FastMethod method = mapMethod(getClass());
     this.source = method;
-    this.invokable = Invokables.method(this, method);
+    this.invokable = Invokable.method(this, method);
   }
   
   Mapper(Object source, Invokable invokable) {

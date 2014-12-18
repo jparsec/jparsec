@@ -27,5 +27,5 @@ public interface TokenMap<T> {
    * Transforms {@code token} to an instance of {@code T}.
    * {@code null} is returned if the token isn't recognized.
    */
-  public T map(Token token);
+  T map(Token token);
 }

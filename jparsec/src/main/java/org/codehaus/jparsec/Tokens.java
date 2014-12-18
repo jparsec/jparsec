@@ -22,14 +22,11 @@ package org.codehaus.jparsec;
  */
 public final class Tokens {
   
-  private Tokens() {}
-  
   /**
    * Returns a {@link Fragment} tagged with {@code tag}.
    * 
    * @param text the fragment text.
    * @param tag the tag representing the fragment's semantics.
-   * @return the TypedToken object.
    */
   public static Fragment fragment(String text, Object tag) {
     return new Fragment(text, tag);
@@ -83,11 +80,18 @@ public final class Tokens {
     return new ScientificNotation(significand, exponent);
   }
   
-  /** Represents a fragment tagged according to its semantics. */
+  /**
+   * Represents a fragment tagged according to its semantics.
+   * It's a convenience class so that you don't have to create many classes each for a different
+   * token. Instead, you could just use {@code new fragment(text, "token1")} to uniquely identify
+   * a token by the "token1" tag.
+   */
   public static final class Fragment {
     private final String text;
     private final Object tag;
 
+    /** @deprecated Use {@code Tokens.fragment()} instead. */
+    @Deprecated
     public Fragment(String text, Object tag) {
       this.text = text;
       this.tag = tag;
@@ -135,6 +139,8 @@ public final class Tokens {
     /** The exponent after the "E". */
     public final String exponent; // we leave the range check to the semantics analysis
     
+    /** @deprecated Use {@code Tokens.scientificNotation()} instead. */
+    @Deprecated
     public ScientificNotation(String mantissa, String exp) {
       this.significand = mantissa;
       this.exponent = exp;
@@ -172,5 +178,7 @@ public final class Tokens {
     /** Decimal number literal */
     DECIMAL
   }
+  
+  private Tokens() {}
 }
 

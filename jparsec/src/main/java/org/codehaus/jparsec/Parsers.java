@@ -15,8 +15,6 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import static java.util.Arrays.asList;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -69,7 +67,14 @@ public final class Parsers {
   private static final Parser ALWAYS = constant(null);
   
   @SuppressWarnings("rawtypes")
-  private static final Parser NEVER = new NeverParser<Object>();
+  private static final Parser NEVER = new Parser<Object>() {
+    @Override boolean apply(ParseContext ctxt) {
+      return false;
+    }
+    @Override public String toString() {
+      return "never";
+    }
+  };
   
   static final Parser<Boolean> TRUE = constant(true);
   static final Parser<Boolean> FALSE = constant(false);
@@ -316,8 +321,22 @@ public final class Parsers {
    * and transforms the return values using {@code map}.
    */
   public static <A, B, T> Parser<T> sequence(
-      Parser<A> p1, Parser<B> p2, Map2<? super A, ? super B, ? extends T> map) {
-    return new Sequence2Parser<A, B, T>(p1, p2, map);
+      final Parser<A> p1, final Parser<B> p2, final Map2<? super A, ? super B, ? extends T> map) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        boolean r1 = p1.apply(ctxt);
+        if (!r1) return false;
+        A o1 = p1.getReturn(ctxt);
+        boolean r2 = p2.apply(ctxt);
+        if (!r2) return false;
+        B o2 = p2.getReturn(ctxt);
+        ctxt.result = map.map(o1, o2);
+        return true;
+      }
+      @Override public String toString() {
+        return map.toString();
+      }
+    };
   }
 
   /**
@@ -325,9 +344,26 @@ public final class Parsers {
    * using {@code map}.
    */
   public static <A, B, C, T> Parser<T> sequence(
-      Parser<A> p1, Parser<B> p2, Parser<C> p3,
-      Map3<? super A, ? super B, ? super C, ? extends T> map) {
-    return new Sequence3Parser<A, B, C, T>(p1, p2, p3, map);
+      final Parser<A> p1, final Parser<B> p2, final Parser<C> p3,
+      final Map3<? super A, ? super B, ? super C, ? extends T> map) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        boolean r1 = p1.apply(ctxt);
+        if (!r1) return false;
+        A o1 = p1.getReturn(ctxt);
+        boolean r2 = p2.apply(ctxt);
+        if (!r2) return false;
+        B o2 = p2.getReturn(ctxt);
+        boolean r3 = p3.apply(ctxt);
+        if (!r3) return false;
+        C o3 = p3.getReturn(ctxt);
+        ctxt.result = map.map(o1, o2, o3);
+        return true;
+      }
+      @Override public String toString() {
+        return map.toString();
+      }
+    };
   }
 
   /**
@@ -335,9 +371,29 @@ public final class Parsers {
    * using {@code map}.
    */
   public static <A, B, C, D, T> Parser<T> sequence(
-      Parser<A> p1, Parser<B> p2, Parser<C> p3, Parser<D> p4,
-      Map4<? super A, ? super B, ? super C, ? super D, ? extends T> map) {
-    return new Sequence4Parser<A, B, C, D, T>(p1, p2, p3, p4, map);
+      final Parser<A> p1, final Parser<B> p2, final Parser<C> p3, final Parser<D> p4,
+      final Map4<? super A, ? super B, ? super C, ? super D, ? extends T> map) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        boolean r1 = p1.apply(ctxt);
+        if (!r1) return false;
+        A o1 = p1.getReturn(ctxt);
+        boolean r2 = p2.apply(ctxt);
+        if (!r2) return false;
+        B o2 = p2.getReturn(ctxt);
+        boolean r3 = p3.apply(ctxt);
+        if (!r3) return false;
+        C o3 = p3.getReturn(ctxt);
+        boolean r4 = p4.apply(ctxt);
+        if (!r4) return false;
+        D o4 = p4.getReturn(ctxt);
+        ctxt.result = map.map(o1, o2, o3, o4);
+        return true;
+      }
+      @Override public String toString() {
+        return map.toString();
+      }
+    };
   }
 
   /** 
@@ -345,14 +401,47 @@ public final class Parsers {
    * using {@code map}.
    */
   public static <A, B, C, D, E, T> Parser<T> sequence(
-      Parser<A> p1, Parser<B> p2, Parser<C> p3, Parser<D> p4, Parser<E> p5,
-      Map5<? super A, ? super B, ? super C, ? super D, ? super E, ? extends T> map) {
-    return new Sequence5Parser<A, B, C, D, E, T>(p1, p2, p3, p4, p5, map);
+      final Parser<A> p1, final Parser<B> p2, final Parser<C> p3, final Parser<D> p4, final Parser<E> p5,
+      final Map5<? super A, ? super B, ? super C, ? super D, ? super E, ? extends T> map) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        boolean r1 = p1.apply(ctxt);
+        if (!r1) return false;
+        A o1 = p1.getReturn(ctxt);
+        boolean r2 = p2.apply(ctxt);
+        if (!r2) return false;
+        B o2 = p2.getReturn(ctxt);
+        boolean r3 = p3.apply(ctxt);
+        if (!r3) return false;
+        C o3 = p3.getReturn(ctxt);
+        boolean r4 = p4.apply(ctxt);
+        if (!r4) return false;
+        D o4 = p4.getReturn(ctxt);
+        boolean r5 = p5.apply(ctxt);
+        if (!r5) return false;
+        E o5 = p5.getReturn(ctxt);
+        ctxt.result = map.map(o1, o2, o3, o4, o5);
+        return true;
+      }
+      @Override public String toString() {
+        return map.toString();
+      }
+    };
   }
   
   /** A {@link Parser} that runs {@code parsers} sequentially and discards the return values. */
-  public static Parser<Object> sequence(Parser<?>... parsers) {
-    return new SequenceParser(parsers);
+  public static Parser<Object> sequence(final Parser<?>... parsers) {
+    return new Parser<Object>() {
+      @Override boolean apply(ParseContext ctxt) {
+        for (Parser<?> p : parsers) {
+          if (!p.apply(ctxt)) return false;
+        }
+        return true;
+      }
+      @Override public String toString() {
+        return "sequence";
+      }
+    };
   }
   
   /** A {@link Parser} that runs {@code parsers} sequentially and discards the return values. */
@@ -476,10 +565,27 @@ public final class Parsers {
    * <p> Different than {@link #alt(Parser[])}, it requires all alternative parsers to have
    * type {@code T}.
    */
-  public static <T> Parser<T> or(Parser<? extends T>... alternatives) {
+  public static <T> Parser<T> or(final Parser<? extends T>... alternatives) {
     if (alternatives.length == 0) return never();
     if (alternatives.length == 1) return alternatives[0].cast();
-    return new OrParser<T>(alternatives);
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        final Object result = ctxt.result;
+        final int at = ctxt.at;
+        final int step = ctxt.step;
+        final TreeNode latestChild = ctxt.trace.getLatestChild();
+        for(Parser<? extends T> p : alternatives) {
+          if (p.apply(ctxt)) {
+            return true;
+          }
+          ctxt.set(step, at, result, latestChild);
+        }
+        return false;
+      }
+      @Override public String toString() {
+        return "or";
+      }
+    };
   }
   
   /**
@@ -563,8 +669,16 @@ public final class Parsers {
   }
 
   /** A {@link Parser} that fails and reports that {@code name} is logically unexpected. */
-  public static <T> Parser<T> unexpected(String name) {
-    return new UnexpectedParser<T>(name);
+  public static <T> Parser<T> unexpected(final String name) {
+    return new Parser<T>() {
+      @Override boolean apply(final ParseContext ctxt) {
+        ctxt.unexpected(name);
+        return false;
+      }
+      @Override public String toString() {
+        return name;
+      }
+    };
   }
 
   /**

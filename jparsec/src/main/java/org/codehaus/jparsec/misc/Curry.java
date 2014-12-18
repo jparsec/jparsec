@@ -87,7 +87,7 @@ final class Curry<T> extends Mapper<T> {
     }
     return new Curry<T>(
         clazz.getName(),
-        Invokables.constructor(FastClass.create(clazz).getConstructor(constructor)),
+        Invokable.constructor(FastClass.create(clazz).getConstructor(constructor)),
         curryArgs, curryIndexes);
   }
 
