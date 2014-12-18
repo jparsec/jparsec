@@ -15,6 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import static java.util.Arrays.asList;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -270,7 +272,22 @@ public final class Parsers {
    * values in a {@link List}.
    */
   public static <T> Parser<List<T>> list(Iterable<? extends Parser<? extends T>> parsers) {
-    return new ListParser<T>(toArray(parsers));
+    final Parser<? extends T>[] array = toArray(parsers);
+    return new Parser<List<T>>() {
+      @Override boolean apply(ParseContext ctxt) {
+        ArrayList<T> list = Lists.arrayList(array.length);
+        for (Parser<? extends T> parser : array) {
+          if (!parser.apply(ctxt)) return false;
+          list.add(parser.getReturn(ctxt));
+        }
+        ctxt.result = list;
+        return true;
+      }
+      
+      @Override public String toString() {
+        return "list";
+      }
+    };
   }
   
   /**

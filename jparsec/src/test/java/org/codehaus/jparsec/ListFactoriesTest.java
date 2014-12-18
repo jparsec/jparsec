@@ -17,8 +17,8 @@ public class ListFactoriesTest {
 
   @Test
   public void testArrayListFactory() {
-    ListFactory<Integer> intListFactory = ListFactories.arrayListFactory();
-    ListFactory<String> stringListFactory = ListFactories.arrayListFactory();
+    ListFactory<Integer> intListFactory = ListFactory.arrayListFactory();
+    ListFactory<String> stringListFactory = ListFactory.arrayListFactory();
     ArrayList<Integer> intList = (ArrayList<Integer>) intListFactory.newList();
     ArrayList<String> stringList = (ArrayList<String>) stringListFactory.newList();
     assertNotSame(intList, stringList);
@@ -28,9 +28,8 @@ public class ListFactoriesTest {
 
   @Test
   public void testArrayListFactoryWithFirstElement() {
-    ListFactory<Integer> intListFactory = ListFactories.arrayListFactoryWithFirstElement(1);
+    ListFactory<Integer> intListFactory = ListFactory.arrayListFactoryWithFirstElement(1);
     ArrayList<Integer> list = (ArrayList<Integer>) intListFactory.newList();
     assertEquals(Arrays.asList(1), list);
   }
-
 }
