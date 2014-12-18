@@ -682,12 +682,12 @@ public abstract class Parser<T> {
   }
 
   /**
-   * Parses {@code source} and return a {@link ParseTree} corresponding to the syntactical
+   * Parses {@code source} and returns a {@link ParseTree} corresponding to the syntactical
    * structure of the input. Only {@link #label labeled} parser nodes are represented in the parse
    * tree.
    *
    * <p>If the parse failed, {@link ParserException#getParseTree()} can be inspected for the parse
-   * tree at error time.
+   * tree at error location.
    *
    * @since 2.3
    */
