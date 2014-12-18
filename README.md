@@ -22,7 +22,7 @@ Add the following fragment to your `<dependencies>` section:
 Jparsec is a recursive-descent parser combinator framework written for Java.
 It's an implementation of [Haskell Parsec](http://www.haskell.org/haskellwiki/Parsec) on the Java platform.
 
-## Feature highlights.
+## Feature highlights
 
 * Operator precedence grammar,
 * Accurate error location and customizable error message,
