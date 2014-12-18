@@ -1,7 +1,7 @@
 jparsec
 =======
 
-Build mini parser in pure Java.
+Build mini parsers in pure Java.
 
 # How to Use?
 
