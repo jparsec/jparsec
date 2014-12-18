@@ -458,7 +458,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void parseToTreeWithTreePopulatedAtCharacterLevel() {
+  public void parseToTreeWithTreePopulatedAtTokenLevel() {
     Terminals terms = Terminals.operators("+");
     Parser<?> expr = Parsers.sequence(
         Terminals.IntegerLiteral.PARSER.label("lhs"),
@@ -466,15 +466,55 @@ public class DebugModeTest {
         Terminals.IntegerLiteral.PARSER.label("rhs"));
     Parser<?> tokenizer = Parsers.<Object>or(
         terms.tokenizer().label("op"), Terminals.IntegerLiteral.TOKENIZER.label("num"));
-    Parser<?> parser = expr.retn("value").label("expr").from(tokenizer, Scanners.WHITESPACES);
+    Parser<?> parser = expr.source().label("expr").from(tokenizer, Scanners.WHITESPACES);
     ParseTree tree = parser.parseToTree("1 + 2");
     assertParseTree(
         rootNode("1 + 2",
-            node("expr", "value", "1 + 2",
+            stringNode("expr", "1 + 2",
                 stringNode("lhs", "1").trailing(1),
                 stringNode("plus", "+").trailing(1),
                 stringNode("rhs", "2"))),
             tree);
+  }
+
+  @Test
+  public void parseToTreeWithTreePopulatedAtCharacterLevel() {
+    Parser<?> expr = Parsers.sequence(
+        Scanners.INTEGER.label("lhs"),
+        Scanners.isChar('+').source().label("plus"),
+        Scanners.INTEGER.label("rhs"));
+    ParseTree tree = expr.source().label("expr").parseToTree("1+2");
+    assertParseTree(
+        rootNode("1+2",
+            stringNode("expr", "1+2",
+                stringNode("lhs", "1"),
+                stringNode("plus", "+"),
+                stringNode("rhs", "2"))),
+            tree);
+  }
+
+  @Test
+  public void parseToTreeWithEmptyTree() {
+    Parser<?> expr = Parsers.sequence(
+        Scanners.INTEGER,
+        Scanners.isChar('+').source(),
+        Scanners.INTEGER);
+    ParseTree tree = expr.source().parseToTree("1+2");
+    assertParseTree(rootNode("1+2"), tree);
+  }
+
+  @Test
+  public void parseToTreeWithCharacterLevelTreeDiscarded() {
+    Terminals terms = Terminals.operators("+");
+    Parser<?> expr = Parsers.sequence(
+        Terminals.IntegerLiteral.PARSER,
+        terms.token("+").retn("+"),
+        Terminals.IntegerLiteral.PARSER);
+    Parser<?> tokenizer = Parsers.<Object>or(
+        terms.tokenizer().label("op"), Terminals.IntegerLiteral.TOKENIZER.label("num"));
+    Parser<?> parser = expr.source().from(tokenizer, Scanners.WHITESPACES);
+    ParseTree tree = parser.parseToTree("1 + 2");
+    assertParseTree(rootNode("1 + 2"), tree);
   }
 
   private static void assertParseTree(MatchNode expected, ParseTree actual) {
