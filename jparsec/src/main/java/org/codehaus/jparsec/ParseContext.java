@@ -318,8 +318,8 @@ abstract class ParseContext {
         @Override public TreeNode getCurrentNode() {
           return current;
         }
-        @Override public void setStateAs(ParserTrace that) {
-          current = that.getCurrentNode();
+        @Override public void setCurrentResult(Object result) {
+          current.setResult(result);
         }
         @Override public TreeNode getLatestChild() {
           return current.latestChild;
@@ -329,12 +329,12 @@ abstract class ParseContext {
               "Trying to set a child node not owned by the parent node");
           current.latestChild = latest;
         }
-        @Override public void setCurrentResult(Object result) {
-          current.setResult(result);
-        }
         @Override public void startFresh(ParseContext context) {
           context.enableTrace(rootName);
-        } 
+        }
+        @Override public void setStateAs(ParserTrace that) {
+          current = that.getCurrentNode();
+        }
       };
   }
   

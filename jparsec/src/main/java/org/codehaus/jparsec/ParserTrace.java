@@ -7,11 +7,11 @@ interface ParserTrace {
     @Override public void push(String name) {}
     @Override public void pop() {}
     @Override public TreeNode getCurrentNode() { return null; }
-    @Override public void setStateAs(ParserTrace that) {}
+    @Override public void setCurrentResult(Object result) {}
     @Override public TreeNode getLatestChild() { return null; }
     @Override public void setLatestChild(TreeNode node) {}
-    @Override public void setCurrentResult(Object result) {}
     @Override public void startFresh(ParseContext context) {}
+    @Override public void setStateAs(ParserTrace that) {}
   };
 
   /**
@@ -23,17 +23,11 @@ interface ParserTrace {
   /** When a parser finishes, the current node is popped so we are back to the parent parser. */
   void pop();
 
-  /** Whenever a labeled parser succeeds, it calls this method to set its result in the trace. */
-  void setCurrentResult(Object result);
-
   /** Returns the current node, that is being parsed (not necessarily finished). */
   TreeNode getCurrentNode();
 
-  /**
-   * Set the enclosing parser's tree state into the nested parser's state. Called for both nested
-   * token-level parser and nested scanner.
-   */
-  void setStateAs(ParserTrace that);
+  /** Whenever a labeled parser succeeds, it calls this method to set its result in the trace. */
+  void setCurrentResult(Object result);
 
   /**
    * Called by branching parsers, to save the current state of tree, before trying parsers that
@@ -49,4 +43,10 @@ interface ParserTrace {
 
   /** Called when tokenizer passes on to token-level parser. */
   void startFresh(ParseContext context);
+
+  /**
+   * Set the enclosing parser's tree state into the nested parser's state. Called for both nested
+   * token-level parser and nested scanner.
+   */
+  void setStateAs(ParserTrace that);
 }
