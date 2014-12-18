@@ -691,7 +691,7 @@ public abstract class Parser<T> {
    * structure of the input. Only {@link #label labeled} parser nodes are represented in the parse
    * tree.
    *
-   * <p>If the parse failed, {@link ParserException#getParseTree()} can be inspected for the parse
+   * <p>If parsing failed, {@link ParserException#getParseTree()} can be inspected for the parse
    * tree at error location.
    *
    * @since 2.3
