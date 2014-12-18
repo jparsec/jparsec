@@ -1,7 +1,7 @@
 jparsec
 =======
 
-Build mini parsers in pure Java.
+Builds mini parsers in pure Java.
 
 # How to Use?
 
@@ -17,7 +17,7 @@ Add the following fragment to your `<dependencies>` section:
         <version>2.2.1</version>
       </dependency>
 
-## What is jparsec?
+## Tell me more about it
 
 Jparsec is a recursive-descent parser combinator framework written for Java.
 It's an implementation of [Haskell Parsec](http://www.haskell.org/haskellwiki/Parsec) on the Java platform.
