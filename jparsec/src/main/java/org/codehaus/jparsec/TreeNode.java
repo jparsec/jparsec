@@ -12,8 +12,8 @@ import java.util.List;
  * encloses this parter), it's previous node (which is the parser at the same syntactical level
  * and had just <em>succeeded</em> before this parser started). It also keeps all the children.
  * 
- * <p>Once a parser's parent and "previous" node is set, they stay immutable (well, unless the node
- * is being discarded). The list of children nodes however can change. When the alternative parsers
+ * <p>Once constructed, a node's 'parent' and 'previous' references are immutable.
+ * The list of children nodes however can change. When the alternative parsers
  * in an {@code or} parser are attempted one after another, they each generate new child node of
  * the parent node. These "alternative" nodes all point to the same parent and same "previous" node.
  * 
@@ -28,8 +28,8 @@ final class TreeNode {
 
   private final String name;
   private final int beginIndex;
-  private TreeNode parent;
-  private TreeNode previous;
+  private final TreeNode parent;
+  private final TreeNode previous;
   private int endIndex = 0;
   private Object result = null;
   TreeNode latestChild = null;
@@ -37,6 +37,15 @@ final class TreeNode {
   TreeNode(String name, int beginIndex) {
     this.name = name;
     this.beginIndex = beginIndex;
+    this.parent = null;
+    this.previous = null;
+  }
+
+  TreeNode(String name, int beginIndex, TreeNode parent, TreeNode previous) {
+    this.name = name;
+    this.beginIndex = beginIndex;
+    this.parent = parent;
+    this.previous = previous;
   }
 
   void setEndIndex(int index) {
@@ -53,10 +62,10 @@ final class TreeNode {
     return parent;
   }
 
-  void addChild(TreeNode child) {
-    child.previous = latestChild;
-    child.parent = this;
+  TreeNode addChild(String childName, int childIndex) {
+    TreeNode child = new TreeNode(childName, childIndex, this, latestChild);
     this.latestChild = child;
+    return child;
   }
 
   /**

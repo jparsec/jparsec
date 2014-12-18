@@ -309,9 +309,7 @@ abstract class ParseContext {
         private TreeNode current = new TreeNode(rootName, getIndex());
     
         @Override public void push(String name) {
-          TreeNode newChild = new TreeNode(name, getIndex());
-          current.addChild(newChild);
-          this.current = newChild;
+          this.current = current.addChild(name, getIndex());
         }
         @Override public void pop() {
           current.setEndIndex(getIndex());
