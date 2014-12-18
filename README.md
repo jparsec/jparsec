@@ -3,7 +3,7 @@ jparsec
 
 Builds mini parsers in pure Java.
 
-# How to Use?
+## How to Use?
 
 jparsec is available in maven-central. [Snapshot Javadoc](http://jparsec.github.io/jparsec/apidocs/)
 
