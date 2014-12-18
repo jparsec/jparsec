@@ -17,7 +17,7 @@ Add the following fragment to your `<dependencies>` section:
         <version>2.2.1</version>
       </dependency>
 
-## Tell me more about it
+## Tell me more
 
 Jparsec is a recursive-descent parser combinator framework written for Java.
 It's an implementation of [Haskell Parsec](http://www.haskell.org/haskellwiki/Parsec) on the Java platform.
