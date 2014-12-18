@@ -6,7 +6,7 @@ import java.util.List;
 import org.codehaus.jparsec.internal.util.Strings;
 
 /**
- * Represents the partial parse tree of an unsuccessful parse attempt.
+ * Represents the syntactical structure of the input being parsed.
  *
  * @since 2.3
  */

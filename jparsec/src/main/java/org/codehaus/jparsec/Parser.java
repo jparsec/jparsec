@@ -682,14 +682,20 @@ public abstract class Parser<T> {
   }
 
   /**
-   * Parses source read from {@code readable} under the given {@code mode}. For example: <pre>
-   *   parser.parse(text, Mode.DEBUG);
-   * </pre>
+   * Parses {@code source} and return a {@link ParseTree} corresponding to the syntactical
+   * structure of the input. Only {@link #label labeled} parser nodes are represented in the parse
+   * tree.
+   *
+   * <p>If the parse failed, {@link ParserException#getParseTree()} can be inspected for the parse
+   * tree at error time.
    *
    * @since 2.3
    */
-  public final T parse(Readable readable, Mode mode) throws IOException {
-    return parse(read(readable), mode);
+  public final ParseTree parseToTree(CharSequence source) {
+    ScannerState state = new ScannerState(source);
+    state.enableTrace("root");
+    state.run(this.followedBy(Parsers.EOF));
+    return state.buildParseTree();
   }
 
   /**

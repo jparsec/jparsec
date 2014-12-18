@@ -57,7 +57,7 @@ public class ParserTest extends BaseMockTest {
     assertEquals("foo", FOO.parse("", mode));
     assertFailure(mode, FOO, "a", 1, 1, "EOF expected, a encountered.");
     assertFailure(FOO, "a", 1, 1, "test module", "EOF expected, a encountered.");
-    assertEquals(new Integer(123), INTEGER.parse(new StringReader("123"), mode));
+    assertEquals(new Integer(123), INTEGER.parse(new StringReader("123")));
     try {
       INTEGER.parse(new StringReader("x"), "test module");
       fail();

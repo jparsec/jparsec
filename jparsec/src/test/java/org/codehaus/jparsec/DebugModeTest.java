@@ -457,6 +457,26 @@ public class DebugModeTest {
     }
   }
 
+  @Test
+  public void parseToTreeWithTreePopulatedAtCharacterLevel() {
+    Terminals terms = Terminals.operators("+");
+    Parser<?> expr = Parsers.sequence(
+        Terminals.IntegerLiteral.PARSER.label("lhs"),
+        terms.token("+").retn("+").label("plus"),
+        Terminals.IntegerLiteral.PARSER.label("rhs"));
+    Parser<?> tokenizer = Parsers.<Object>or(
+        terms.tokenizer().label("op"), Terminals.IntegerLiteral.TOKENIZER.label("num"));
+    Parser<?> parser = expr.retn("value").label("expr").from(tokenizer, Scanners.WHITESPACES);
+    ParseTree tree = parser.parseToTree("1 + 2");
+    assertParseTree(
+        rootNode("1 + 2",
+            node("expr", "value", "1 + 2",
+                stringNode("lhs", "1").trailing(1),
+                stringNode("plus", "+").trailing(1),
+                stringNode("rhs", "2"))),
+            tree);
+  }
+
   private static void assertParseTree(MatchNode expected, ParseTree actual) {
     assertParseTree(0, expected, actual);
   }
@@ -466,13 +486,13 @@ public class DebugModeTest {
     assertEquals(actual.toString(), expected.name, actual.getName());
     assertEquals(actual.toString(), offset, actual.getBeginIndex());
     assertEquals(actual.toString(),
-        offset + expected.skipped + expected.matched.length(), actual.getEndIndex());
+        offset + expected.matched.length() + expected.trailing, actual.getEndIndex());
     assertEquals(actual.toString(), expected.value, actual.getValue());
     assertEquals(actual.toString(), expected.children.size(), actual.getChildren().size());
     for (int i = 0; i < expected.children.size(); i++) {
       MatchNode expectedChild = expected.children.get(i);
       assertParseTree(offset, expectedChild, actual.getChildren().get(i));
-      offset += expectedChild.skipped + expectedChild.matched.length();
+      offset += expectedChild.matched.length() + expectedChild.trailing;
     }
   }
 
@@ -485,22 +505,26 @@ public class DebugModeTest {
   }
 
   private static MatchNode node(String name, Object value, String matched, MatchNode... children) {
-    return new MatchNode(0, name, value, matched, asList(children));
+    return new MatchNode(name, value, matched, asList(children));
   }
 
   private static final class MatchNode {
-    final int skipped;
     final String name;
     final String matched;
     final Object value;
     final List<MatchNode> children;
+    private int trailing = 0;
 
-    MatchNode(int skipped, String name, Object value, String matched, List<MatchNode> children) {
-      this.skipped = skipped;
+    MatchNode(String name, Object value, String matched, List<MatchNode> children) {
       this.name = name;
       this.matched = matched;
       this.value = value;
       this.children = children;
+    }
+
+    MatchNode trailing(int offset) {
+      this.trailing = offset;
+      return this;
     }
   }
 }

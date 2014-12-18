@@ -249,6 +249,7 @@ abstract class ParseContext {
     // nested is either the token-level parser, or the inner scanner of a subpattern.
     if (parser.apply(nestedState))  {
       set(nestedState.step, at, nestedState.result);
+      trace.setCurrentNode(nestedState.trace.getCurrentNode());
       return true;
     }
     // index on token level is the "at" on character level
