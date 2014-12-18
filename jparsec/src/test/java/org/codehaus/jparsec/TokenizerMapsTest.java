@@ -84,15 +84,15 @@ public class TokenizerMapsTest {
   @Test
   public void testScientificNotation() {
     assertEquals("SCIENTIFIC_NOTATION", TokenizerMaps.SCIENTIFIC_NOTATION.toString());
-    assertEquals(new Tokens.ScientificNotation("1", "2"),
+    assertEquals(Tokens.scientificNotation("1", "2"),
         TokenizerMaps.SCIENTIFIC_NOTATION.map("1e2"));
-    assertEquals(new Tokens.ScientificNotation("1", "2"),
+    assertEquals(Tokens.scientificNotation("1", "2"),
         TokenizerMaps.SCIENTIFIC_NOTATION.map("1e+2"));
-    assertEquals(new Tokens.ScientificNotation("1", "-2"),
+    assertEquals(Tokens.scientificNotation("1", "-2"),
         TokenizerMaps.SCIENTIFIC_NOTATION.map("1e-2"));
-    assertEquals(new Tokens.ScientificNotation("1.2", "30"),
+    assertEquals(Tokens.scientificNotation("1.2", "30"),
         TokenizerMaps.SCIENTIFIC_NOTATION.map("1.2E30"));
-    assertEquals(new Tokens.ScientificNotation("0", "0"),
+    assertEquals(Tokens.scientificNotation("0", "0"),
         TokenizerMaps.SCIENTIFIC_NOTATION.map("0E0"));
   }
 
