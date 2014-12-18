@@ -8,16 +8,13 @@ class PeekPattern extends Pattern {
     this.pp = pp;
   }
 
-  @Override
-  public int match(CharSequence src, int begin, int end) {
+  @Override public int match(CharSequence src, int begin, int end) {
     if (pp.match(src, begin, end) == Pattern.MISMATCH)
       return Pattern.MISMATCH;
-    else
-      return 0;
+    else return 0;
   }
 
-  @Override
-  public String toString() {
+  @Override public String toString() {
     return "(?:" + pp.toString() + ")";
   }
 }

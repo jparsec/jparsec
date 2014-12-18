@@ -19,7 +19,7 @@ class ManyPattern extends Pattern {
 
   private final Pattern pattern;
 
-  public ManyPattern(Pattern pattern) {
+  ManyPattern(Pattern pattern) {
     this.pattern = pattern;
   }
 

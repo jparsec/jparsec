@@ -128,17 +128,33 @@ public final class Patterns {
    * Returns a {@link Pattern} object that matches if the input has at least {@code n} characters left. Match length is
    * {@code n} if succeed.
    */
-  public static Pattern hasAtLeast(int n) {
-    return new HasAtLeastPattern(n);
+  public static Pattern hasAtLeast(final int n) {
+    return new Pattern() {
+      @Override public int match(CharSequence src, int begin, int end) {
+        if ((begin + n) > end) return Pattern.MISMATCH;
+        else return n;
+      }
+      @Override public String toString() {
+        return ".{" + n + ",}";
+      }
+    };
   }
 
   /**
    * Returns a {@link Pattern} object that matches if the input has exactly {@code n} characters left. Match length is
    * {@code n} if succeed.
    */
-  public static Pattern hasExact(int n) {
+  public static Pattern hasExact(final int n) {
     Checks.checkNonNegative(n, "n < 0");
-    return new HasExactPattern(n);
+    return new Pattern() {
+      @Override public int match(CharSequence src, int begin, int end) {
+        if ((begin + n) != end) return Pattern.MISMATCH;
+        else return n;
+      }
+      @Override public String toString() {
+        return ".{" + n + "}";
+      }
+    };
   }
 
   /**
@@ -169,8 +185,21 @@ public final class Patterns {
    * Returns a {@link Pattern} object that matches if the current character in the input satisfies {@code predicate}, in
    * which case {@code 1} is returned as match length.
    */
-  public static Pattern isChar(CharPredicate predicate) {
-    return new CharPredicatePattern(predicate);
+  public static Pattern isChar(final CharPredicate predicate) {
+    return new Pattern() {
+      @Override public int match(CharSequence src, int begin, int end) {
+        if (begin >= end)
+          return Pattern.MISMATCH;
+        else if (predicate.isChar(src.charAt(begin)))
+          return 1;
+        else
+          return Pattern.MISMATCH;
+      }
+
+      @Override public String toString() {
+        return predicate.toString();
+      }
+    };
   }
 
   /**
@@ -182,21 +211,47 @@ public final class Patterns {
   }
 
   /** Returns a {@link Pattern} object that matches {@code string} literally. */
-  public static Pattern string(String string) {
-    return new StringPattern(string);
+  public static Pattern string(final String string) {
+    return new Pattern() {
+      @Override public int match(CharSequence src, int begin, int end) {
+        if ((end - begin) < string.length()) return MISMATCH;
+        return matchString(string, src, begin, end);
+      }
+      @Override public String toString() {
+        return string;
+      }
+    };
   }
 
   /** Returns a {@link Pattern} object that matches {@code string} case insensitively. */
-  public static Pattern stringCaseInsensitive(String string) {
-    return new StringCaseInsensitivePattern(string);
+  public static Pattern stringCaseInsensitive(final String string) {
+    return new Pattern() {
+      @Override public int match(CharSequence src, int begin, int end) {
+        return matchStringCaseInsensitive(string, src, begin, end);
+      }
+      @Override public String toString() {
+        return string.toUpperCase();
+      }
+    };
   }
 
   /**
    * Returns a {@link Pattern} object that matches if the input has at least 1 character and doesn't match {@code
    * string}. {@code 1} is returned as match length if succeeds.
    */
-  public static Pattern notString(String string) {
-    return new NotStringPattern(string);
+  public static Pattern notString(final String string) {
+    return new Pattern() {
+      @Override public int match(CharSequence src, int begin, int end) {
+        if (begin >= end) return MISMATCH;
+        int matchedLength = matchString(string, src, begin, end);
+        if ((matchedLength == Pattern.MISMATCH) || (matchedLength < string.length()))
+          return 1;
+        else return MISMATCH;
+      }
+      @Override public String toString() {
+        return "!(" + string + ")";
+      }
+    };
   }
 
   /**
@@ -204,7 +259,17 @@ public final class Patterns {
    * string} case insensitively. {@code 1} is returned as match length if succeeds.
    */
   public static Pattern notStringCaseInsensitive(final String string) {
-    return new NotStringCaseInsensitivePattern(string);
+    return new Pattern() {
+      @Override public int match(CharSequence src, int begin, int end) {
+        if (begin >= end) return MISMATCH;
+        if (matchStringCaseInsensitive(string, src, begin, end) == Pattern.MISMATCH)
+          return 1;
+        else return MISMATCH;
+      }
+      @Override public String toString(){
+        return "!(" + string.toUpperCase() + ")";
+      }
+    };
   }
 
   /**
@@ -216,16 +281,34 @@ public final class Patterns {
     return pattern.not();
   }
 
-  static Pattern peek(Pattern pp) {
-    return new PeekPattern(pp);
-  }
-
   /**
    * Returns a {@link Pattern} that matches if all of {@code patterns} matches, in which case, the maximum match length
    * is returned. Mismatch if any one mismatches.
    */
-  public static Pattern and(Pattern... patterns) {
-    return new AndPattern(patterns);
+  public static Pattern and(final Pattern... patterns) {
+    return new Pattern() {
+      @Override public int match(CharSequence src, int begin, int end) {
+        int ret = 0;
+        for (Pattern pattern : patterns) {
+          int l = pattern.match(src, begin, end);
+          if (l == MISMATCH) return MISMATCH;
+          if (l > ret) ret = l;
+        }
+        return ret;
+      }
+
+      @Override public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append('(');
+        for (Pattern pattern : patterns) {
+          sb.append(pattern).append(" & ");
+        }
+        if (sb.length() > 1) {
+          sb.delete(sb.length() - 3, sb.length());
+        }
+        return sb.append(')').toString();
+      }
+    };
   }
 
   /**
@@ -284,14 +367,30 @@ public final class Patterns {
    * satisfy {@code predicate}.
    * @since 2.2
    */
-  public static Pattern atLeast(int min, CharPredicate predicate) {
+  public static Pattern atLeast(final int min, final CharPredicate predicate) {
     Checks.checkMin(min);
-    return new ManyCharPredicateBoundedPattern(predicate, min);
+    return new Pattern() {
+      @Override public int match(CharSequence src, int begin, int end) {
+        int minLen = RepeatCharPredicatePattern.matchRepeat(min, predicate, src, end, begin, 0);
+        if (minLen == MISMATCH) return MISMATCH;
+        return matchMany(predicate, src, end, begin + minLen, minLen);
+      }
+      @Override public String toString() {
+        return (min > 1) ? (predicate + "{" + min + ",}") : (predicate + "+");
+      }
+    };
   }
 
   /** Returns a {@link Pattern} that matches 0 or more characters satisfying {@code predicate}. */
-  public static Pattern many(CharPredicate predicate) {
-    return new ManyCharPredicatePattern(predicate);
+  public static Pattern many(final CharPredicate predicate) {
+    return new Pattern() {
+      @Override public int match(CharSequence src, int begin, int end) {
+        return matchMany(predicate, src, end, begin, 0);
+      }
+      @Override public String toString() {
+        return predicate + "*";
+      }
+    };
   }
 
   /**
@@ -452,5 +551,47 @@ public final class Patterns {
 
   private static Pattern getModifiersPattern() {
     return isChar(CharPredicates.IS_ALPHA).many();
+  }
+
+  private static int matchMany(
+      CharPredicate predicate, CharSequence src, int len, int from, int acc) {
+    for (int i = from; i < len; i++) {
+      if (!predicate.isChar(src.charAt(i)))
+        return i - from + acc;
+    }
+    return len - from + acc;
+  }
+
+  private  static int matchStringCaseInsensitive(String str, CharSequence src, int begin, int end) {
+    final int patternLength = str.length();
+    if ((end - begin) < patternLength) return Pattern.MISMATCH;
+    for (int i = 0; i < patternLength; i++) {
+      final char exp = str.charAt(i);
+      final char enc = src.charAt(begin + i);
+      if (Character.toLowerCase(exp) != Character.toLowerCase(enc))
+        return Pattern.MISMATCH;
+    }
+    return patternLength;
+  }
+
+  /**
+   * Matches (part of) a character sequence against a pattern string.
+   *
+   * @param  str   the pattern string.
+   * @param  src   the input sequence. Must not be null.
+   * @param  begin start of index to scan characters from <code>src</code>.
+   * @param  end   end of index to scan characters from <code>src</code>.
+   *
+   * @return the number of characters matched, or {@link Pattern#MISMATCH} if an unexpected character is encountered.
+   */
+  private static int matchString(String str, CharSequence src, int begin, int end) {
+    final int patternLength = str.length();
+    int i = 0;
+    for (; (i < patternLength) && ((begin + i) < end); i++) {
+      final char exp = str.charAt(i);
+      final char enc = src.charAt(begin + i);
+      if (exp != enc) return Pattern.MISMATCH;
+    }
+    return i;
   }
 }

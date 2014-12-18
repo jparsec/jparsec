@@ -90,7 +90,7 @@ public abstract class Pattern {
    * @since 2.2
    */
   public final Pattern atLeast(int min) {
-    return new ManyBoundedPattern(Checks.checkMin(min), this);
+    return new LowerBoundedPattern(Checks.checkMin(min), this);
   }
   
   /**
@@ -123,7 +123,7 @@ public abstract class Pattern {
    * @since 2.2
    */
   public final Pattern atMost(int max) {
-    return new SomePattern(Checks.checkMax(max), this);
+    return new UpperBoundedPattern(Checks.checkMax(max), this);
   }
   
   /**
@@ -238,7 +238,7 @@ public abstract class Pattern {
         int minLen = RepeatPattern.matchRepeat(min, pp, src, end, begin, 0);
         if (MISMATCH == minLen)
           return MISMATCH;
-        return SomePattern.matchSome(max - min, pp, src, end, begin + minLen, minLen);
+        return UpperBoundedPattern.matchSome(max - min, pp, src, end, begin + minLen, minLen);
       }
     };
   }

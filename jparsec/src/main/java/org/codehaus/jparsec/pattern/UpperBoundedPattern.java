@@ -15,48 +15,30 @@
  *****************************************************************************/
 package org.codehaus.jparsec.pattern;
 
-class StringPattern extends Pattern {
+class UpperBoundedPattern extends Pattern {
+  private final int max;
+  private final Pattern pattern;
 
-  private final String string;
-
-  public StringPattern(String string) {
-    this.string = string;
+  UpperBoundedPattern(int max, Pattern pattern) {
+    this.max = max;
+    this.pattern = pattern;
   }
 
-  /**
-   * Matches (part of) a character sequence against a pattern string.
-   *
-   * @param  str   the pattern string.
-   * @param  src   the input sequence. Must not be null.
-   * @param  begin start of index to scan characters from <code>src</code>.
-   * @param  end   end of index to scan characters from <code>src</code>.
-   *
-   * @return the number of characters matched, or {@link Pattern#MISMATCH} if an unexpected character is encountered.
-   */
-  static int matchString(String str, CharSequence src, int begin, int end) {
-    final int patternLength = str.length();
+  @Override public int match(CharSequence src, int begin, int end) {
+    return matchSome(max, pattern, src, end, begin, 0);
+  }
 
-    int i;
-    for (i = 0; (i < patternLength) && ((begin + i) < end); i++) {
-      final char exp = str.charAt(i);
-      final char enc = src.charAt(begin + i);
-      if (exp != enc) {
-        return MISMATCH;
-      }
+  @Override public String toString() {
+    return pattern.toString() + "{0," + max + '}';
+  }
+
+  static int matchSome(int max, Pattern pattern, CharSequence src, int len, int from, int acc) {
+    int begin = from;
+    for (int i = 0; i < max; i++) {
+      int l = pattern.match(src, begin, len);
+      if (MISMATCH == l) return begin - from + acc;
+      begin += l;
     }
-    return i;
-  }
-
-  @Override
-  public int match(CharSequence src, int begin, int end) {
-    if ((end - begin) < string.length())
-      return Pattern.MISMATCH;
-
-    return matchString(string, src, begin, end);
-  }
-
-  @Override
-  public String toString() {
-    return string;
+    return begin - from + acc;
   }
 }
