@@ -691,7 +691,7 @@ public abstract class Parser<T> {
    *
    * @since 2.3
    */
-  public final ParseTree parseToTree(CharSequence source) {
+  public final ParseTree parseTree(CharSequence source) {
     ScannerState state = new ScannerState(source);
     state.enableTrace("root");
     state.run(this.followedBy(Parsers.EOF));

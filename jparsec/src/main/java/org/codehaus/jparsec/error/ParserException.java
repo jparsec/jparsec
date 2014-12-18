@@ -81,8 +81,11 @@ public class ParserException extends RuntimeException {
   }
 
   /**
-   * Returns the parse tree until the parse error happened. {@code null} if
-   * {@link Parser#enableTrace()} isn't called.
+   * Returns the parse tree until the parse error happened, when either
+   * {@link org.codehaus.jparsec.Parser#parseTree parseTree()} was invoked or
+   * {@link Parser.Mode#DEBUG DEBUG mode} was used in
+   * {@link org.codehaus.jparsec.Parser#parse(CharSequence, org.codehaus.jparsec.Parser.Mode) parse()}.
+   * {@code null} if absent.
    *
    * @since 2.3
    */

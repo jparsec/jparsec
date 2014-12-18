@@ -467,7 +467,7 @@ public class DebugModeTest {
     Parser<?> tokenizer = Parsers.<Object>or(
         terms.tokenizer().label("op"), Terminals.IntegerLiteral.TOKENIZER.label("num"));
     Parser<?> parser = expr.source().label("expr").from(tokenizer, Scanners.WHITESPACES);
-    ParseTree tree = parser.parseToTree("1 + 2");
+    ParseTree tree = parser.parseTree("1 + 2");
     assertParseTree(
         rootNode("1 + 2",
             stringNode("expr", "1 + 2",
@@ -483,7 +483,7 @@ public class DebugModeTest {
         Scanners.INTEGER.label("lhs"),
         Scanners.isChar('+').source().label("plus"),
         Scanners.INTEGER.label("rhs"));
-    ParseTree tree = expr.source().label("expr").parseToTree("1+2");
+    ParseTree tree = expr.source().label("expr").parseTree("1+2");
     assertParseTree(
         rootNode("1+2",
             stringNode("expr", "1+2",
@@ -499,7 +499,7 @@ public class DebugModeTest {
         Scanners.INTEGER,
         Scanners.isChar('+').source(),
         Scanners.INTEGER);
-    ParseTree tree = expr.source().parseToTree("1+2");
+    ParseTree tree = expr.source().parseTree("1+2");
     assertParseTree(rootNode("1+2"), tree);
   }
 
@@ -513,7 +513,7 @@ public class DebugModeTest {
     Parser<?> tokenizer = Parsers.<Object>or(
         terms.tokenizer().label("op"), Terminals.IntegerLiteral.TOKENIZER.label("num"));
     Parser<?> parser = expr.source().from(tokenizer, Scanners.WHITESPACES);
-    ParseTree tree = parser.parseToTree("1 + 2");
+    ParseTree tree = parser.parseTree("1 + 2");
     assertParseTree(rootNode("1 + 2"), tree);
   }
 
