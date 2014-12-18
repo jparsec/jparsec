@@ -1,9 +1,7 @@
 jparsec
 =======
 
-> This is code repository for jParsec 3.0 development branch. It used to be maintained on  [Codehaus](http://jparsec.codehaus.org/) site. I took over its maintenance on github.
-
-[![Build Status](https://travis-ci.org/abailly/jparsec.png)](https://travis-ci.org/abailly/jparsec)
+Build mini parser in pure Java.
 
 # How to Use?
 
@@ -47,3 +45,8 @@ Look at the [wiki](https://github.com/abailly/jparsec/wiki) for documentation on
 * 2014-01-16 - [Nantes JUG](http://nantesjug.org/#/events/2014_01_20):
   Quickie on jparsec for local JUG
 * 2013-09-23 - [JUGSummerCamp 2013](http://www.jugsummercamp.com/edition/4): Directory `parsing-made-easy` contains material for the talk (slides + sample code)
+* 
+
+
+
+[Build Status](http://travis-ci.org/jparsec/jparsec)
