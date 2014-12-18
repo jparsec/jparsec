@@ -672,7 +672,12 @@ public abstract class Parser<T> {
 
   /**
    * Parses {@code source} under the given {@code mode}. For example: <pre>
-   *   parser.parse(text, Mode.DEBUG);
+   *   try {
+   *     parser.parse(text, Mode.DEBUG);
+   *   } catch (ParserException e) {
+   *     ParseTree parseTree = e.getParseTree();
+   *     ...
+   *   }
    * </pre>
    *
    * @since 2.3
