@@ -30,8 +30,8 @@ interface ParserTrace {
   TreeNode getCurrentNode();
 
   /**
-   * Called by {@link NestedScanner} to set the enclosing parser's tree state into the nested
-   * parser's state.
+   * Called by {@link Scanners#nestedScanner} to set the enclosing parser's tree state into
+   * the nested parser's state.
    */
   void setCurrentNode(TreeNode node);
 

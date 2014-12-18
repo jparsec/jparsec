@@ -154,8 +154,21 @@ public final class Parsers {
    * @param parser the token level parser object.
    * @return the new Parser object.
    */
-  static <T> Parser<T> nested(Parser<Token[]> lexer, Parser<? extends T> parser) {
-    return new NestedParser<T>(lexer, parser);
+  static <T> Parser<T> nested(final Parser<Token[]> lexer, final Parser<? extends T> parser) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        if (!lexer.apply(ctxt)) return false;
+        Token[] tokens = lexer.getReturn(ctxt);
+        ParserState parserState = new ParserState(
+            ctxt.module, ctxt.source, tokens, 0, ctxt.locator, ctxt.getIndex(), tokens);
+        ctxt.trace.startFresh(parserState);
+        return ctxt.applyNested(parser, parserState);
+      }
+      
+      @Override public String toString() {
+        return parser.toString();
+      }
+    };
   }
 
   /******************** monadic combinators ******************* */

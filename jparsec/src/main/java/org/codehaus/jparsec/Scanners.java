@@ -515,8 +515,26 @@ public final class Scanners {
    * <p> Is useful for scenarios like parsing string interpolation grammar, with parsing errors
    * correctly pointing to the right location in the original source.
    */
-  public static Parser<Void> nestedScanner(Parser<?> outer, Parser<Void> inner) {
-    return new NestedScanner(outer, inner);
+  public static Parser<Void> nestedScanner(final Parser<?> outer, final Parser<Void> inner) {
+    return new Parser<Void>() {
+      @Override boolean apply(ParseContext ctxt) {
+        int from = ctxt.at;
+        if (!outer.apply(ctxt)) return false;
+        ScannerState scannerState = new ScannerState(
+            ctxt.module, ctxt.characters(), from, ctxt.at, ctxt.locator, ctxt.result);
+        ctxt.trace.startFresh(scannerState);
+        scannerState.trace.setCurrentNode(ctxt.trace.getCurrentNode());
+        try {
+          return ctxt.applyNested(inner, scannerState);
+        } finally {
+          ctxt.trace.setCurrentNode(scannerState.trace.getCurrentNode());
+        }
+      }
+      
+      @Override public String toString() {
+        return "nested scanner";
+      }
+    };
   }
   
   /**
