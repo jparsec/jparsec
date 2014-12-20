@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import java.util.Arrays;
 import java.util.List;
 
 import org.codehaus.jparsec.error.ParserException;
@@ -261,8 +262,98 @@ public class DebugModeTest {
   }
 
   @Test
+  public void sepBy1ProducesListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy1(Scanners.isChar(','));
+    try {
+      parser.label("digits").parse("1 ", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("1", node("digits", asList("1"), "1",
+              stringNode("d", "1"))),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void sepByProducesEmptyListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy(Scanners.isChar(','));
+    try {
+      parser.label("digits").parse(" ", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("", node("digits", Arrays.<String>asList(), "")),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void sepBy1ProducesEmptyListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy1(Scanners.isChar(','));
+    try {
+      parser.label("digits").parse("", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("", node("digits", null, "")),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void sepBy1ProducesSingleElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy1(Scanners.isChar(','));
+    try {
+      parser.label("digits").parse("1 ", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("1", node("digits", asList("1"), "1", stringNode("d", "1"))),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void sepEndBy1ProducesListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy1(Scanners.isChar(','));
+    try {
+      parser.label("digits").parse("1,2,3 ", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("1,2,3", node("digits", asList("1", "2", "3"), "1,2,3",
+              stringNode("d", "1"),
+              stringNode("d", "2").leading(1),
+              stringNode("d", "3").leading(1))),
+          e.getParseTree());
+    }
+  }
+
+  @Test
   public void manyProducesListInParseTree() {
     Parser<?> parser = Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many();
+    try {
+      parser.label("digits").parse("123 ", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("123", node("digits", asList("1", "2", "3"), "123",
+              stringNode("d", "1"),
+              stringNode("d", "2"),
+              stringNode("d", "3"))),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void many1ProducesListInParseTree() {
+    Parser<?> parser = Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many1();
     try {
       parser.label("digits").parse("123 ", Parser.Mode.DEBUG);
       fail();
@@ -486,15 +577,16 @@ public class DebugModeTest {
   private static void assertParseTree(int offset, MatchNode expected, ParseTree actual) {
     assertNotNull(actual);
     assertEquals(actual.toString(), expected.name, actual.getName());
-    assertEquals(actual.toString(), offset, actual.getBeginIndex());
+    assertEquals(actual.toString(), offset + expected.leading, actual.getBeginIndex());
     assertEquals(actual.toString(),
-        offset + expected.matched.length() + expected.trailing, actual.getEndIndex());
+        offset + expected.leading + expected.matched.length() + expected.trailing,
+        actual.getEndIndex());
     assertEquals(actual.toString(), expected.value, actual.getValue());
     assertEquals(actual.toString(), expected.children.size(), actual.getChildren().size());
     for (int i = 0; i < expected.children.size(); i++) {
       MatchNode expectedChild = expected.children.get(i);
       assertParseTree(offset, expectedChild, actual.getChildren().get(i));
-      offset += expectedChild.matched.length() + expectedChild.trailing;
+      offset += expectedChild.matched.length() + expectedChild.leading + expectedChild.trailing;
     }
   }
 
@@ -515,6 +607,7 @@ public class DebugModeTest {
     final String matched;
     final Object value;
     final List<MatchNode> children;
+    private int leading = 0;
     private int trailing = 0;
 
     MatchNode(String name, Object value, String matched, List<MatchNode> children) {
@@ -522,6 +615,11 @@ public class DebugModeTest {
       this.matched = matched;
       this.value = value;
       this.children = children;
+    }
+
+    MatchNode leading(int offset) {
+      this.leading = offset;
+      return this;
     }
 
     MatchNode trailing(int offset) {

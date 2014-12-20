@@ -442,7 +442,7 @@ public abstract class Parser<T> {
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> sepBy1(Parser<?> delim) {
-    final Parser<T> afterFirst = delim.step(0).next(this);
+    final Parser<T> afterFirst = delim.asDelimiter().step(0).next(this);
     Map<T, Parser<List<T>>> binder = new Map<T, Parser<List<T>>>() {
       @Override public Parser<List<T>> map(T firstValue) {
         return new RepeatAtLeastParser<T>(
@@ -720,6 +720,18 @@ public abstract class Parser<T> {
    */
   public Parser<List<Token>> lexer(Parser<?> delim) {
     return delim.optional().next(token().sepEndBy(delim));
+  }
+
+  /**
+   * As a delimiter, the parser's error is considered lenient and will only be reported if no other
+   * meaningful error is encountered.
+   */
+  final Parser<T> asDelimiter() {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        return ctxt.applyDelimiter(Parser.this);
+      }
+    };
   }
 
   /**

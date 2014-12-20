@@ -54,6 +54,9 @@ abstract class ParseContext {
     
     /** Default value, no error. */
     NONE(false),
+
+    /** When the error is mostly lenient (as a delimiter of repetitions for example). */
+    DELIMITING(false),
     
     /** When {@link Parser#not()} is called. Signals that something isn't expected. */
     UNEXPECTED(false),
@@ -62,7 +65,7 @@ abstract class ParseContext {
     MISSING(true),
     
     /** When {@link Parser#label()} is called. Signals that a logical stuff isn't found. */
-    EXPECTED(true),
+    EXPECTING(true),
     
     /** When {@link Parsers#fail(String)} is called. Signals a serious problem. */
     FAILURE(false);
@@ -83,6 +86,7 @@ abstract class ParseContext {
   
   // explicit suppresses error recording if true.
   private boolean errorSuppressed = false;
+  private ErrorType overrideErrorType = ErrorType.NONE;
   
   //caller should not change input after it is passed in.
   ParseContext(CharSequence source, int at, String module, SourceLocator locator) {
@@ -99,12 +103,23 @@ abstract class ParseContext {
     this.locator = locator;
     this.currentErrorAt = at;
   }
-  
-  /** Explicitly suppress or de-suppress error recording. */
-  final boolean suppressError(boolean value) {
+
+  /** Runs {@code parser} with error recording suppressed. */
+  final boolean withErrorSuppressed(Parser<?> parser) {
     boolean oldValue = errorSuppressed;
-    errorSuppressed = value;
-    return oldValue;
+    errorSuppressed = true;
+    boolean ok = parser.apply(this);
+    errorSuppressed = oldValue;
+    return ok;
+  }
+
+  /** Runs {@code parser} with error recording suppressed. */
+  final boolean applyDelimiter(Parser<?> parser) {
+    ErrorType oldValue = overrideErrorType;
+    overrideErrorType = ErrorType.DELIMITING;
+    boolean ok = parser.apply(this);
+    overrideErrorType = oldValue;
+    return ok;
   }
   
   /** The physical index of the current most relevant error, {@code 0} if none. */
@@ -155,8 +170,9 @@ abstract class ParseContext {
           return errorStrings.get(0);
         }
       };
-    case EXPECTED:
+    case EXPECTING:
     case MISSING:
+    case DELIMITING:
       return new EmptyParseError(errorIndex, encounteredName) {
         @Override public List<String> getExpected() {
           return errorStrings;
@@ -196,6 +212,7 @@ abstract class ParseContext {
   @Private final void raise(ErrorType type, Object subject) {
     if (errorSuppressed) return;
     if (at < currentErrorAt) return;
+    if (overrideErrorType != ErrorType.NONE) type = overrideErrorType;
     if (at > currentErrorAt) {
       setErrorState(at, getIndex(), type);
       errors.add(subject);
@@ -226,7 +243,7 @@ abstract class ParseContext {
   }
   
   final void expected(Object what) {
-    raise(ErrorType.EXPECTED, what);
+    raise(ErrorType.EXPECTING, what);
   }
   
   final void unexpected(String what) {
