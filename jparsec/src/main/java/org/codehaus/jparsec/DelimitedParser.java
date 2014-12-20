@@ -15,23 +15,27 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import java.util.List;
+
 /**
  * Parses a list of pattern started with a delimiter, separated and optionally
  * ended by the delimiter.
  * 
  * @author Ben Yu
  */
-abstract class DelimitedParser<T, R> extends Parser<R> {
-  final Parser<T> parser;
+final class DelimitedParser<T> extends Parser<List<T>> {
+  private final Parser<T> parser;
   private final Parser<?> delim;
+  private final ListFactory<T> listFactory;
 
-  DelimitedParser(Parser<T> p, Parser<?> delim) {
+  DelimitedParser(Parser<T> p, Parser<?> delim, ListFactory<T> listFactory) {
     this.parser = p;
     this.delim = delim;
+    this.listFactory = listFactory;
   }
 
   @Override final boolean apply(final ParseContext ctxt) {
-    final R result = begin();
+    final List<T> result = listFactory.newList();
     for (;;) {
       final int step0 = ctxt.step;
       final int at0 = ctxt.at;
@@ -53,12 +57,9 @@ abstract class DelimitedParser<T, R> extends Parser<R> {
         ctxt.result = result;
         return true;
       }
-      element(ctxt, result);
+      result.add(parser.getReturn(ctxt));
     }
   }
-
-  abstract R begin();
-  abstract void element(ParseContext ctxt, R result);
   
   @Override public String toString() {
     return "delimited";

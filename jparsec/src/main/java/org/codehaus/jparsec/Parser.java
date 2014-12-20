@@ -281,8 +281,19 @@ public abstract class Parser<T> {
   /**
    * A {@link Parser} that runs {@code this} parser and transforms the return value using {@code map}.
    */
-  public final <R> Parser<R> map(Map<? super T, ? extends R> map) {
-    return new MapParser<T, R>(this, map);
+  public final <R> Parser<R> map(final Map<? super T, ? extends R> map) {
+    return new Parser<R>() {
+      @Override boolean apply(final ParseContext ctxt) {
+        final boolean r = Parser.this.apply(ctxt);
+        if (r) {
+          ctxt.result = map.map(Parser.this.getReturn(ctxt));
+        }
+        return r;
+      }
+      @Override public String toString() {
+        return map.toString();
+      }
+    };
   }
 
   /**
@@ -329,7 +340,21 @@ public abstract class Parser<T> {
    * A {@link Parser} that runs {@code this} and undoes any input consumption if succeeds.
    */
   public final Parser<T> peek() {
-    return new PeekParser<T>(this);
+    return new Parser<T>() {
+      @Override public Parser<T> label(String name) {
+        return Parser.this.label(name).peek();
+      }
+      @Override boolean apply(ParseContext ctxt) {
+        int step = ctxt.step;
+        int at = ctxt.at;
+        boolean ok = Parser.this.apply(ctxt);
+        if (ok) ctxt.setAt(step, at);
+        return ok;
+      }
+      @Override public String toString() {
+        return "peek";
+      }
+    };
   }
 
   /**
@@ -463,7 +488,7 @@ public abstract class Parser<T> {
   public final Parser<List<T>> sepEndBy1(final Parser<?> delim) {
     return next(new Map<T, Parser<List<T>>>() {
       @Override public Parser<List<T>> map(T first) {
-        return new DelimitedListParser<T>(
+        return new DelimitedParser<T>(
             Parser.this, delim, ListFactory.arrayListFactoryWithFirstElement(first));
       }
     });
@@ -578,21 +603,62 @@ public abstract class Parser<T> {
    * Parser)} both do the conversion automatically.
    */
   public final Parser<Token> token() {
-    return new ToTokenParser(this);
+    return new Parser<Token>() {
+      @Override boolean apply(ParseContext ctxt) {
+        int begin = ctxt.getIndex();
+        if (!Parser.this.apply(ctxt)) {
+          return false;
+        }
+        int len = ctxt.getIndex() - begin;
+        Token token = new Token(begin, len, ctxt.result);
+        ctxt.result = token;
+        return true;
+      }
+      @Override public String toString() {
+        return Parser.this.toString();
+      }
+    };
   }
 
   /**
    * A {@link Parser} that returns the matched string in the original source.
    */
   public final Parser<String> source() {
-    return new ReturnSourceParser(this);
+    return new Parser<String>() {
+      @Override boolean apply(ParseContext ctxt) {
+        int begin = ctxt.getIndex();
+        if (!Parser.this.apply(ctxt)) {
+          return false;
+        }
+        ctxt.result = ctxt.source.subSequence(begin, ctxt.getIndex()).toString();
+        return true;
+      }
+      @Override public String toString() {
+        return "source";
+      }
+    };
   }
 
   /**
    * A {@link Parser} that returns both parsed object and matched string.
    */
   public final Parser<WithSource<T>> withSource() {
-    return new WithSourceParser<T>(this);
+    return new Parser<WithSource<T>>() {
+      @Override boolean apply(ParseContext ctxt) {
+        int begin = ctxt.getIndex();
+        if (!Parser.this.apply(ctxt)) {
+          return false;
+        }
+        String source = ctxt.source.subSequence(begin, ctxt.getIndex()).toString();
+        @SuppressWarnings("unchecked")
+        WithSource<T> withSource = new WithSource<T>((T) ctxt.result, source);
+        ctxt.result = withSource;
+        return true;
+      }
+      @Override public String toString() {
+        return Parser.this.toString();
+      }
+    };
   }
 
   /**
