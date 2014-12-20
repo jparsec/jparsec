@@ -87,62 +87,6 @@ public class DebugModeTest {
   }
 
   @Test
-  public void firstChildMatchesInPlusParser() {
-    Parser<?> parser = Parsers.plus(
-        Scanners.string("hello").source().label("hi"),
-        Scanners.string("hello world").source().label("hi you"));
-    try {
-      parser.label("greeting").parse("helloworld", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(rootNode("hello", stringNode("greeting", "hello", stringNode("hi", "hello"))),
-          e.getParseTree());
-    }
-  }
-
-  @Test
-  public void firstChildConsumedInputInPlusParser() {
-    Parser<?> parser = Parsers.plus(
-        Scanners.string("hello").followedBy(Scanners.isChar(' ')).source().label("hi"),
-        Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
-    try {
-      parser.label("greeting").parse("helloworld", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(rootNode("hello", node("greeting", null, "hello")), e.getParseTree());
-    }
-  }
-
-  @Test
-  public void secondChildMatchesInPlusParser() {
-    Parser<?> parser = Parsers.plus(
-        Scanners.string("hello ").source().label("hi"),
-        Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
-    try {
-      parser.label("greeting").parse("helloworldx", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(
-          rootNode("helloworld",
-              stringNode("greeting", "helloworld", stringNode("hi you", "helloworld"))),
-          e.getParseTree());
-    }
-  }
-
-  @Test
-  public void secondChildMismatchesInPlusParser() {
-    Parser<?> parser = Parsers.plus(
-        Scanners.string("hello ").source().label("hi"),
-        Scanners.string("bye").source().label("farewell"));
-    try {
-      parser.label("greeting").parse("hello", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(rootNode("", node("greeting", null, "")), e.getParseTree());
-    }
-  }
-
-  @Test
   public void grandChildInOrParser() {
     Parser<?> parser = Parsers.or(
         Scanners.string("hello ").source().label("hi"),

@@ -449,36 +449,6 @@ public final class Parsers {
     return sequence(toArray(parsers));
   }
   
-
-  /**
-   * Overload of {@link #plus(Parser[])} that takes 2 parser objects
-   * to avoid unchecked compiler warning.
-   */
-  @SuppressWarnings("unchecked")
-  static <T> Parser<T> plus(Parser<? extends T> p1, Parser<? extends T> p2) {
-    return new SumParser<T>(p1, p2);
-  }
-  
-  /**
-   * Overload of {@link #plus(Parser[])} that takes 3 parser objects
-   * to avoid unchecked compiler warning. 
-   */
-  @SuppressWarnings("unchecked")
-  static <T> Parser<T> plus(
-      Parser<? extends T> p1, Parser<? extends T> p2, Parser<? extends T> p3) {
-    return new SumParser<T>(p1, p2, p3);
-  }
-  
-  /**
-   * A {@link Parser} that tries each alternative parser in {@code alternatives} and falls back
-   * to the next parser if the previous parser fails <em>with no partial match</em>.
-   */
-  static <T> Parser<T> plus(Parser<? extends T>... alternatives) {
-    if (alternatives.length == 0) return never();
-    if (alternatives.length == 1) return alternatives[0].cast();
-    return new SumParser<T>(alternatives);
-  }
-  
   /**
    * A {@link Parser} that tries 2 alternative parser objects.
    * Fallback happens regardless of partial match.
@@ -790,7 +760,7 @@ public final class Parsers {
                 return "shift right operand";
               }
             });
-        return plus(shift, constant(a));
+        return or(shift, constant(a));
       }
       @Override public String toString() {
         return "infixn";

@@ -246,39 +246,6 @@ public class ParsersTest extends BaseMockTest {
 
   @SuppressWarnings("unchecked")
   @Test
-  public void testPlus_0Parser() {
-    assertSame(Parsers.never(), Parsers.plus());
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
-  public void testPlus_1Parser() {
-    Parser<?> parser = Parsers.constant(1);
-    assertSame(parser, Parsers.plus(parser));
-  }
-
-  @Test
-  public void testPlus_2Parsers() {
-    Parser<Character> parser = Parsers.plus(isChar('a'), isChar('b'));
-    assertEquals("plus", parser.toString());
-    assertEquals((Object) 'a', parser.parse("a", mode));
-    assertEquals((Object) 'b', parser.parse("b", mode));
-    assertFailure(mode, Parsers.plus(areChars("ab"), isChar('b')), "a", 1, 2);
-    assertFailure(mode, Parsers.plus(areChars("ax"), areChars("abc")), "abx", 1, 2);
-  }
-
-  @Test
-  public void testPlus_3Parsers() {
-    Parser<Character> parser = Parsers.plus(isChar('a'), isChar('b'), isChar('c'));
-    assertEquals("plus", parser.toString());
-    assertEquals((Object) 'a', parser.parse("a", mode));
-    assertEquals((Object) 'b', parser.parse("b", mode));
-    assertEquals((Object) 'c', parser.parse("c", mode));
-    assertFailure(mode, Parsers.plus(areChars("ab"), isChar('b'), isChar('c')), "a", 1, 2);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Test
   public void testOr_0Parser() {
     assertSame(Parsers.never(), Parsers.or());
   }

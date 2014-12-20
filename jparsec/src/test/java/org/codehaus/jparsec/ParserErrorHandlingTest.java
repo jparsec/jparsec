@@ -120,13 +120,6 @@ public class ParserErrorHandlingTest {
   }
 
   @Test
-  public void testErrorSurvivesPlus() {
-    assertError(
-        Parsers.plus(areChars("abc").atomic(), isChar('a')).next(isChar('x')), areChars("ax"),
-        "abx", 1, 3, "c expected, x encountered.");
-  }
-
-  @Test
   public void testErrorSurvivesOr() {
     assertError(
         Parsers.or(areChars("abc"), isChar('a')).next(isChar('x')), areChars("ax"),

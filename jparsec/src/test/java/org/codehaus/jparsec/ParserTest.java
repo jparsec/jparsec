@@ -302,7 +302,7 @@ public class ParserTest extends BaseMockTest {
     assertParser(mode, INTEGER.peek(), "12", 12, "12");
     assertFailure(mode, INTEGER.peek(), "a", 1, 1);
     assertFailure(mode, areChars("ab").peek(), "a", 1, 2);
-    assertFailure(mode, Parsers.plus(areChars("ab").peek(), isChar('a')), "a", 1, 2);
+    assertParser(mode, Parsers.or(areChars("ab").peek(), isChar('a')), "a", 'a', "");
     assertEquals("peek", INTEGER.peek().toString());
   }
 
@@ -311,7 +311,7 @@ public class ParserTest extends BaseMockTest {
     assertEquals("integer", INTEGER.atomic().toString());
     assertEquals((Object) 'b', areChars("ab").atomic().parse("ab", mode));
     assertEquals((Object) 'a',
-        Parsers.plus(areChars("ab").atomic(), isChar('a')).parse("a", mode));
+        Parsers.or(areChars("ab").atomic(), isChar('a')).parse("a", mode));
     assertFailure(mode, areChars("ab").atomic(), "a", 1, 2);
   }
 
@@ -319,7 +319,7 @@ public class ParserTest extends BaseMockTest {
   public void testStep() {
     assertEquals(INTEGER.toString(), INTEGER.step(0).toString());
     assertEquals((Object) 'b',
-        Parsers.plus(areChars("ab").step(0).next(isChar('c')), areChars("ab")).parse("ab", mode));
+        Parsers.or(areChars("ab").step(0).next(isChar('c')), areChars("ab")).parse("ab", mode));
   }
 
   @Test

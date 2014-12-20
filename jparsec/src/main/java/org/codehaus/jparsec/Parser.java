@@ -299,14 +299,14 @@ public abstract class Parser<T> {
    * no partial match.
    */
   public final Parser<T> optional() {
-    return Parsers.plus(this, Parsers.<T>always());
+    return Parsers.or(this, Parsers.<T>always());
   }
 
   /**
    * A {@link Parser} that returns {@code defaultValue} if {@code this} fails with no partial match.
    */
   public final Parser<T> optional(T defaultValue) {
-    return Parsers.plus(this, Parsers.constant(defaultValue));
+    return Parsers.or(this, Parsers.constant(defaultValue));
   }
 
   /**
@@ -433,7 +433,7 @@ public abstract class Parser<T> {
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> sepBy(Parser<?> delim) {
-    return Parsers.plus(sepBy1(delim), EmptyListParser.<T>instance());
+    return Parsers.or(sepBy1(delim), EmptyListParser.<T>instance());
   }
 
   /**
@@ -476,7 +476,7 @@ public abstract class Parser<T> {
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> sepEndBy(Parser<?> delim) {
-    return Parsers.plus(sepEndBy1(delim), EmptyListParser.<T>instance());
+    return Parsers.or(sepEndBy1(delim), EmptyListParser.<T>instance());
   }
 
   /**
