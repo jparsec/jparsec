@@ -80,7 +80,7 @@ abstract class ParseContext {
   private ErrorType currentErrorType = ErrorType.NONE;
   private int currentErrorAt;
   private int currentErrorIndex = 0; // TODO: is it necessary to set this to the starting index?
-  private final ArrayList<Object> errors = Lists.arrayList();
+  private final ArrayList<Object> errors = Lists.arrayList(50);
   private String encountered = null; // for explicitly setting encountered token into ScannerState.
   private TreeNode currentErrorNode = null;
   
