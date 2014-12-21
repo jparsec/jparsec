@@ -262,7 +262,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void endByProducesEmptyListInParseTree() {
+  public void endByProducesEmptyListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").endBy(Scanners.isChar(';'));
     try {
@@ -306,17 +306,11 @@ public class DebugModeTest {
   }
 
   @Test
-  public void endByProducesEmptyListInErrorParseTree() {
+  public void endByProducesEmptyListInParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").endBy(Scanners.isChar(';'));
-    try {
-      parser.label("digits").parse("; ", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(
-          rootNode("", node("digits", Arrays.<String>asList(), "")),
-          e.getParseTree());
-    }
+    ParseTree tree = parser.label("digits").parseTree("");
+    assertParseTree(rootNode("", node("digits", Arrays.<String>asList(), "")), tree);
   }
 
   @Test

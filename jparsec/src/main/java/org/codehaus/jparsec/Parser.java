@@ -171,8 +171,20 @@ public abstract class Parser<T> {
    * A {@link Parser} that executes {@code this}, maps the result using {@code map} to another {@code Parser} object
    * to be executed as the next step.
    */
-  public final <To> Parser<To> next(Map<? super T, ? extends Parser<? extends To>> map) {
-    return new BindNextParser<T, To>(this, map);
+  public final <To> Parser<To> next(
+      final Map<? super T, ? extends Parser<? extends To>> map) {
+    return new Parser<To>() {
+      @Override boolean apply(ParseContext ctxt) {
+        return Parser.this.apply(ctxt) && runNext(ctxt);
+      }
+      @Override public String toString() {
+        return map.toString();
+      }
+      private boolean runNext(ParseContext state) {
+        T from = Parser.this.getReturn(state);
+        return map.map(from).apply(state);
+      }
+    };
   }
 
   /**
@@ -389,16 +401,53 @@ public abstract class Parser<T> {
    * A {@link Parser} that runs {@code consequence} if {@code this} succeeds, or {@code alternative} otherwise.
    */
   public final <R> Parser<R> ifelse(
-      Map<? super T, ? extends Parser<? extends R>> consequence, Parser<? extends R> alternative) {
-    return new IfElseParser<R, T>(this, consequence, alternative);
+      final Map<? super T, ? extends Parser<? extends R>> consequence,
+      final Parser<? extends R> alternative) {
+    return new Parser<R>() {
+      @Override boolean apply(ParseContext ctxt) {
+        final Object ret = ctxt.result;
+        final int step = ctxt.step;
+        final int at = ctxt.at;
+        final TreeNode latestChild = ctxt.getTrace().getLatestChild();
+        if (ctxt.withErrorSuppressed(Parser.this)) {
+          Parser<? extends R> parser = consequence.map(Parser.this.getReturn(ctxt));
+          return parser.apply(ctxt);
+        }
+        ctxt.set(step, at, ret, latestChild);
+        return alternative.apply(ctxt);
+      }
+      @Override public String toString() {
+        return "ifelse";
+      }
+    };
   }
 
   /**
    * A {@link Parser} that reports reports an error about {@code name} expected, if {@code this} fails with no partial
    * match.
    */
-  public Parser<T> label(String name) {
-    return new LabeledParser<T>(this, name);
+  public Parser<T> label(final String name) {
+    return new Parser<T>() {
+      @Override public Parser<T> label(String overrideName) {
+        return Parser.this.label(overrideName);
+      }
+      @Override boolean apply(ParseContext ctxt) {
+        int at = ctxt.at;
+        int step = ctxt.step;
+        ctxt.getTrace().push(name);
+        if (Parser.this.apply(ctxt)) {
+          ctxt.traceCurrentResult();
+          ctxt.getTrace().pop();
+          return true;
+        }
+        if (ctxt.stillThere(at, step)) ctxt.expected(name);
+        ctxt.getTrace().pop();
+        return false;
+      }
+      @Override public String toString() {
+        return name;
+      }
+    };
   }
 
   /**
