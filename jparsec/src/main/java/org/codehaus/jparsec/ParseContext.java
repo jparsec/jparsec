@@ -114,7 +114,7 @@ abstract class ParseContext {
   }
 
   /** Runs {@code parser} with error recording suppressed. */
-  final boolean applyDelimiter(Parser<?> parser) {
+  final boolean applyAsDelimiter(Parser<?> parser) {
     ErrorType oldValue = overrideErrorType;
     overrideErrorType = ErrorType.DELIMITING;
     int oldStep = step;

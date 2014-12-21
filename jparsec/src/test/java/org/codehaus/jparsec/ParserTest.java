@@ -188,7 +188,7 @@ public class ParserTest extends BaseMockTest {
     assertFailure(mode, areChars("ab").skipTimes(1, 2), "aba", 1, 4);
     assertEquals(null, FOO.skipTimes(0, 1).parse("", mode));
     assertEquals(null, FOO.skipTimes(1, 2).parse("", mode));
-    assertParser(mode, isChar('a').step(0).next(isChar('b')).skipTimes(1, 2), "aba", null, "a");
+    assertParser(mode, isChar('a').asDelimiter().next(isChar('b')).skipTimes(1, 2), "aba", null, "a");
     assertEquals("skipTimes", isChar('a').skipTimes(1, 2).toString());
   }
 
@@ -200,7 +200,7 @@ public class ParserTest extends BaseMockTest {
     assertFailure(mode, areChars("ab").times(1, 2), "aba", 1, 4);
     assertListParser(FOO.times(0, 1), "", "foo");
     assertListParser(FOO.times(2, 3), "", "foo", "foo", "foo");
-    assertListParser(isChar('a').step(0).next(isChar('b')).times(1, 2).followedBy(isChar('a')),
+    assertListParser(isChar('a').asDelimiter().next(isChar('b')).times(1, 2).followedBy(isChar('a')),
         "aba", 'b');
     assertEquals("times", isChar('a').times(1, 2).toString());
   }
@@ -218,7 +218,7 @@ public class ParserTest extends BaseMockTest {
     assertFailure(mode, areChars("ab").skipAtLeast(2), "aba", 1, 4);
     assertEquals(null, FOO.skipAtLeast(0).parse("", mode));
     assertEquals(null, FOO.skipAtLeast(2).parse("", mode));
-    assertParser(mode, isChar('a').step(0).next(isChar('b')).skipMany(), "a", null, "a");
+    assertParser(mode, isChar('a').asDelimiter().next(isChar('b')).skipMany(), "a", null, "a");
     assertEquals("skipAtLeast", isChar('a').skipMany().toString());
     assertEquals("skipAtLeast", isChar('a').skipAtLeast(2).toString());
   }
@@ -230,7 +230,7 @@ public class ParserTest extends BaseMockTest {
     assertEquals(null, isChar('a').skipMany1().parse("aaa", mode));
     assertFailure(mode, areChars("ab").skipMany1(), "aba", 1, 4);
     assertEquals(null, FOO.skipMany1().parse("", mode));
-    assertParser(mode, isChar('a').step(0).next(isChar('b')).skipMany1(), "aba", null, "a");
+    assertParser(mode, isChar('a').asDelimiter().next(isChar('b')).skipMany1(), "aba", null, "a");
     assertEquals("skipAtLeast", isChar('a').skipMany1().toString());
   }
 
@@ -241,7 +241,7 @@ public class ParserTest extends BaseMockTest {
     assertListParser(isChar('a').many1(), "aaa", 'a', 'a', 'a');
     assertFailure(mode, areChars("ab").many1(), "aba", 1, 4);
     assertListParser(FOO.many1(), "", "foo");
-    assertListParser(isChar('a').step(0).next(isChar('b')).many1().followedBy(isChar('a')),
+    assertListParser(isChar('a').asDelimiter().next(isChar('b')).many1().followedBy(isChar('a')),
         "aba", 'b');
     assertEquals("atLeast", isChar('a').many1().toString());
   }
@@ -259,7 +259,7 @@ public class ParserTest extends BaseMockTest {
     assertFailure(mode, areChars("ab").atLeast(2), "aba", 1, 4);
     assertListParser(FOO.atLeast(0), "");
     assertListParser(FOO.atLeast(2), "", "foo", "foo");
-    assertListParser(isChar('a').step(0).next(isChar('b')).many().followedBy(isChar('a')), "a");
+    assertListParser(isChar('a').asDelimiter().next(isChar('b')).many().followedBy(isChar('a')), "a");
     assertEquals("atLeast", isChar('a').many().toString());
     assertEquals("atLeast", isChar('a').atLeast(1).toString());
   }
@@ -317,19 +317,9 @@ public class ParserTest extends BaseMockTest {
 
   @Test
   public void testStep() {
-    assertEquals(INTEGER.toString(), INTEGER.step(0).toString());
+    assertEquals(INTEGER.toString(), INTEGER.asDelimiter().toString());
     assertEquals((Object) 'b',
-        Parsers.or(areChars("ab").step(0).next(isChar('c')), areChars("ab")).parse("ab", mode));
-  }
-
-  @Test
-  public void testStep_negativeStep() {
-    try {
-      INTEGER.step(-1);
-      fail();
-    } catch (IllegalArgumentException e) {
-      assertEquals(e.getMessage(), "step < 0", e.getMessage());
-    }
+        Parsers.or(areChars("ab").asDelimiter().next(isChar('c')), areChars("ab")).parse("ab", mode));
   }
 
   @Test
@@ -440,9 +430,9 @@ public class ParserTest extends BaseMockTest {
   }
 
   @Test
-  public void labelShouldOverrideFromAcrossStep() {
+  public void labelShouldOverrideFromAcrossAsDelimiter() {
     try {
-      Scanners.string("foo").label("bar").step(1).label("override").parse("fo", mode);
+      Scanners.string("foo").label("bar").asDelimiter().label("override").parse("fo", mode);
       fail();
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains("override"));
@@ -550,7 +540,7 @@ public class ParserTest extends BaseMockTest {
         "1,", 1);
     
     // 0 step partial delimiter consumption
-    assertListParser(INTEGER.sepEndBy1(COMMA.step(0).next(COMMA)).followedBy(COMMA),
+    assertListParser(INTEGER.sepEndBy1(COMMA.asDelimiter().next(COMMA)).followedBy(COMMA),
         "1,", 1);
     
     // partial delimiter consumption
@@ -564,7 +554,7 @@ public class ParserTest extends BaseMockTest {
         "1,,1", 1, 5, ", expected, EOF encountered.");
     
     // 0 step partial delimited consumption
-    assertListParser(INTEGER.step(0).followedBy(COMMA).sepEndBy1(COMMA).followedBy(string("1"))
+    assertListParser(INTEGER.asDelimiter().followedBy(COMMA).sepEndBy1(COMMA).followedBy(string("1"))
         , "1,,1", 1);
   }
 
@@ -584,7 +574,7 @@ public class ParserTest extends BaseMockTest {
         "1,", 1);
     
     // 0 step partial delimiter consumption
-    assertListParser(INTEGER.sepEndBy(COMMA.step(0).next(COMMA)).followedBy(COMMA),
+    assertListParser(INTEGER.sepEndBy(COMMA.asDelimiter().next(COMMA)).followedBy(COMMA),
         "1,", 1);
     
     // partial delimiter consumption
@@ -598,7 +588,7 @@ public class ParserTest extends BaseMockTest {
         "1,,1", 1, 5, ", expected, EOF encountered.");
     
     // 0 step partial delimited consumption
-    assertListParser(INTEGER.step(0).followedBy(COMMA).sepEndBy(COMMA).followedBy(string("1"))
+    assertListParser(INTEGER.asDelimiter().followedBy(COMMA).sepEndBy(COMMA).followedBy(string("1"))
         , "1,,1", 1);
   }
 

@@ -528,8 +528,8 @@ public class ScannersTest {
   @Test
   public void testNestedBlockComment_notLogicalPartialMatch() {
     Parser<Void> scanner = Scanners.nestableBlockComment(
-        Scanners.isChar('/').step(0).next(Scanners.isChar('*')),
-        Scanners.isChar('*').step(0).next(Scanners.isChar('/')),
+        Scanners.isChar('/').asDelimiter().next(Scanners.isChar('*')),
+        Scanners.isChar('*').asDelimiter().next(Scanners.isChar('/')),
         Scanners.among("*/"));
     assertNull(scanner.parse("/*****/"));
     assertNull(scanner.parse("/*//****/*/"));

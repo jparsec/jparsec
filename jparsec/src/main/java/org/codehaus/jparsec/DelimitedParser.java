@@ -39,7 +39,7 @@ final class DelimitedParser<T> extends Parser<List<T>> {
     for (;;) {
       final int step0 = ctxt.step;
       final int at0 = ctxt.at;
-      boolean r = ctxt.applyDelimiter(delim);
+      boolean r = ctxt.applyAsDelimiter(delim);
       if (!r) {
         if (!ctxt.stillThere(at0, step0)) return false;
         ctxt.result = result;

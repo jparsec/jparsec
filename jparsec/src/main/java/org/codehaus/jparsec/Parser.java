@@ -15,20 +15,18 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
-import org.codehaus.jparsec.functors.Maps;
-import org.codehaus.jparsec.internal.annotations.Private;
-import org.codehaus.jparsec.internal.util.Checks;
-
 import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
+import org.codehaus.jparsec.error.ParserException;
+import org.codehaus.jparsec.functors.Map;
+import org.codehaus.jparsec.functors.Map2;
+import org.codehaus.jparsec.functors.Maps;
+import org.codehaus.jparsec.internal.annotations.Private;
+import org.codehaus.jparsec.internal.util.Checks;
 
 /**
  * Defines grammar and encapsulates parsing logic. A {@link Parser} takes as input a
@@ -370,10 +368,26 @@ public abstract class Parser<T> {
   }
 
   /**
-   * A {@link Parser} that undoes any partial match if {@code this} fails.
+   * A {@link Parser} that undoes any partial match if {@code this} fails. In other words, the
+   * parser either fully matches, or matches none.
    */
   public final Parser<T> atomic() {
-    return new AtomicParser<T>(this);
+    return new Parser<T>() {
+      @Override public Parser<T> label(String name) {
+        return Parser.this.label(name).atomic();
+      }
+      @Override boolean apply(ParseContext ctxt) {
+        int at = ctxt.at;
+        int step = ctxt.step;
+        boolean r = Parser.this.apply(ctxt);
+        if (r) ctxt.step = step + 1;
+        else ctxt.setAt(step, at);
+        return r;
+      }
+      @Override public String toString() {
+        return Parser.this.toString();
+      }
+    };
   }
 
   /**
@@ -776,12 +790,16 @@ public abstract class Parser<T> {
 
   /**
    * As a delimiter, the parser's error is considered lenient and will only be reported if no other
-   * meaningful error is encountered.
+   * meaningful error is encountered. The delimiter's logical step is also considered 0, which means
+   * it won't ever stop repetition combinators such as {@link #many}.
    */
   final Parser<T> asDelimiter() {
     return new Parser<T>() {
       @Override boolean apply(ParseContext ctxt) {
-        return ctxt.applyDelimiter(Parser.this);
+        return ctxt.applyAsDelimiter(Parser.this);
+      }
+      @Override public String toString() {
+        return Parser.this.toString();
       }
     };
   }
@@ -903,14 +921,6 @@ public abstract class Parser<T> {
       builder.append(buf, 0, r);
     }
     return builder;
-  }
-
-  /**
-   * A {@link Parser} that runs {@code this} parser and sets the number of logical steps explicitly to {@code n}.
-   */
-  final Parser<T> step(int n) {
-    checkArgument(n >= 0, "step < 0");
-    return new StepParser<T>(this, n);
   }
 
   @SuppressWarnings("unchecked")
