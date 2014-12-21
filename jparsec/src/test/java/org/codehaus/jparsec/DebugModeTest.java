@@ -16,7 +16,7 @@ import org.junit.Test;
 public class DebugModeTest {
 
   @Test
-  public void runtimeExceptionPopulatesParseTree() {
+  public void runtimeExceptionPopulatesErrorParseTree() {
     Parser<?> parser = Scanners.string("hello").source().label("word")
         .map(new Map<Object, String>() {
           @Override public String map(Object from) {
@@ -43,7 +43,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void nonLabeledParserDoesNotPopulateParseTree() {
+  public void nonLabeledParserDoesNotPopulateErrorParseTree() {
     try {
       Scanners.string("hello").source().parse("hello world", Parser.Mode.DEBUG);
       fail();
@@ -53,7 +53,13 @@ public class DebugModeTest {
   }
 
   @Test
-  public void partialMatchDoesNotPopulateParseTree() {
+  public void nonLabeledParserDoesNotPopulateParseTree() {
+    ParseTree tree = Scanners.string("hello").source().parseTree("hello");
+    assertParseTree(rootNode("hello"), tree);
+  }
+
+  @Test
+  public void partialMatchDoesNotPopulateErrorParseTree() {
     try {
       Parser<?> parser = Scanners.string("hello ").source().label("hi");
       parser.parse("hello", Parser.Mode.DEBUG);
@@ -64,7 +70,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void explicitLabelPopulatesParseTree() {
+  public void explicitLabelPopulatesErrorParseTree() {
     try {
       Scanners.string("hello").source().label("hi").parse("hello world", Parser.Mode.DEBUG);
       fail();
@@ -74,7 +80,13 @@ public class DebugModeTest {
   }
 
   @Test
-  public void twoChildrenNodesInParseTree() {
+  public void explicitLabelPopulatesParseTree() {
+    ParseTree tree = Scanners.string("hello").source().label("hi").parseTree("hello");
+    assertParseTree(rootNode("hello", stringNode("hi", "hello")), tree);
+  }
+
+  @Test
+  public void twoChildrenNodesInErrorParseTree() {
     Parser<?> parser = Parsers.sequence(
         Scanners.string("hello").source().label("hi"),
         Scanners.string("world").source().label("you"));
@@ -88,7 +100,17 @@ public class DebugModeTest {
   }
 
   @Test
-  public void grandChildInOrParser() {
+  public void twoChildrenNodesInParseTree() {
+    Parser<?> parser = Parsers.sequence(
+        Scanners.string("hello").source().label("hi"),
+        Scanners.string("world").source().label("you"));
+    ParseTree tree = parser.parseTree("helloworld");
+    assertParseTree(rootNode("helloworld", stringNode("hi", "hello"), stringNode("you", "world")),
+        tree);
+  }
+
+  @Test
+  public void grandChildInOrParserPopulatesErrorParseTree() {
     Parser<?> parser = Parsers.or(
         Scanners.string("hello ").source().label("hi"),
         Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
@@ -104,7 +126,19 @@ public class DebugModeTest {
   }
 
   @Test
-  public void longerGrandChildMatchesInLongerParser() {
+  public void grandChildInOrParserPopulatesParseTree() {
+    Parser<?> parser = Parsers.or(
+        Scanners.string("hello ").source().label("hi"),
+        Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
+    ParseTree tree = parser.label("greeting").parseTree("helloworld");
+    assertParseTree(
+        rootNode("helloworld",
+            stringNode("greeting", "helloworld", stringNode("hi you", "helloworld"))),
+        tree);
+  }
+
+  @Test
+  public void longerGrandChildMatchesInLongerParserPopulatesErrorParseTree() {
     Parser<?> parser = Parsers.longer(
         Scanners.string("hello ").source().label("hi"),
         Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
@@ -120,7 +154,19 @@ public class DebugModeTest {
   }
 
   @Test
-  public void shorterGrandChildMatchesInLongerParser() {
+  public void longerGrandChildMatchesInLongerParserPopulatesParseTree() {
+    Parser<?> parser = Parsers.longer(
+        Scanners.string("hello ").source().label("hi"),
+        Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
+    ParseTree tree = parser.label("greeting").parseTree("helloworld");
+    assertParseTree(
+        rootNode("helloworld",
+            stringNode("greeting", "helloworld", stringNode("hi you", "helloworld"))),
+        tree);
+  }
+
+  @Test
+  public void shorterGrandChildMatchesInLongerParserPopulatesErrorParseTree() {
     Parser<?> parser = Parsers.longer(
         Scanners.string("hello ").source().label("hi"),
         Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
@@ -136,7 +182,19 @@ public class DebugModeTest {
   }
 
   @Test
-  public void bothGrandChildrenMatchInLongerParser() {
+  public void shorterGrandChildMatchesInLongerParserPopulatesParseTree() {
+    Parser<?> parser = Parsers.longer(
+        Scanners.string("hello ").source().label("hi"),
+        Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
+    ParseTree tree = parser.label("greeting").parseTree("helloworld");
+    assertParseTree(
+        rootNode("helloworld",
+            stringNode("greeting", "helloworld", stringNode("hi you", "helloworld"))),
+        tree);
+  }
+
+  @Test
+  public void bothGrandChildrenMatchInLongerParserPopulatesErrorParseTree() {
     Parser<?> parser = Parsers.longer(
         Scanners.string("hello ").source().label("hi"),
         Scanners.string("hello").next(Scanners.string(" world")).source().label("hi you"));
@@ -152,7 +210,19 @@ public class DebugModeTest {
   }
 
   @Test
-  public void longerGrandChildMatchesInShorterParser() {
+  public void bothGrandChildrenMatchInLongerParserPopulatesParseTree() {
+    Parser<?> parser = Parsers.longer(
+        Scanners.string("hello ").source().label("hi"),
+        Scanners.string("hello").next(Scanners.string(" world")).source().label("hi you"));
+    ParseTree tree = parser.label("greeting").parseTree("hello world");
+    assertParseTree(
+        rootNode("hello world",
+            stringNode("greeting", "hello world", stringNode("hi you", "hello world"))),
+        tree);
+  }
+
+  @Test
+  public void longerGrandChildMatchesInShorterParserPopulatesErrorParseTree() {
     Parser<?> parser = Parsers.shorter(
         Scanners.string("hello ").source().label("hi"),
         Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
@@ -168,8 +238,20 @@ public class DebugModeTest {
   }
 
   @Test
-  public void failedOptionalAttemptDoesNotPopulateParseTree() {
-    Parser<?> parser = Scanners.string("hello ").optional().source().label("hi");
+  public void longerGrandChildMatchesInShorterParserPopulatesParseTree() {
+    Parser<?> parser = Parsers.shorter(
+        Scanners.string("hello ").source().label("hi"),
+        Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
+    ParseTree tree = parser.label("greeting").parseTree("helloworld");
+    assertParseTree(
+        rootNode("helloworld",
+            stringNode("greeting", "helloworld", stringNode("hi you", "helloworld"))),
+        tree);
+  }
+
+  @Test
+  public void failedOptionalAttemptDoesNotPopulateErrorParseTree() {
+    Parser<?> parser = Scanners.string("hello ").label("hi").optional().source();
     try {
       parser.parse("helloworld", Parser.Mode.DEBUG);
       fail();
@@ -179,7 +261,14 @@ public class DebugModeTest {
   }
 
   @Test
-  public void shorterGrandChildMatchesInShorterParser() {
+  public void succeededOptionalAttemptDoesNotPopulateParseTree() {
+    Parser<?> parser = Scanners.string("hello").label("hi").optional().source();
+    ParseTree tree = parser.parseTree("hello");
+    assertParseTree(rootNode("hello", node("hi", null, "hello")), tree);
+  }
+
+  @Test
+  public void shorterGrandChildMatchesInShorterParserPopulatesErrorParseTree() {
     Parser<?> parser = Parsers.shorter(
         Scanners.string("hello ").source().label("hi"),
         Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
@@ -195,7 +284,20 @@ public class DebugModeTest {
   }
 
   @Test
-  public void bothGrandChildrenMatchInShorterParser() {
+  public void shorterGrandChildMatchesInShorterParserPopulatesParseTree() {
+    Parser<?> parser = Parsers.shorter(
+        Scanners.string("hello ").source().label("hi"),
+        Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
+    ParseTree tree = parser.followedBy(Scanners.ANY_CHAR.skipMany()).label("greeting")
+        .parseTree("hello world");
+    assertParseTree(
+        rootNode("hello world",
+            node("greeting", "hello ", "hello world", stringNode("hi", "hello "))),
+        tree);
+  }
+
+  @Test
+  public void bothGrandChildrenMatchInShorterParserPopulatesErrorParseTree() {
     Parser<?> parser = Parsers.shorter(
         Scanners.string("hello").source().label("hi"),
         Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
@@ -211,7 +313,20 @@ public class DebugModeTest {
   }
 
   @Test
-  public void ifElseParserWithTrueBranchFailed() {
+  public void bothGrandChildrenMatchInShorterParserPopulatesParseTree() {
+    Parser<?> parser = Parsers.shorter(
+        Scanners.string("hello").source().label("hi"),
+        Scanners.string("hello").next(Scanners.string("world")).source().label("hi you"));
+    ParseTree tree = parser.label("greeting").followedBy(Scanners.ANY_CHAR.skipMany())
+        .parseTree("helloworld");
+    assertParseTree(
+        rootNode("helloworld",
+            stringNode("greeting", "hello", stringNode("hi", "hello"))),
+        tree);
+  }
+
+  @Test
+  public void ifElseParserWithTrueBranchFailedPopulatesErrorParseTree() {
     Parser<?> parser = Scanners.isChar('@').label("?")
         .ifelse(Scanners.INTEGER.label("tel"), Scanners.IDENTIFIER.label("name"));
     try {
@@ -223,7 +338,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void ifElseParserWithTrueBranchSucceeded() {
+  public void ifElseParserWithTrueBranchSucceededPopulatesErrorParseTree() {
     Parser<?> parser = Scanners.isChar('@').label("?")
         .ifelse(Scanners.INTEGER.label("tel"), Scanners.IDENTIFIER.label("name"));
     try {
@@ -237,7 +352,17 @@ public class DebugModeTest {
   }
 
   @Test
-  public void ifElseParserWithFalseBranchFailed() {
+  public void ifElseParserWithTrueBranchSucceededPopulatesParseTree() {
+    Parser<?> parser = Scanners.isChar('@').label("?")
+        .ifelse(Scanners.INTEGER.label("tel"), Scanners.IDENTIFIER.label("name"));
+    ParseTree tree = parser.label("id").parseTree("@123");
+    assertParseTree(
+        rootNode("@123", node("id", "123", "@123", node("?", null, "@"), stringNode("tel", "123"))),
+        tree);
+  }
+
+  @Test
+  public void ifElseParserWithFalseBranchFailedPopulatesErrorParseTree() {
     Parser<?> parser = Scanners.isChar('@').label("?")
         .ifelse(Scanners.INTEGER.label("tel"), Scanners.IDENTIFIER.label("name"));
     try {
@@ -249,7 +374,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void ifElseParserWithFalseBranchSucceeded() {
+  public void ifElseParserWithFalseBranchSucceededPopulatesErrorParseTree() {
     Parser<?> parser = Scanners.isChar('@').label("?")
         .ifelse(Scanners.INTEGER.label("tel"), Scanners.IDENTIFIER.label("name"));
     try {
@@ -259,6 +384,14 @@ public class DebugModeTest {
       assertParseTree(rootNode("Ben", stringNode("id", "Ben", stringNode("name", "Ben"))),
           e.getParseTree());
     }
+  }
+
+  @Test
+  public void ifElseParserWithFalseBranchSucceededPopulatesParseTree() {
+    Parser<?> parser = Scanners.isChar('@').label("?")
+        .ifelse(Scanners.INTEGER.label("tel"), Scanners.IDENTIFIER.label("name"));
+    ParseTree tree = parser.label("id").parseTree("Ben");
+    assertParseTree(rootNode("Ben", stringNode("id", "Ben", stringNode("name", "Ben"))), tree);
   }
 
   @Test
@@ -327,20 +460,16 @@ public class DebugModeTest {
   public void endByProducesTwoElementListInParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").endBy(Scanners.isChar(';'));
-    try {
-      parser.label("digits").parse("1;2; ", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(
-          rootNode("1;2;", node("digits", asList("1", "2"), "1;2;",
-                  stringNode("d", "1"),
-                  stringNode("d", "2").leading(1))),
-          e.getParseTree());
-    }
+    ParseTree tree = parser.label("digits").parseTree("1;2;");
+    assertParseTree(
+        rootNode("1;2;", node("digits", asList("1", "2"), "1;2;",
+                stringNode("d", "1"),
+                stringNode("d", "2").leading(1))),
+        tree);
   }
 
   @Test
-  public void endBy1ProducesEmptyListInParseTree() {
+  public void endBy1ProducesEmptyListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").endBy1(Scanners.isChar(';'));
     try {
@@ -354,7 +483,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void endBy1ProducesSingleElementListInParseTree() {
+  public void endBy1ProducesSingleElementListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").endBy1(Scanners.isChar(';'));
     try {
@@ -368,7 +497,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void endBy1ProducesTwoElementListInParseTree() {
+  public void endBy1ProducesTwoElementListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").endBy1(Scanners.isChar(';'));
     try {
@@ -384,7 +513,29 @@ public class DebugModeTest {
   }
 
   @Test
-  public void sepByProducesEmptyListInParseTree() {
+  public void endBy1ProducesSingleElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").endBy1(Scanners.isChar(';'));
+    ParseTree tree = parser.label("digits").parseTree("1;");
+    assertParseTree(
+        rootNode("1;", node("digits", asList("1"), "1;", stringNode("d", "1"))),
+        tree);
+  }
+
+  @Test
+  public void endBy1ProducesTwoElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").endBy1(Scanners.isChar(';'));
+    ParseTree tree = parser.label("digits").parseTree("1;2;");
+    assertParseTree(
+        rootNode("1;2;", node("digits", asList("1", "2"), "1;2;",
+                stringNode("d", "1"),
+                stringNode("d", "2").leading(1))),
+        tree);
+  }
+
+  @Test
+  public void sepByProducesEmptyListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy(Scanners.isChar(','));
     try {
@@ -398,7 +549,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void sepByProducesSingleElementListInParseTree() {
+  public void sepByProducesSingleElementListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy(Scanners.isChar(','));
     try {
@@ -412,7 +563,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void sepByProducesTwoElementListInParseTree() {
+  public void sepByProducesTwoElementListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy(Scanners.isChar(','));
     try {
@@ -430,7 +581,41 @@ public class DebugModeTest {
   }
 
   @Test
-  public void sepBy1ProducesEmptyListInParseTree() {
+  public void sepByProducesEmptyListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy(Scanners.isChar(','));
+    ParseTree tree = parser.label("digits").parseTree("");
+    assertParseTree(
+        rootNode("", node("digits", Arrays.<String>asList(), "")),
+        tree);
+  }
+
+  @Test
+  public void sepByProducesSingleElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy(Scanners.isChar(','));
+    ParseTree tree = parser.label("digits").parseTree("1");
+    assertParseTree(
+        rootNode("1", node("digits", asList("1"), "1", stringNode("d", "1"))),
+        tree);
+  }
+
+  @Test
+  public void sepByProducesTwoElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy(Scanners.isChar(','));
+    ParseTree tree = parser.label("digits").parseTree("1,2");
+    assertParseTree(
+        rootNode("1,2", node("digits",
+            asList("1", "2"), "1,2",
+                stringNode("d", "1"),
+                stringNode("d", "2").leading(1)
+                )),
+        tree);
+  }
+
+  @Test
+  public void sepBy1ProducesEmptyListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy1(Scanners.isChar(','));
     try {
@@ -444,7 +629,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void sepBy1ProducesSingleElementListInParseTree() {
+  public void sepBy1ProducesSingleElementListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy1(Scanners.isChar(','));
     try {
@@ -458,7 +643,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void sepBy1ProducesTwoElementListInParseTree() {
+  public void sepBy1ProducesTwoElementListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy1(Scanners.isChar(','));
     try {
@@ -476,7 +661,31 @@ public class DebugModeTest {
   }
 
   @Test
-  public void sepEndBy1ProducesEmptyListInParseTree() {
+  public void sepBy1ProducesSingleElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy1(Scanners.isChar(','));
+    ParseTree tree = parser.label("digits").parseTree("1");
+    assertParseTree(
+        rootNode("1", node("digits", asList("1"), "1", stringNode("d", "1"))),
+        tree);
+  }
+
+  @Test
+  public void sepBy1ProducesTwoElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepBy1(Scanners.isChar(','));
+    ParseTree tree = parser.label("digits").parseTree("1,2");
+    assertParseTree(
+        rootNode("1,2", node("digits",
+            asList("1", "2"), "1,2",
+                stringNode("d", "1"),
+                stringNode("d", "2").leading(1)
+                )),
+        tree);
+  }
+
+  @Test
+  public void sepEndBy1ProducesEmptyListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy1(Scanners.isChar(','));
     try {
@@ -490,7 +699,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void sepEndBy1ProducesSingleElementListInParseTree() {
+  public void sepEndBy1ProducesSingleElementListInErrorParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy1(Scanners.isChar(','));
     try {
@@ -505,9 +714,79 @@ public class DebugModeTest {
   }
 
   @Test
+  public void sepEndBy1ProducesListInErrorParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy1(Scanners.isChar(','));
+    try {
+      parser.label("digits").parse("1,2,3 ", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("1,2,3", node("digits", asList("1", "2", "3"), "1,2,3",
+              stringNode("d", "1"),
+              stringNode("d", "2").leading(1),
+              stringNode("d", "3").leading(1))),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void sepEndBy1ProducesSingleElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy1(Scanners.isChar(','));
+    ParseTree tree = parser.label("digits").parseTree("1,");
+    assertParseTree(
+        rootNode("1,", node("digits", asList("1"), "1,",
+            stringNode("d", "1"))),
+        tree);
+  }
+
+  @Test
   public void sepEndBy1ProducesListInParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy1(Scanners.isChar(','));
+    ParseTree tree = parser.label("digits").parseTree("1,2,3");
+    assertParseTree(
+        rootNode("1,2,3", node("digits", asList("1", "2", "3"), "1,2,3",
+            stringNode("d", "1"),
+            stringNode("d", "2").leading(1),
+            stringNode("d", "3").leading(1))),
+        tree);
+  }
+
+  @Test
+  public void sepEndByProducesEmptyListInErrorParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy(Scanners.isChar(','));
+    try {
+      parser.label("digits").parse(" ", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("", node("digits", Arrays.<String>asList(), "")),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void sepEndByProducesSingleElementListInErrorParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy(Scanners.isChar(','));
+    try {
+      parser.label("digits").parse("1, ", Parser.Mode.DEBUG);
+      fail();
+    } catch (ParserException e) {
+      assertParseTree(
+          rootNode("1,", node("digits", asList("1"), "1,",
+              stringNode("d", "1"))),
+          e.getParseTree());
+    }
+  }
+
+  @Test
+  public void sepEndByProducesListInErrorParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy(Scanners.isChar(','));
     try {
       parser.label("digits").parse("1,2,3 ", Parser.Mode.DEBUG);
       fail();
@@ -525,46 +804,34 @@ public class DebugModeTest {
   public void sepEndByProducesEmptyListInParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy(Scanners.isChar(','));
-    try {
-      parser.label("digits").parse(" ", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(
-          rootNode("", node("digits", Arrays.<String>asList(), "")),
-          e.getParseTree());
-    }
+    ParseTree tree = parser.label("digits").parseTree("");
+    assertParseTree(
+        rootNode("", node("digits", Arrays.<String>asList(), "")),
+        tree);
   }
 
   @Test
   public void sepEndByProducesSingleElementListInParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy(Scanners.isChar(','));
-    try {
-      parser.label("digits").parse("1, ", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(
-          rootNode("1,", node("digits", asList("1"), "1,",
-              stringNode("d", "1"))),
-          e.getParseTree());
-    }
+    ParseTree tree = parser.label("digits").parseTree("1,");
+    assertParseTree(
+        rootNode("1,", node("digits", asList("1"), "1,",
+            stringNode("d", "1"))),
+        tree);
   }
 
   @Test
   public void sepEndByProducesListInParseTree() {
     Parser<?> parser =
         Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").sepEndBy(Scanners.isChar(','));
-    try {
-      parser.label("digits").parse("1,2,3 ", Parser.Mode.DEBUG);
-      fail();
-    } catch (ParserException e) {
-      assertParseTree(
-          rootNode("1,2,3", node("digits", asList("1", "2", "3"), "1,2,3",
-              stringNode("d", "1"),
-              stringNode("d", "2").leading(1),
-              stringNode("d", "3").leading(1))),
-          e.getParseTree());
-    }
+    ParseTree tree = parser.label("digits").parseTree("1,2,3");
+    assertParseTree(
+        rootNode("1,2,3", node("digits", asList("1", "2", "3"), "1,2,3",
+            stringNode("d", "1"),
+            stringNode("d", "2").leading(1),
+            stringNode("d", "3").leading(1))),
+        tree);
   }
 
   @Test
@@ -576,7 +843,103 @@ public class DebugModeTest {
   }
 
   @Test
-  public void manyProducesListInParseTree() {
+  public void manyProducesSingleElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many();
+    ParseTree tree = parser.label("digits").parseTree("1");
+    assertParseTree(
+        rootNode("1", node("digits", Arrays.asList("1"), "1", stringNode("d", "1"))), tree);
+  }
+
+  @Test
+  public void manyProducesTwoElementsListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many();
+    ParseTree tree = parser.label("digits").parseTree("12");
+    assertParseTree(
+        rootNode("12", node("digits", Arrays.asList("1", "2"), "12",
+            stringNode("d", "1"), stringNode("d", "2"))),
+        tree);
+  }
+
+  @Test
+  public void many1ProducesSingleElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many1();
+    ParseTree tree = parser.label("digits").parseTree("1");
+    assertParseTree(
+        rootNode("1", node("digits", Arrays.asList("1"), "1", stringNode("d", "1"))), tree);
+  }
+
+  @Test
+  public void many1ProducesTwoElementsListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many1();
+    ParseTree tree = parser.label("digits").parseTree("12");
+    assertParseTree(
+        rootNode("12", node("digits", Arrays.asList("1", "2"), "12",
+            stringNode("d", "1"), stringNode("d", "2"))),
+        tree);
+  }
+
+  @Test
+  public void atMostProducesEmptyListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").times(0, 2);
+    ParseTree tree = parser.label("digits").parseTree("");
+    assertParseTree(rootNode("", node("digits", Arrays.<String>asList(), "")), tree);
+  }
+
+  @Test
+  public void atMostProducesSingleElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").times(0, 2);
+    ParseTree tree = parser.label("digits").parseTree("1");
+    assertParseTree(
+        rootNode("1", node("digits", Arrays.asList("1"), "1", stringNode("d", "1"))), tree);
+  }
+
+  @Test
+  public void atMostProducesTwoElementsListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").times(0, 2);
+    ParseTree tree = parser.label("digits").parseTree("12");
+    assertParseTree(
+        rootNode("12", node("digits", Arrays.asList("1", "2"), "12",
+            stringNode("d", "1"), stringNode("d", "2"))),
+        tree);
+  }
+
+  @Test
+  public void timesProducesEmptyListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").times(0);
+    ParseTree tree = parser.label("digits").parseTree("");
+    assertParseTree(rootNode("", node("digits", Arrays.<String>asList(), "")), tree);
+  }
+
+  @Test
+  public void timesProducesSingleElementListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").times(1);
+    ParseTree tree = parser.label("digits").parseTree("1");
+    assertParseTree(
+        rootNode("1", node("digits", Arrays.asList("1"), "1", stringNode("d", "1"))), tree);
+  }
+
+  @Test
+  public void timesProducesTwoElementsListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").times(2);
+    ParseTree tree = parser.label("digits").parseTree("12");
+    assertParseTree(
+        rootNode("12", node("digits", Arrays.asList("1", "2"), "12",
+            stringNode("d", "1"), stringNode("d", "2"))),
+        tree);
+  }
+
+  @Test
+  public void manyProducesListInErrorParseTree() {
     Parser<?> parser = Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many();
     try {
       parser.label("digits").parse("123 ", Parser.Mode.DEBUG);
@@ -592,7 +955,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void many1ProducesListInParseTree() {
+  public void many1ProducesListInErrorParseTree() {
     Parser<?> parser = Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many1();
     try {
       parser.label("digits").parse("123 ", Parser.Mode.DEBUG);
@@ -608,7 +971,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void atLeastProducesListInParseTree() {
+  public void atLeastProducesListInErrorParseTree() {
     Parser<?> parser = Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").atLeast(1);
     try {
       parser.label("digits").parse("123 ", Parser.Mode.DEBUG);
@@ -624,7 +987,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void timesProducesListInParseTree() {
+  public void timesProducesListInErrorParseTree() {
     Parser<?> parser = Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").times(0, 2);
     try {
       parser.label("digits").parse("123", Parser.Mode.DEBUG);
@@ -639,7 +1002,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void terminalsPhrasePopulatedInParseTree() {
+  public void terminalsPhrasePopulatedInErrorParseTree() {
     Terminals terminals = Terminals.operators("if", "then");
     Parser<?> parser = terminals.phrase("if", "then")
         .from(terminals.tokenizer(), Scanners.WHITESPACES);
@@ -653,7 +1016,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void tokenLevelLabelPopulatedInParseTree() {
+  public void tokenLevelLabelPopulatedInErrorParseTree() {
     Terminals terminals = Terminals.operators("if", "then");
     Parser<?> parser = terminals.token("if").retn(true).label("condition")
         .from(terminals.tokenizer().label("token"), Scanners.WHITESPACES);
@@ -667,7 +1030,7 @@ public class DebugModeTest {
   }
 
   @Test
-  public void unrecognizedCharactersReportedInTokenLevelParseTree() {
+  public void unrecognizedCharactersReportedInTokenLevelErrorParseTree() {
     Terminals terminals = Terminals.operators("if", "then");
     Parser<?> parser = terminals.token("if").retn(true).label("condition")
         .from(terminals.tokenizer().label("token"), Scanners.WHITESPACES);
