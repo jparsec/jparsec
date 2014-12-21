@@ -462,7 +462,8 @@ public abstract class Parser<T> {
   }
 
   /**
-   * A {@link Parser} that runs {@code this} for 0 or more times delimited and terminated by {@code delim}.
+   * A {@link Parser} that runs {@code this} for 0 or more times delimited and terminated by
+   * {@code delim}.
    *
    * <p>The return values are collected in a {@link List}.
    */
