@@ -414,7 +414,6 @@ abstract class ParseContext {
     void setStateAs(ParserTrace that);
   }
 
-  
   private void setErrorState(
       int errorAt, int errorIndex, ErrorType errorType, List<Object> errors) {
     setErrorState(errorAt, errorIndex, errorType);
