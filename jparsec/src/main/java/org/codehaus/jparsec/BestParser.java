@@ -36,7 +36,7 @@ final class BestParser<T> extends Parser<T> {
         return true;
       }
       // in alternate, we do not care partial match.
-      ctxt.set(step, at, result, latestChild);
+      ctxt.set(step, at, result);
     }
     return false;
   }
@@ -53,7 +53,8 @@ final class BestParser<T> extends Parser<T> {
     Object bestResult = ctxt.result;
     TreeNode bestChild = ctxt.getTrace().getLatestChild();
     for (int i = from; i < parsers.length; i++) {
-      ctxt.set(originalStep, originalAt, originalResult, originalLatestChild);
+      ctxt.set(originalStep, originalAt, originalResult);
+      ctxt.getTrace().setLatestChild(originalLatestChild);
       Parser<?> parser = parsers[i];
       boolean ok = parser.apply(ctxt);
       if (!ok) continue;
@@ -65,6 +66,7 @@ final class BestParser<T> extends Parser<T> {
         bestChild = ctxt.getTrace().getLatestChild();
       }
     }
-    ctxt.set(bestStep, bestAt, bestResult, bestChild);
+    ctxt.set(bestStep, bestAt, bestResult);
+    ctxt.getTrace().setLatestChild(bestChild);
   }
 }

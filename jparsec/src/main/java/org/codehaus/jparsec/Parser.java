@@ -408,12 +408,11 @@ public abstract class Parser<T> {
         final Object ret = ctxt.result;
         final int step = ctxt.step;
         final int at = ctxt.at;
-        final TreeNode latestChild = ctxt.getTrace().getLatestChild();
         if (ctxt.withErrorSuppressed(Parser.this)) {
           Parser<? extends R> parser = consequence.map(Parser.this.getReturn(ctxt));
           return parser.apply(ctxt);
         }
-        ctxt.set(step, at, ret, latestChild);
+        ctxt.set(step, at, ret);
         return alternative.apply(ctxt);
       }
       @Override public String toString() {
@@ -434,6 +433,7 @@ public abstract class Parser<T> {
       @Override boolean apply(ParseContext ctxt) {
         int at = ctxt.at;
         int step = ctxt.step;
+        TreeNode latestChild = ctxt.getTrace().getLatestChild();
         ctxt.getTrace().push(name);
         if (Parser.this.apply(ctxt)) {
           ctxt.traceCurrentResult();
@@ -442,6 +442,8 @@ public abstract class Parser<T> {
         }
         if (ctxt.stillThere(at, step)) ctxt.expected(name);
         ctxt.getTrace().pop();
+        // On failure, the erroneous path shouldn't be counted in the parse tree.
+        ctxt.getTrace().setLatestChild(latestChild);
         return false;
       }
       @Override public String toString() {

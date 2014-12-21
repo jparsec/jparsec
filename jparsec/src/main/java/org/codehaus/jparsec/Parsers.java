@@ -543,12 +543,11 @@ public final class Parsers {
         final Object result = ctxt.result;
         final int at = ctxt.at;
         final int step = ctxt.step;
-        final TreeNode latestChild = ctxt.getTrace().getLatestChild();
         for(Parser<? extends T> p : alternatives) {
           if (p.apply(ctxt)) {
             return true;
           }
-          ctxt.set(step, at, result, latestChild);
+          ctxt.set(step, at, result);
         }
         return false;
       }

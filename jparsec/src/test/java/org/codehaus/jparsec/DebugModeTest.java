@@ -568,6 +568,14 @@ public class DebugModeTest {
   }
 
   @Test
+  public void manyProducesEmptyListInParseTree() {
+    Parser<?> parser =
+        Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many();
+    ParseTree tree = parser.label("digits").parseTree("");
+    assertParseTree(rootNode("", node("digits", Arrays.<String>asList(), "")), tree);
+  }
+
+  @Test
   public void manyProducesListInParseTree() {
     Parser<?> parser = Scanners.isChar(CharPredicates.IS_DIGIT).source().label("d").many();
     try {

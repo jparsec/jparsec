@@ -294,11 +294,6 @@ abstract class ParseContext {
     return false;
   }
   
-  final void set(int step, int at, Object ret, TreeNode latestChild) {
-    set(step, at, ret);
-    trace.setLatestChild(latestChild);
-  }
-  
   final void set(int step, int at, Object ret) {
     this.step = step;
     this.at = at;
@@ -381,4 +376,8 @@ abstract class ParseContext {
 
   /** Reads the characters as input. Only applicable to character level parsers. */
   abstract CharSequence characters();
+
+  @Override public String toString() {
+    return source.subSequence(getIndex(), source.length()).toString();
+  }
 }
