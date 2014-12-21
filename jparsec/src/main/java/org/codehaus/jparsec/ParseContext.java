@@ -48,7 +48,16 @@ abstract class ParseContext {
   /** The current parse result. */
   Object result;
 
-  private ParserTrace trace = ParserTrace.DISABLED;
+  private ParserTrace trace = new ParserTrace() {
+    @Override public void push(String name) {}
+    @Override public void pop() {}
+    @Override public TreeNode getCurrentNode() { return null; }
+    @Override public void setCurrentResult(Object result) {}
+    @Override public TreeNode getLatestChild() { return null; }
+    @Override public void setLatestChild(TreeNode node) {}
+    @Override public void startFresh(ParseContext context) {}
+    @Override public void setStateAs(ParserTrace that) {}
+  };
   
   enum ErrorType {
     
@@ -123,18 +132,66 @@ abstract class ParseContext {
     overrideErrorType = oldValue;
     return ok;
   }
-  
-  /** The physical index of the current most relevant error, {@code 0} if none. */
-  final int errorIndex() {
-    return currentErrorIndex;
+
+  final boolean applyNewNode(Parser<?> parser, String name) {
+    int physical = at;
+    int logical = step;
+    TreeNode latestChild = trace.getLatestChild();
+    trace.push(name);
+    if (parser.apply(this)) {
+      trace.setCurrentResult(result);
+      trace.pop();
+      return true;
+    }
+    if (stillThere(physical, logical)) expected(name);
+    trace.pop();
+    // On failure, the erroneous path shouldn't be counted in the parse tree.
+    trace.setLatestChild(latestChild);
+    return false;
+  }
+
+  final boolean applyNested(Parser<?> parser, ParseContext nestedState) {
+    // nested is either the token-level parser, or the inner scanner of a subpattern.
+    try {
+      if (parser.apply(nestedState))  {
+        set(nestedState.step, at, nestedState.result);
+        return true;
+      }
+      // index on token level is the "at" on character level
+      set(step, nestedState.getIndex(), null);
+      
+      // always copy error because there could be false alarms in the character level.
+      // For example, a "or" parser nested in a "many" failed in one of its branches.
+      copyErrorFrom(nestedState);
+      return false;
+    } finally {
+      trace.setStateAs(nestedState.trace);
+    }
+  }
+
+  final boolean repeat(Parser<?> parser, int n) {
+    for (int i = 0; i < n; i++) {
+      if (!parser.apply(this)) return false;
+    }
+    return true;
+  }
+
+  final <T> boolean repeat(
+      Parser<? extends T> parser, int n, Collection<T> collection) {
+    for (int i = 0; i < n; i++) {
+      if (!parser.apply(this)) return false;
+      collection.add(parser.getReturn(this));
+    }
+    return true;
   }
 
   final ParserTrace getTrace() {
     return trace;
   }
-
-  final void traceCurrentResult() {
-    trace.setCurrentResult(result);
+  
+  /** The physical index of the current most relevant error, {@code 0} if none. */
+  final int errorIndex() {
+    return currentErrorIndex;
   }
 
   final ParseTree buildParseTree() {
@@ -252,41 +309,6 @@ abstract class ParseContext {
     raise(ErrorType.UNEXPECTED, what);
   }
 
-  final boolean repeat(Parser<?> parser, int n) {
-    for (int i = 0; i < n; i++) {
-      if (!parser.apply(this)) return false;
-    }
-    return true;
-  }
-
-  final <T> boolean repeat(
-      Parser<? extends T> parser, int n, Collection<T> collection) {
-    for (int i = 0; i < n; i++) {
-      if (!parser.apply(this)) return false;
-      collection.add(parser.getReturn(this));
-    }
-    return true;
-  }
-
-  final boolean applyNested(Parser<?> parser, ParseContext nestedState) {
-    // nested is either the token-level parser, or the inner scanner of a subpattern.
-    try {
-      if (parser.apply(nestedState))  {
-        set(nestedState.step, at, nestedState.result);
-        return true;
-      }
-      // index on token level is the "at" on character level
-      set(step, nestedState.getIndex(), null);
-      
-      // always copy error because there could be false alarms in the character level.
-      // For example, a "or" parser nested in a "many" failed in one of its branches.
-      copyErrorFrom(nestedState);
-      return false;
-    } finally {
-      trace.setStateAs(nestedState.trace);
-    }
-  }
-
   final boolean stillThere(int wasAt, int originalStep) {
     if (step == originalStep) {
       // logical step didn't change, so logically we are still there, undo any physical offset
@@ -351,6 +373,47 @@ abstract class ParseContext {
         }
       };
   }
+
+  /** Allows tracing of parsing progress during error condition, to ease debugging. */
+  interface ParserTrace {
+
+    /**
+     * Upon applying a parser with {@link Parser#label}, the label name is used to create a new
+     * child node under the current node. The new child node is set to be the current node.
+     */
+    void push(String name);
+
+    /** When a parser finishes, the current node is popped so we are back to the parent parser. */
+    void pop();
+
+    /** Returns the current node, that is being parsed (not necessarily finished). */
+    TreeNode getCurrentNode();
+
+    /** Whenever a labeled parser succeeds, it calls this method to set its result in the trace. */
+    void setCurrentResult(Object result);
+
+    /**
+     * Called by branching parsers, to save the current state of tree, before trying parsers that
+     * could modify the tree state.
+     */
+    TreeNode getLatestChild();
+
+    /**
+     * Called by labeled parser to reset the current child node when the current node failed.
+     * Also called by {@link BestParser} to set the optimum parse tree.
+     */
+    void setLatestChild(TreeNode node);
+
+    /** Called when tokenizer passes on to token-level parser. */
+    void startFresh(ParseContext context);
+
+    /**
+     * Set the enclosing parser's tree state into the nested parser's state. Called for both nested
+     * token-level parser and nested scanner.
+     */
+    void setStateAs(ParserTrace that);
+  }
+
   
   private void setErrorState(
       int errorAt, int errorIndex, ErrorType errorType, List<Object> errors) {

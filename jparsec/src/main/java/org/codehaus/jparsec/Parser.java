@@ -445,20 +445,7 @@ public abstract class Parser<T> {
         return Parser.this.label(overrideName);
       }
       @Override boolean apply(ParseContext ctxt) {
-        int at = ctxt.at;
-        int step = ctxt.step;
-        TreeNode latestChild = ctxt.getTrace().getLatestChild();
-        ctxt.getTrace().push(name);
-        if (Parser.this.apply(ctxt)) {
-          ctxt.traceCurrentResult();
-          ctxt.getTrace().pop();
-          return true;
-        }
-        if (ctxt.stillThere(at, step)) ctxt.expected(name);
-        ctxt.getTrace().pop();
-        // On failure, the erroneous path shouldn't be counted in the parse tree.
-        ctxt.getTrace().setLatestChild(latestChild);
-        return false;
+        return ctxt.applyNewNode(Parser.this, name);
       }
       @Override public String toString() {
         return name;
