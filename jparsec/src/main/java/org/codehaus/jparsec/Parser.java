@@ -493,7 +493,7 @@ public abstract class Parser<T> {
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> sepBy1(Parser<?> delim) {
-    final Parser<T> afterFirst = delim.asDelimiter().step(0).next(this);
+    final Parser<T> afterFirst = delim.asDelimiter().next(this);
     Map<T, Parser<List<T>>> binder = new Map<T, Parser<List<T>>>() {
       @Override public Parser<List<T>> map(T firstValue) {
         return new RepeatAtLeastParser<T>(

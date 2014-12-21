@@ -117,7 +117,9 @@ abstract class ParseContext {
   final boolean applyDelimiter(Parser<?> parser) {
     ErrorType oldValue = overrideErrorType;
     overrideErrorType = ErrorType.DELIMITING;
+    int oldStep = step;
     boolean ok = parser.apply(this);
+    if (ok) step = oldStep;
     overrideErrorType = oldValue;
     return ok;
   }
