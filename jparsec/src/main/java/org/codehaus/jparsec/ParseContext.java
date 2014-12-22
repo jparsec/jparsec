@@ -135,7 +135,7 @@ abstract class ParseContext {
 
   /**
    * Applies {@code parser} as a new tree node with {@code name}, and if fails, reports
-   * "expecting 'name'.
+   * "expecting $name".
    */
   final boolean applyNewNode(Parser<?> parser, String name) {
     int physical = at;
