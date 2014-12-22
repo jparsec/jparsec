@@ -190,6 +190,8 @@ public abstract class Parser<T> {
    * until the given parser succeeds. The input that matches the given parser
    * will not be consumed. The input that matches this parser will
    * be collected in a list that will be returned by this function.
+   *
+   * @since 2.2
    */
   public final Parser<List<T>> until(Parser<?> parser) {
     return parser.not().next(this).many().followedBy(parser.peek());
