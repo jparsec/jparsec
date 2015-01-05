@@ -15,6 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import org.codehaus.jparsec.parameters.Parameters;
+
 /**
  * Represents {@link ParseContext} for token level parsing.
  * 
@@ -27,7 +29,7 @@ final class ParserState extends ParseContext {
       + " For example: Scanners.string(foo).from(tokenizer).parse(text) will result in this error"
       + " because scanner works on characters while it's used as a token-level parser.";
 
-  private final Token[] input;
+  final Token[] input;
   
   // in case a terminating eof token is not explicitly created, the implicit one is used.
   private final int endIndex;
@@ -46,8 +48,8 @@ final class ParserState extends ParseContext {
   }
   
   ParserState(String module, CharSequence source, Token[] input, int at,
-      SourceLocator locator, int endIndex, Object result) {
-    super(source, result, at, module, locator);
+      SourceLocator locator, int endIndex, Object result, Parameters params) {
+    super(source, result, at, module, locator, params);
     this.input = input;
     this.endIndex = endIndex;
   }

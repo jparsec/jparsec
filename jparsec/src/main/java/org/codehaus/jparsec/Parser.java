@@ -27,6 +27,9 @@ import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Maps;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Checks;
+import org.codehaus.jparsec.parameters.MapListener;
+import org.codehaus.jparsec.parameters.Parameters;
+import org.codehaus.jparsec.parameters.ParseLevelState;
 
 /**
  * Defines grammar and encapsulates parsing logic. A {@link Parser} takes as input a
@@ -294,9 +297,19 @@ public abstract class Parser<T> {
   public final <R> Parser<R> map(final Map<? super T, ? extends R> map) {
     return new Parser<R>() {
       @Override boolean apply(final ParseContext ctxt) {
+        int first = ctxt.at;
+        
         final boolean r = Parser.this.apply(ctxt);
         if (r) {
           ctxt.result = map.map(Parser.this.getReturn(ctxt));
+          if (ctxt instanceof ParserState) {
+            int last = ctxt.at - 1;
+            MapListener listener = ctxt.params.getMapListener();
+            if (listener != null) {
+              listener.onMap(ctxt.result, new ParseLevelState(((ParserState) ctxt).input[first], ((ParserState) ctxt).input[last],
+                  ctxt.params));
+            }
+          }
         }
         return r;
       }
@@ -722,9 +735,22 @@ public abstract class Parser<T> {
    * <p> {@code this} must be a token level parser.
    */
   public final Parser<T> from(Parser<? extends Collection<Token>> lexer) {
-    return Parsers.nested(Parsers.tokens(lexer), followedBy(Parsers.EOF));
+    return Parsers.nested(Parsers.tokens(lexer), followedBy(Parsers.EOF), new Parameters());
   }
 
+  /**
+   * A {@link Parser} that takes as input the {@link Token} collection returned by {@code lexer},
+   * and runs {@code this} to parse the tokens. Most parsers should use the simpler
+   * {@link #from(Parser, Parameters)} instead.
+   *
+   * <p> {@code this} must be a token level parser.
+   * <p> {@code params} runtime parameters.
+   */
+  public final Parser<T> from(Parser<? extends Collection<Token>> lexer, Parameters params) {
+    return Parsers.nested(Parsers.tokens(lexer), followedBy(Parsers.EOF), params);
+  }
+
+  
   /**
    * A {@link Parser} that takes as input the tokens returned by {@code tokenizer} delimited by
    * {@code delim}, and runs {@code this} to parse the tokens. A common misunderstanding is that
@@ -799,6 +825,13 @@ public abstract class Parser<T> {
   }
 
   /**
+   * Parses {@code source}.
+   */
+  public final T parse(CharSequence source, Parameters params) {
+    return params.getMode().run(this, source, params);
+  }
+  
+  /**
    * Parses source read from {@code readable}.
    */
   public final T parse(Readable readable) throws IOException {
@@ -818,7 +851,9 @@ public abstract class Parser<T> {
    * @since 2.3
    */
   public final T parse(CharSequence source, Mode mode) {
-    return mode.run(this, source);
+    Parameters params = new Parameters();
+    params.setMode(mode);
+    return mode.run(this, source, params);
   }
 
   /**
@@ -832,7 +867,7 @@ public abstract class Parser<T> {
    * @since 2.3
    */
   public final ParseTree parseTree(CharSequence source) {
-    ScannerState state = new ScannerState(source);
+    ScannerState state = new ScannerState(source, new Parameters());
     state.enableTrace("root");
     state.run(this.followedBy(Parsers.EOF));
     return state.buildParseTree();
@@ -846,8 +881,8 @@ public abstract class Parser<T> {
   public enum Mode {
     /** Default mode. Used for production. */
     PRODUCTION {
-      @Override <T> T run(Parser<T> parser, CharSequence source) {
-        return new ScannerState(source).run(parser.followedBy(Parsers.EOF));
+      @Override <T> T run(Parser<T> parser, CharSequence source, Parameters params) {
+        return new ScannerState(source, params).run(parser.followedBy(Parsers.EOF));
       }
     },
 
@@ -855,14 +890,14 @@ public abstract class Parser<T> {
      * Debug mode. {@link ParserException#getParseTree} can be used to inspect partial parse result.
      */
     DEBUG {
-      @Override <T> T run(Parser<T> parser, CharSequence source) {
-        ScannerState state = new ScannerState(source);
+      @Override <T> T run(Parser<T> parser, CharSequence source, Parameters params) {
+        ScannerState state = new ScannerState(source, params);
         state.enableTrace("root");
         return state.run(parser.followedBy(Parsers.EOF));
       }
     }
     ;
-    abstract <T> T run(Parser<T> parser, CharSequence source);
+    abstract <T> T run(Parser<T> parser, CharSequence source, Parameters params);
   }
 
   /**
@@ -875,10 +910,10 @@ public abstract class Parser<T> {
    */
   @Deprecated
   public final T parse(CharSequence source, String moduleName) {
-    return new ScannerState(moduleName, source, 0, new SourceLocator(source))
+    return new ScannerState(moduleName, source, 0, new SourceLocator(source), new Parameters())
         .run(followedBy(Parsers.EOF));
   }
-
+  
   /**
    * Parses source read from {@code readable}.
    *

@@ -16,6 +16,7 @@
 package org.codehaus.jparsec;
 
 import org.codehaus.jparsec.error.ParserException;
+import org.codehaus.jparsec.parameters.Parameters;
 
 /**
  * Parser state for scanner.
@@ -25,12 +26,12 @@ import org.codehaus.jparsec.error.ParserException;
 final class ScannerState extends ParseContext {
   private final int end;
   
-  ScannerState(CharSequence source) {
-    this(null, source, 0, new SourceLocator(source));
+  ScannerState(CharSequence source, Parameters params) {
+    this(null, source, 0, new SourceLocator(source), params);
   }
   
-  ScannerState(String module, CharSequence source, int from, SourceLocator locator) {
-    super(source, from, module, locator);
+  ScannerState(String module, CharSequence source, int from, SourceLocator locator, Parameters params) {
+    super(source, from, module, locator, params);
     this.end = source.length();
   }
   
@@ -43,8 +44,8 @@ final class ScannerState extends ParseContext {
    * @param originalResult the original result value
    */
   ScannerState(String module, CharSequence source, int from, int end,
-      SourceLocator locator, Object originalResult) {
-    super(source, originalResult, from, module, locator);
+      SourceLocator locator, Object originalResult, Parameters params) {
+    super(source, originalResult, from, module, locator, params);
     this.end = end;
   }
   

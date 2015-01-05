@@ -31,6 +31,7 @@ import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
+import org.codehaus.jparsec.parameters.Parameters;
 
 /**
  * Provides common {@link Parser} implementations.
@@ -159,13 +160,13 @@ public final class Parsers {
    * @param parser the token level parser object.
    * @return the new Parser object.
    */
-  static <T> Parser<T> nested(final Parser<Token[]> lexer, final Parser<? extends T> parser) {
+  static <T> Parser<T> nested(final Parser<Token[]> lexer, final Parser<? extends T> parser, final Parameters params) {
     return new Parser<T>() {
       @Override boolean apply(ParseContext ctxt) {
         if (!lexer.apply(ctxt)) return false;
         Token[] tokens = lexer.getReturn(ctxt);
         ParserState parserState = new ParserState(
-            ctxt.module, ctxt.source, tokens, 0, ctxt.locator, ctxt.getIndex(), tokens);
+            ctxt.module, ctxt.source, tokens, 0, ctxt.locator, ctxt.getIndex(), tokens, ctxt.params);
         ctxt.getTrace().startFresh(parserState);
         return ctxt.applyNested(parser, parserState);
       }

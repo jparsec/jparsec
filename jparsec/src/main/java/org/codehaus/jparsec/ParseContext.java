@@ -25,6 +25,7 @@ import org.codehaus.jparsec.error.ParseErrorDetails;
 import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
+import org.codehaus.jparsec.parameters.Parameters;
 
 /**
  * Represents the context state during parsing.
@@ -38,6 +39,7 @@ abstract class ParseContext {
   final String module;
   final CharSequence source;
   final SourceLocator locator;
+  final Parameters params;
   
   /** The current position of the input. Points to the token array for token level. */
   int at;
@@ -96,14 +98,15 @@ abstract class ParseContext {
   // explicit suppresses error recording if true.
   private boolean errorSuppressed = false;
   private ErrorType overrideErrorType = ErrorType.NONE;
+
   
   //caller should not change input after it is passed in.
-  ParseContext(CharSequence source, int at, String module, SourceLocator locator) {
-    this(source, null, at, module, locator);
+  ParseContext(CharSequence source, int at, String module, SourceLocator locator, Parameters params) {
+    this(source, null, at, module, locator, params);
   }
   
   ParseContext(
-      CharSequence source, Object ret, int at, String module, SourceLocator locator) {
+      CharSequence source, Object ret, int at, String module, SourceLocator locator, Parameters params) {
     this.source = source;
     this.result = ret;
     this.step = 0;
@@ -111,6 +114,7 @@ abstract class ParseContext {
     this.module = module;
     this.locator = locator;
     this.currentErrorAt = at;
+    this.params = params;
   }
 
   /** Runs {@code parser} with error recording suppressed. */

@@ -50,7 +50,7 @@ final class ReluctantBetweenParser<T> extends Parser<T> {
 			r2 = end.apply(ctxt);
 		}
 		if (!r2) return false;
-		ParseContext betweenCtxt = new ScannerState(ctxt.module, ctxt.source, betweenAt, endAt, ctxt.locator, ctxt.result );
+		ParseContext betweenCtxt = new ScannerState(ctxt.module, ctxt.source, betweenAt, endAt, ctxt.locator, ctxt.result, ctxt.params);
 		boolean rb = between.apply(betweenCtxt);
 		
 		if ( ! rb ) return false;

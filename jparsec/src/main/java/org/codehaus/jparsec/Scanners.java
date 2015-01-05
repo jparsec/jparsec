@@ -537,7 +537,7 @@ public final class Scanners {
         int from = ctxt.at;
         if (!outer.apply(ctxt)) return false;
         ScannerState innerState = new ScannerState(
-            ctxt.module, ctxt.characters(), from, ctxt.at, ctxt.locator, ctxt.result);
+            ctxt.module, ctxt.characters(), from, ctxt.at, ctxt.locator, ctxt.result, ctxt.params);
         ctxt.getTrace().startFresh(innerState);
         innerState.getTrace().setStateAs(ctxt.getTrace());
         return ctxt.applyNested(inner, innerState);
