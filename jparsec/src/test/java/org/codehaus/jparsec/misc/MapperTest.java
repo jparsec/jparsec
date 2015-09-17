@@ -1,7 +1,6 @@
 package org.codehaus.jparsec.misc;
 
 import static org.codehaus.jparsec.Parsers.constant;
-import static org.codehaus.jparsec.misc.Mapper._;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;
@@ -13,6 +12,7 @@ import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.functors.Binary;
 import org.codehaus.jparsec.functors.Unary;
 import org.junit.Test;
+import static org.codehaus.jparsec.misc.Mapper.skip;
 
 /**
  * Unit test for {@link Mapper}.
@@ -281,69 +281,61 @@ public class MapperTest {
   @Test
   public void testParametersSkippedForSequence() {
     assertEquals("foo12truec",
-        Mapper.curry(Thing.class, "foo", 1, 2L).sequence(
-            _(constant("bar")), constant(true), constant('c')).parse("").toString());
+        Mapper.curry(Thing.class, "foo", 1, 2L).sequence(skip(constant("bar")), constant(true), constant('c')).parse("").toString());
     assertEquals("foo12truec",
-        Mapper.curry(Thing.class, "foo", 1, 2L).sequence(
-            _(constant(false)), constant(true),
-            _(constant("bar")), _(constant(false)), constant('c'),
-            _(constant('d')), _(constant('e'))).parse("").toString());
+        Mapper.curry(Thing.class, "foo", 1, 2L).sequence(skip(constant(false)), constant(true),
+            skip(constant("bar")), skip(constant(false)), constant('c'),
+            skip(constant('d')), skip(constant('e'))).parse("").toString());
     assertFoo("foo",
-        fooMapper().sequence(_(constant("bar")), constant("foo"), constant(1)).parse(""));
+        fooMapper().sequence(skip(constant("bar")), constant("foo"), constant(1)).parse(""));
   }
 
   @Test
   public void testParametersSkippedForPrefix() {
     assertEquals("foo12truec",
-        Mapper.<Object>curry(Thing.class, "foo", 2L).prefix(
-            constant(1), _(constant("bar")), constant(true)).parse("").map('c').toString());
+        Mapper.<Object>curry(Thing.class, "foo", 2L).prefix(constant(1), skip(constant("bar")), constant(true)).parse("").map('c').toString());
     assertEquals("thing12truec",
-        thingMapper().prefix(
-            constant(1), _(constant("bar")), constant(true)).parse("").map('c').toString());
+        thingMapper().prefix(constant(1), skip(constant("bar")), constant(true)).parse("").map('c').toString());
   }
 
   @Test
   public void testParametersSkippedForPostfix() {
     assertEquals("foo12truec",
-        Mapper.<Object>curry(Thing.class, "foo", 2L).postfix(
-            _(constant("bar")), constant(true), constant('c')).parse("").map(1).toString());
+        Mapper.<Object>curry(Thing.class, "foo", 2L).postfix(skip(constant("bar")), constant(true), constant('c')).parse("").map(1).toString());
     assertEquals("thing12truec",
-        thingMapper().postfix(
-            _(constant("bar")), constant(true), constant('c')).parse("").map(1).toString());
+        thingMapper().postfix(skip(constant("bar")), constant(true), constant('c')).parse("").map(1).toString());
   }
 
   @Test
   public void testParametersSkippedForInfix() {
     assertEquals("foo12truec",
-        Mapper.<Object>curry(Thing.class, "foo", 2L).infix(
-            constant(true), _(constant("bar"))).parse("").map(1, 'c').toString());
+        Mapper.<Object>curry(Thing.class, "foo", 2L).infix(constant(true), skip(constant("bar"))).parse("").map(1, 'c').toString());
     assertEquals("thing12truec",
-        thingMapper().infix(
-            constant(true), _(constant("bar"))).parse("").map(1, 'c').toString());
+        thingMapper().infix(constant(true), skip(constant("bar"))).parse("").map(1, 'c').toString());
   }
 
   @Test
   public void testInvalidSkipForPrefix() {
     try {
-      Mapper.<Object>curry(Foo.class).prefix(_(constant("bar")));
+      Mapper.<Object>curry(Foo.class).prefix(skip(constant("bar")));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip the only parser parameter.", e.getMessage());
     }
     try {
-      Mapper.<Object>curry(Foo.class).prefix(_(constant(1)), _(constant("bar")));
+      Mapper.<Object>curry(Foo.class).prefix(skip(constant(1)), skip(constant("bar")));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip all parser parameters.", e.getMessage());
     }
     try {
-      fooMapper().prefix(_(constant(1)));
+      fooMapper().prefix(skip(constant(1)));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip the only parser parameter.", e.getMessage());
     }
     try {
-      fooMapper().prefix(_(constant(1)), _(constant("bar")));
+      fooMapper().prefix(skip(constant(1)), skip(constant("bar")));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip all parser parameters.", e.getMessage());
@@ -353,25 +345,25 @@ public class MapperTest {
   @Test
   public void testInvalidSkipForPostfix() {
     try {
-      Mapper.<Object>curry(Foo.class).postfix(_(constant("bar")));
+      Mapper.<Object>curry(Foo.class).postfix(skip(constant("bar")));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip the only parser parameter.", e.getMessage());
     }
     try {
-      Mapper.<Object>curry(Foo.class).postfix(_(constant(1)), _(constant("bar")));
+      Mapper.<Object>curry(Foo.class).postfix(skip(constant(1)), skip(constant("bar")));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip all parser parameters.", e.getMessage());
     }
     try {
-      fooMapper().postfix(_(constant(1)));
+      fooMapper().postfix(skip(constant(1)));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip the only parser parameter.", e.getMessage());
     }
     try {
-      fooMapper().postfix(_(constant(1)), _(constant("bar")));
+      fooMapper().postfix(skip(constant(1)), skip(constant("bar")));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip all parser parameters.", e.getMessage());
@@ -381,25 +373,25 @@ public class MapperTest {
   @Test
   public void testInvalidSkipForInfix() {
     try {
-      Mapper.<Object>curry(Foo.class).infix(_(constant("bar")));
+      Mapper.<Object>curry(Foo.class).infix(skip(constant("bar")));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip the only parser parameter.", e.getMessage());
     }
     try {
-      Mapper.<Object>curry(Foo.class).infix(_(constant(1)), _(constant("bar")));
+      Mapper.<Object>curry(Foo.class).infix(skip(constant(1)), skip(constant("bar")));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip all parser parameters.", e.getMessage());
     }
     try {
-      fooMapper().infix(_(constant(1)));
+      fooMapper().infix(skip(constant(1)));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip the only parser parameter.", e.getMessage());
     }
     try {
-      fooMapper().infix(_(constant(1)), _(constant("bar")));
+      fooMapper().infix(skip(constant(1)), skip(constant("bar")));
       fail();
     } catch (IllegalArgumentException e) {
       assertEquals("Cannot skip all parser parameters.", e.getMessage());

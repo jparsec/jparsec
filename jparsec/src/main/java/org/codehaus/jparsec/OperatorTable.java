@@ -28,12 +28,13 @@ import org.codehaus.jparsec.internal.util.Lists;
  * and precedences are declared in this table.
  * 
  * <p>Operators have precedences. The higher the precedence number, the higher the precedence. For
- * the same precedence, prefix > postfix > left-associative > non-associative > right-asscociative.
+ * the same precedence, prefix &gt; postfix &gt; left-associative &gt; non-associative &gt; right-associative.
  *
- * <p>For example: <pre class="code">   {@code
- *   Unary<Integer> negate = new Unary<Integer>() {... return -n; }};
- *   Binary<Integer> plus = new Binary<Integer>() {... return a + b; }};
- *   Binary<Integer> minus = new Binary<Integer() {... return a - b; }};
+ * <p>For example: 
+ * {@code
+ *   Unary<Integer> negate = new Unary<Integer>() {... return -n; };
+ *   Binary<Integer> plus = new Binary<Integer>() {... return a + b; };
+ *   Binary<Integer> minus = new Binary<Integer>() {... return a - b; };
  *   ...
  *   Terminals terms = Terminals.operators("+", "-", "*", "/");
  *   Parser<Integer> calculator = new OperatorTable()
@@ -46,7 +47,7 @@ import org.codehaus.jparsec.internal.util.Lists;
  *   Parser<Integer> parser = calculator.from(
  *       terms.tokenizer().or(Terminals.IntegerLiteral.TOKENIZER), Scanners.WHITESPACES.optional());
  *   return parser.parse(text);
- * }</pre>
+ * }
  * 
  * @author Ben Yu
  */

@@ -34,7 +34,6 @@ public class ParserException extends RuntimeException {
    * Creates a {@link ParserException} object.
    * 
    * @param details the {@link ParseErrorDetails} that describes the error details.
-   * @param moduleName the module name.
    * @param location the error location.
    */
   public ParserException(ParseErrorDetails details,  Location location) {
@@ -81,10 +80,8 @@ public class ParserException extends RuntimeException {
   }
 
   /**
-   * Returns the parse tree until the parse error happened, when either
-   * {@link org.codehaus.jparsec.Parser#parseTree parseTree()} was invoked or
-   * {@link Parser.Mode#DEBUG DEBUG mode} was used in
-   * {@link org.codehaus.jparsec.Parser#parse(CharSequence, org.codehaus.jparsec.Parser.Mode) parse()}.
+   * Returns the parse tree until the parse error happened, when 
+   * {@link org.codehaus.jparsec.Parser#parseTree parseTree()} was invoked.
    * {@code null} if absent.
    *
    * @since 2.3

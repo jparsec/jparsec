@@ -41,7 +41,7 @@ public final class TerminalParser {
   static final Indentation INDENTATION = new Indentation();
   
   static Parser<?> term(String name) {
-    return Mapper._(TERMS.token(name));
+    return Mapper.skip(TERMS.token(name));
   }
   
   static <T> T parse(Parser<T> parser, String source) {
