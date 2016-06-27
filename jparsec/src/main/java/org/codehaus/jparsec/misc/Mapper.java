@@ -38,6 +38,9 @@ import org.codehaus.jparsec.functors.Binary;
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Unary;
 import org.codehaus.jparsec.internal.util.Lists;
+import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
+import static org.codehaus.jparsec.internal.util.Checks.checkNotNullState;
+import static org.codehaus.jparsec.internal.util.Checks.checkState;
 
 /**
  * Allows mapping arbitrary number of {@link Parser} results  to an object of {@code T} type-safely
@@ -49,11 +52,13 @@ import org.codehaus.jparsec.internal.util.Lists;
  * subclass (or the curried constructor in target class).
  * 
  * <p> For example: <pre>
- * Parser&lt;Foo> fooParser = new Mapper&lt;Foo>() {
+ * {@code
+ * Parser<Foo> fooParser = new Mapper<Foo>() {
  *   Foo map(String s, Integer n, Bar bar, Baz baz) {
  *     return new Foo(s, n, bar, baz);
  *   }
  * }.sequence(stringParser, integerParser, barParser, bazParser);
+ * }
  * </pre>
  * 
  * <p> Alternatively, instead of sequencing the operands and operators directly,
@@ -66,8 +71,10 @@ import org.codehaus.jparsec.internal.util.Lists;
  * It allows currying constructor defined in the target class so that no explicit mapping code
  * is needed. For the above example, it can be more concisely written as:
  * <pre>
- * Parser&lt;Foo> fooParser = Mapper.curry(Foo.class)
+ * {@code
+ * Parser<Foo> fooParser = Mapper.curry(Foo.class)
  *     .sequence(stringParser, integerParser, barParser, bazParser);
+ * }
  * </pre>
  * 
  * <p> NOTE: cglib is required on the classpath.
@@ -107,20 +114,24 @@ public abstract class Mapper<T> {
    * </pre>
    * The parser that parses this expression with binary operator can be written as:
    * <pre>
-   * Parser&lt;Expression> binary(Parser&lt;Expression> operand, Parser&lt;Operator> operator) {
-   *   return Sequencer.&lt;Expression>curry(BinaryExpression.class)
+   * {@code 
+   * Parser<Expression> binary(Parser<Expression> operand, Parser<Operator> operator) {
+   *   return Sequencer.<Expression>curry(BinaryExpression.class)
    *       .sequence(operand, operator, operand);
+   * }
    * }
    * </pre>
    * Which is equivalent to the more verbose but reflection-free version:
    * <pre>
-   * Parser&lt;Expression> binary(Parser&lt;Expression> expr, Parser&lt;Operator> op) {
+   * {@code 
+   * Parser<Expression> binary(Parser<Expression> expr, Parser<Operator> op) {
    *   return Parsers.sequence(expr, op, expr,
-   *       new Map3&lt;Expression, Operator, Expression, Expression>() {
+   *       new Map3<Expression, Operator, Expression, Expression>() {
    *         public Expression map(Expression left, Operator op, Expression right) {
    *           return new BinaryExpression(left, op, right);
    *         }
    *       });
+   * }
    * }
    * </pre>
    */
@@ -167,17 +178,22 @@ public abstract class Mapper<T> {
    * 
    * <p> For example:
    * <pre>
-   * Parser&lt;Unary&lt;Expression>> prefixOperator(Parser&lt;Operator> op) {
-   *   return new Mapper&lt;Expression>() {
+   * {@code 
+   * Parser<Unary&lt;Expression>> prefixOperator(Parser<Operator> op) {
+   *   return new Mapper<Expression>() {
    *     Expression map(Operator operator, Expression operand) {
    *       return new PrefixExpression(operator, operand);
    *     }
    *   }.prefix(op);
    * }
+   * }
    * </pre>
+   * <pre>
+   * {@code 
    * Or alternatively, by using the {@link #curry(Class, Object[])} method: <pre>
-   * Parser&lt;Unary&lt;Expression>> prefixOperator(Parser&lt;Operator> op) {
-   *   return Mapper.&lt;Expression>curry(PrefixExpression.class).prefix(op);
+   * Parser<Unary<Expression>> prefixOperator(Parser<Operator> op) {
+   *   return Mapper.<Expression>curry(PrefixExpression.class).prefix(op);
+   * }
    * }
    * </pre>
    * 
@@ -207,16 +223,20 @@ public abstract class Mapper<T> {
    * than one components. For example, the Java label statement (like {@code here:}) can be
    * modeled as a prefix operator applied to statements:
    * <pre>
+   * {@code 
    * Parser&lt;Unary&lt;Statement>> label = new Mapper&lt;Statement>() {
-   *   Statement map(String label, Statement statement) {
-   *     return new LabelStatement(label, statement);
-   *   }
-   * }.prefix(Terminals.STRING, _(terminal(":")));
+   *     Statement map(String label, Statement statement) {
+   *         return new LabelStatement(label, statement);
+   *     }
+   * }.prefix(Terminals.STRING, skip(terminal(":")));
+   * }
    * </pre>
    * Or alternatively, by using the {@link #curry(Class, Object[])} method:
    * <pre>
-   * Parser&lt;Unary&lt;Statement>> label = Mapper.&lt;Statement>curry(LabelStatement.class)
-   *     .prefix(Terminals.STRING, _(terminal(":")));
+   * {@code
+   * Parser<Unary<Statement>> label = Mapper<Statement>curry(LabelStatement.class)
+   *  .prefix(Terminals.STRING, skip(terminal(":")));
+   * }
    * </pre>
    * 
    * <p> Useful when the returned parser is used in {@link Parser#prefix(Parser)} or
@@ -245,17 +265,22 @@ public abstract class Mapper<T> {
    * 
    * <p> For example:
    * <pre>
-   * Parser&lt;Binary&lt;Expression>> postfixOperator(Parser&lt;Operator> op) {
-   *   return new Mapper&lt;Expression>() {
+   * {@code 
+   * Parser<Binary<Expression>> postfixOperator(Parser<Operator> op) {
+   *   return new Mapper<Expression>() {
    *     Expression map(Expression operand, Operator operator) {
    *       return new PostfixExpression(operand, operator);
    *     }
    *   }.postfix(op);
    * }
+   * }
    * </pre>
-   * Or alternatively, by using the {@link #curry(Class, Object[])} method: <pre>
-   * Parser&lt;Unary&lt;Expression>> postfixOperator(Parser&lt;Operator> op) {
-   *   return Mapper.&lt;Expression>curry(PostfixExpression.class).postfix(op);
+   * Or alternatively, by using the {@link #curry(Class, Object[])} method:
+   * <pre>
+   * {@code 
+   * Parser<Unary<Expression>> postfixOperator(Parser<Operator> op) {
+   *   return Mapper.<Expression>curry(PostfixExpression.class).postfix(op);
+   * }
    * }
    * </pre>
    * 
@@ -289,19 +314,23 @@ public abstract class Mapper<T> {
    * {@code array} expression to an array slice expression.
    * The parser can be written as:
    * <pre>
-   * Parser&lt;Unary&lt;Expression>> slice(Parser&lt;Expression bound) {
-   *   return new Mapper&lt;Expression>() {
-   *     Expression map(Expression array, Expression from, Expression to) {
-   *       return new ArraySliceExpression(array, from, to);
-   *     }
-   *   }.postfix(_(terminal("[")), bound, _(terminal(",")), bound, _(terminal("]")));
+   * {@code 
+   * Parser<Unary<Expression>> slice(Parser<Expression> bound) {
+   *   return new Mapper<Expression>() {
+   *  Expression map(Expression array, Expression from, Expression to) {
+   *    return new ArraySliceExpression(array, from, to);
+   *  }
+   * }.postfix(skip(terminal("[")), bound, skip(terminal(",")), bound, skip(terminal("]")));
+   * }
    * }
    * </pre>
    * Or alternatively, by using the {@link #curry(Class, Object[])} method:
    * <pre>
-   * Parser&lt;Unary&lt;Expression>> slice(Parser&lt;Expression bound) {
-   *   return Mapper.&lt;Expression>curry(ArraySliceExpression.class)
-   *       .postfix(_(terminal("[")), bound, _(terminal(",")), bound, _(terminal("]")));
+   * {@code 
+   * Parser<Unary<Expression>> slice(Parser<Expression bound) {
+   *   return Mapper.<Expression>curry(ArraySliceExpression.class)
+   *       .postfix(skip(terminal("[")), bound, skip(terminal(",")), bound, skip(terminal("]")));
+   * }
    * }
    * </pre>
    * 
@@ -333,17 +362,22 @@ public abstract class Mapper<T> {
    * 
    * <p> For example:
    * <pre>
-   * Parser&lt;Binary&lt;Expression>> infixOperator(Parser&lt;Operator> op) {
-   *   return new Mapper&lt;Expression>() {
+   * {@code 
+   * Parser<Binary<Expression>> infixOperator(Parser<Operator> op) {
+   *   return new Mapper<Expression>() {
    *     Expression map(Expression left, Operator operator, Expression right) {
    *       return new InfixExpression(left, operand, right);
    *     }
    *   }.infix(op);
    * }
+   * }
    * </pre>
-   * Or alternatively, by using the {@link #curry(Class, Object[])} method: <pre>
-   * Parser&lt;Binary&lt;Expression>> infixOperator(Parser&lt;Operator> op) {
-   *   return Mapper.&lt;Expression>curry(InfixExpression.class).infix(op);
+   * Or alternatively, by using the {@link #curry(Class, Object[])} method:
+   * <pre>
+   * {@code 
+   * Parser<Binary<Expression>> infixOperator(Parser<Operator> op) {
+   *   return Mapper.<Expression>curry(InfixExpression.class).infix(op);
+   * }
    * }
    * </pre>
    * 
@@ -376,19 +410,23 @@ public abstract class Mapper<T> {
    * {@code ? consequence :} part as a right associative infix operator that binds the condition and
    * the alternative expression together as a composite expression. The parser can be written as:
    * <pre>
-   * Parser&lt;Binary&lt;Expression>> conditional(Parser&lt;Expression> expr) {
-   *   return new Mapper&lt;Expression>() {
+   * {@code 
+   * Parser<Binary<Expression>> conditional(Parser<Expression> expr) {
+   *   return new Mapper<Expression>() {
    *     Expression map(Expression condition, Expression consequence, Expression alternative) {
    *       return new ConditionalExpression(condition, consequence, alternative);
    *     }
-   *   }.postfix(_(terminal("?")), expr, _(terminal(":")));
+   *   }.postfix(skip(terminal("?")), expr, skip(terminal(":")));
+   * }
    * }
    * </pre>
    * Or alternatively, by using the {@link #curry(Class, Object[])} method:
    * <pre>
-   * Parser&lt;Binary&lt;Expression>> conditional(Parser&lt;Expression> expr) {
-   *   return Mapper.&lt;Expression>.curry(ConditionalExpression.class)
-   *       .postfix(_(terminal("?")), expr, _(terminal(":")));
+   * {@code 
+   * Parser<Binary<Expression>> conditional(Parser<Expression> expr) {
+   *   return Mapper.<Expression>.curry(ConditionalExpression.class)
+   *     .postfix(skip(terminal("?")), expr, skip(terminal(":")));
+   * }
    * }
    * </pre>
    * 
@@ -421,15 +459,19 @@ public abstract class Mapper<T> {
    * maps the two expressions after "if" and "else" to the constructor of {@code IfElseExpression}
    * and skips the return values of the keyword "if" and "else".
    * <pre>
-   * Parser&lt;IfElseExpression> expression = curry(IfElseExpression.class).sequence(
-   *     _(word("if")), expr, _(word("else")), expr);
+   * {@code
+   * Parser<IfElseExpression> expression = curry(IfElseExpression.class).sequence(
+   *  skip(word("if")), expr, skip(word("else")), expr);
+   * }
    * </pre>
    */
-  public static final Parser<?> _(Parser<?> parser) {
+  public static final Parser<?> skip(Parser<?> parser) {
     return parser.map(SKIP);
   }
   
-  /** Returns the string representation of this object. */
+  /** 
+   * @return the string representation of this object. 
+   */
   @Override public String toString() {
     return source.toString();
   }

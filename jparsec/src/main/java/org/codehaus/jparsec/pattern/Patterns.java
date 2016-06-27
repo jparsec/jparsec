@@ -77,7 +77,6 @@ public final class Patterns {
    * A {@link Pattern} object that matches a decimal number that has at least one digit before the decimal point. The
    * decimal point and the numbers to the right are optional.
    *
-   * <p/>
    * <p> {@code 0, 11., 2.3} are all good candidates. While {@code .1, .} are not.
    */
   public static final Pattern STRICT_DECIMAL = INTEGER.next(isChar('.').next(many(CharPredicates.IS_DIGIT)).optional());

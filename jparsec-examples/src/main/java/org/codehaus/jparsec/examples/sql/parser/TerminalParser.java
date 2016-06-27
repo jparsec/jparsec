@@ -66,10 +66,10 @@ final class TerminalParser {
   }
   
   public static Parser<?> term(String term) {
-    return Mapper._(TERMS.token(term));
+    return Mapper.skip(TERMS.token(term));
   }
   
   public static Parser<?> phrase(String phrase) {
-    return Mapper._(TERMS.phrase(phrase.split("\\s")));
+    return Mapper.skip(TERMS.phrase(phrase.split("\\s")));
   }
 }

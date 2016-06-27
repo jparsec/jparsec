@@ -2,7 +2,6 @@ package org.codehaus.jparsec.misc;
 
 import static org.codehaus.jparsec.Parsers.constant;
 import static org.codehaus.jparsec.Scanners.string;
-import static org.codehaus.jparsec.misc.Mapper._;
 import static org.junit.Assert.*;
 
 import org.codehaus.jparsec.Parser;
@@ -12,6 +11,8 @@ import org.codehaus.jparsec.functors.Binary;
 import org.codehaus.jparsec.functors.Unary;
 import org.codehaus.jparsec.util.ObjectTester;
 import org.junit.Test;
+import static org.codehaus.jparsec.misc.Mapper.skip;
+import static org.codehaus.jparsec.Scanners.string;
 
 /**
  * Unit test for {@link Curry}.
@@ -166,7 +167,7 @@ public class CurryTest {
 
   @Test
   public void testPrefix_onlyOneUnskippedOperator() {
-    Expr result = Curry.<Expr>of(PrefixExpr.class).prefix(_(string("foo")), constant("x"))
+    Expr result = Curry.<Expr>of(PrefixExpr.class).prefix(skip(string("foo")), constant("x"))
         .parse("foo").map(FAKE_EXPR);
     PrefixExpr prefix = (PrefixExpr) result;
     assertEquals("x", prefix.op);
@@ -194,7 +195,7 @@ public class CurryTest {
 
   @Test
   public void testPostfix_onlyOneUnskippedOperator() {
-    Expr result = Curry.<Expr>of(PostfixExpr.class).postfix(_(string("foo")), constant("x"))
+    Expr result = Curry.<Expr>of(PostfixExpr.class).postfix(skip(string("foo")), constant("x"))
         .parse("foo").map(FAKE_EXPR);
     PostfixExpr postfix = (PostfixExpr) result;
     assertEquals("x", postfix.op);
@@ -227,7 +228,7 @@ public class CurryTest {
   public void testInfix_onlyOneUnskippedOperator() {
     Expr left = FAKE_EXPR;
     Expr right = new Expr() {};
-    Expr result = Curry.<Expr>of(InfixExpr.class).infix(_(string("foo")), constant("x"))
+    Expr result = Curry.<Expr>of(InfixExpr.class).infix(skip(string("foo")), constant("x"))
         .parse("foo").map(left, right);
     InfixExpr infix = (InfixExpr) result;
     assertEquals("x", infix.op);
