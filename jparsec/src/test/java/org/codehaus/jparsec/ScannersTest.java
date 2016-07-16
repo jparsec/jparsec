@@ -602,17 +602,13 @@ public class ScannersTest {
 
   @Test
   public void veryLongDoublyQuotedStringWithEscapedDoubleQuotes() {
-    String test = "\"";
-    for (int i = 0; i < 100; ++ i)
-      test += "\n\\\"dsvtrbdfvbgf\\\"";
-    test += "\"";
-
-    Scanners.DOUBLE_QUOTE_STRING.parse(test);
+    String quoted = "\"" + replicate(1000, "\n\\\"dsvtrbdfvbgf\\\"") + "\"";
+    assertEquals(quoted, Scanners.DOUBLE_QUOTE_STRING.parse(quoted));
   }
 
   @Test
-  public void veryLongString() {
-    String quoted = replicate(1000, "a''b");
+  public void veryLongStringWithEscapedSingleQuotes() {
+    String quoted = replicate(1000, "a''bc");
     assertEquals("'"+ quoted  +"'", Scanners.SINGLE_QUOTE_STRING.parse("'"+ quoted  +"'"));
   }
 
