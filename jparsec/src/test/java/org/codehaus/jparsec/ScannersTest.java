@@ -611,10 +611,16 @@ public class ScannersTest {
   }
 
   @Test
-  public void VeryLongString() {
-    String content = "__content__='aaaasdasdwqasdadddv1111111111abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd123456abad123456abcd123456abcd123456abcd123456abcd123456abcd123456abcd12345'";
-    Parser<String> next = Scanners.IDENTIFIER.next(Scanners.string("="))
-        .next(Terminals.StringLiteral.SINGLE_QUOTE_TOKENIZER);
-    next.parse(content);
+  public void veryLongString() {
+    String quoted = replicate(1000, "a''b");
+    assertEquals("'"+ quoted  +"'", Scanners.SINGLE_QUOTE_STRING.parse("'"+ quoted  +"'"));
+  }
+
+  private static String replicate(int times, String s) {
+    StringBuilder builder = new StringBuilder();
+    for (int i = 0; i < times; i++) {
+      builder.append(s);
+    }
+    return builder.toString();
   }
 }
