@@ -7,7 +7,7 @@
       <relativePath>../pom.xml</relativePath>
   </parent>
   <artifactId>jparsec</artifactId>
-  <packaging>jar</packaging>
+  <packaging>bundle</packaging>
 
   <name>jParsec</name>
 
