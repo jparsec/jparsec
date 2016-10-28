@@ -41,41 +41,41 @@ import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
  *       });
  * }
  * </pre>
- * 
+ *
  * <p> Alternatively, instead of sequencing the operands and operators directly,
  * a {@link Unary} or {@link Binary} instance can be returned to cooperate with
  * {@link org.codehaus.jparsec.OperatorTable}, {@link Parser#prefix(Parser)},
  *  {@link Parser#postfix(Parser)}, {@link Parser#infixl(Parser)},
  * {@link Parser#infixn(Parser)} or {@link Parser#infixr(Parser)}.
- * 
+ *
  * <p> NOTE: cglib is required on the classpath.
- * 
+ *
  * @author Ben Yu
  */
 final class Curry<T> extends Mapper<T> {
   private final Object[] curryArgs;
   private final int[] curryIndexes;
-  
+
   private Curry(
-      Object source, Invokable invokable, Object[] curryArgs, int[] curryIndexes) {
+  Object source, Invokable invokable, Object[] curryArgs, int[] curryIndexes) {
     super(source, invokable);
     this.curryArgs = curryArgs;
     this.curryIndexes = curryIndexes;
   }
-  
+
   /**
    * Creates a {@link Curry} object that curries the only public constructor of {@code clazz}
    * with {@code curryArgs} by matching parameter types.
    */
   public static <T> Curry<T> of(Class<? extends T> clazz, Object... curryArgs) {
     checkArgument(!Modifier.isAbstract(clazz.getModifiers()),
-        "Cannot curry abstract class: %s", clazz.getName());
+    "Cannot curry abstract class: %s", clazz.getName());
     Constructor<?>[] constructors = clazz.getConstructors();
     checkArgument(constructors.length == 1,
-        "Expecting 1 public constructor in %s, %s encountered.",
-        clazz.getName(), constructors.length);
+    "Expecting 1 public constructor in %s, %s encountered.",
+    clazz.getName(), constructors.length);
     checkArgument(!constructors[0].isVarArgs(),
-        "Cannot curry for constructor with varargs: %s", constructors[0]);
+    "Cannot curry for constructor with varargs: %s", constructors[0]);
     Constructor<?> constructor = constructors[0];
     Class<?>[] parameterTypes = constructor.getParameterTypes();
     int[] curryIndexes = new int[curryArgs.length];
@@ -86,18 +86,18 @@ final class Curry<T> extends Mapper<T> {
       curryIndexes[curry++] = curryIndex;
     }
     return new Curry<T>(
-        clazz.getName(),
-        Invokable.constructor(FastClass.create(clazz).getConstructor(constructor)),
-        curryArgs, curryIndexes);
+    clazz.getName(),
+    Invokable.constructor(FastClass.create(clazz).getConstructor(constructor)),
+    curryArgs, curryIndexes);
   }
 
-  
+
   @Override void checkFutureParameters(Class<?> targetType, int providedParameters) {
     int totalProvidedParameters = providedParameters + curryArgs.length;
     int totalExpectedParameters = invokable.parameterTypes().length;
     checkFutureParameters(totalExpectedParameters, targetType, totalProvidedParameters);
   }
-  
+
   /**
    * Two {@link Curry} objects are equal only if they curry the same class and have equal
    * curry arguments.
@@ -105,7 +105,7 @@ final class Curry<T> extends Mapper<T> {
   @Override public int hashCode() {
     return valueList().hashCode();
   }
-  
+
   /**
    * Two {@link Curry} objects are equal only if they curry the same class and have equal
    * curry arguments.
@@ -116,38 +116,38 @@ final class Curry<T> extends Mapper<T> {
     }
     return false;
   }
-  
+
   private List<?> valueList() {
     return Arrays.asList(invokable, Arrays.asList(curryArgs));
   }
-  
+
   private static void checkDup(
-      int[] curryIndexes, int curry, int curryIndex, Constructor<?> constructor) {
+  int[] curryIndexes, int curry, int curryIndex, Constructor<?> constructor) {
     for (int i = 0; i < curry; i++) {
       if (curryIndexes[i] == curryIndex) {
         throw new IllegalArgumentException(
-            "More than one curry arguments match the "
-            + constructor.getParameterTypes()[curryIndex].getName()
-            + " parameter of " + constructor);
+        "More than one curry arguments match the "
+        + constructor.getParameterTypes()[curryIndex].getName()
+        + " parameter of " + constructor);
       }
     }
   }
 
   private static int findCurryIndex(
-      Constructor<?> constructor, Class<?>[] parameterTypes, int index, Object object) {
+  Constructor<?> constructor, Class<?>[] parameterTypes, int index, Object object) {
     for (int i = 0; i < parameterTypes.length; i++) {
       if (Reflection.isInstance(parameterTypes[i], object)) return i;
     }
     throw new IllegalArgumentException(
-        "Curry parameter " + index + " is " + Reflection.getClassName(object)
-        + ", which isn't compatible to any parameter of " + constructor);
+    "Curry parameter " + index + " is " + Reflection.getClassName(object)
+    + ", which isn't compatible to any parameter of " + constructor);
   }
-  
+
   @Override Object invoke(Object[] args) throws Throwable {
     if (args.length != expectedParams()) {
       throw new IllegalArgumentException(
-          expectedParams() + " parameters expected, " + args.length + " provided: "
-          + invokable);
+      expectedParams() + " parameters expected, " + args.length + " provided: "
+      + invokable);
     }
     Class<?>[] parameterTypes = invokable.parameterTypes();
     Object[] actualArgs = new Object[parameterTypes.length];
@@ -165,7 +165,7 @@ final class Curry<T> extends Mapper<T> {
     }
     return invokable.invoke(actualArgs);
   }
-  
+
   @Private static int find(int[] array, int value) {
     for (int i = 0 ; i < array.length; i++) {
       if (array[i] == value) {
@@ -174,7 +174,7 @@ final class Curry<T> extends Mapper<T> {
     }
     return -1;
   }
-  
+
   @Override int expectedParams() {
     return super.expectedParams() - curryArgs.length;
   }
