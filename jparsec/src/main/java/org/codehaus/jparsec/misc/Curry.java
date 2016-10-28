@@ -181,4 +181,3 @@ final class Curry<T> extends Mapper<T> {
     return super.expectedParams() - curryArgs.length;
   }
 }
-
