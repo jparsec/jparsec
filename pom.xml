@@ -61,7 +61,7 @@
 
   <modules>
     <module>jparsec</module>
-    <!--<module>jparsec-examples</module>-->
+    <module>jparsec-examples</module>
     <module>jparsec-testutils</module>
   </modules>
 
@@ -87,6 +87,12 @@
         <artifactId>easymock</artifactId>
         <version>2.4</version>
         <scope>test</scope>
+      </dependency>
+
+      <dependency>
+        <groupId>org.apache.servicemix.bundles</groupId>
+        <artifactId>org.apache.servicemix.bundles.cglib</artifactId>
+        <version>3.2.4_1</version>
       </dependency>
 
       <dependency>
