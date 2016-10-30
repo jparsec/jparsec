@@ -23,6 +23,7 @@ import static org.codehaus.jparsec.examples.java.parser.TypeLiteralParser.TYPE_L
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
@@ -54,8 +55,6 @@ import org.codehaus.jparsec.examples.java.ast.statement.ThrowStatement;
 import org.codehaus.jparsec.examples.java.ast.statement.TryStatement;
 import org.codehaus.jparsec.examples.java.ast.statement.VarStatement;
 import org.codehaus.jparsec.examples.java.ast.statement.WhileStatement;
-import org.codehaus.jparsec.functors.Unary;
-import org.codehaus.jparsec.misc.Mapper;
 
 /**
  * Parses a statement.
@@ -75,12 +74,14 @@ public final class StatementParser {
   static final Parser<Modifier> SYSTEM_MODIFIER = systemModifier(SystemModifier.values());
   
   static Parser<Annotation> annotation(Parser<Expression> expr) {
-    Parser<Annotation.Element> element = Mapper.curry(Annotation.Element.class).sequence(
+    Parser<Annotation.Element> element = Parsers.sequence(
         Terminals.Identifier.PARSER.followedBy(term("=")).atomic().optional(),
-        ExpressionParser.arrayInitializerOrRegularExpression(expr));
-    return Mapper.curry(Annotation.class).sequence(
-        term("@"), TypeLiteralParser.ELEMENT_TYPE_LITERAL,
-        paren(element.sepBy(term(","))).optional());
+        ExpressionParser.arrayInitializerOrRegularExpression(expr),
+        Annotation.Element::new);
+    return Parsers.sequence(
+        term("@").next(TypeLiteralParser.ELEMENT_TYPE_LITERAL),
+        paren(element.sepBy(term(","))).optional(),
+        Annotation::new);
   }
   
   static Parser<Modifier> modifier(Parser<Expression> expr) {
@@ -89,116 +90,134 @@ public final class StatementParser {
   
   static final Parser<Statement> NOP = term(";").retn(NopStatement.instance);
   
-  static final Parser<Unary<Statement>> LABEL =
-      curry(LabelStatement.class).prefix(Terminals.Identifier.PARSER, term(":")).atomic();
+  static final Parser<UnaryOperator<Statement>> LABEL = Terminals.Identifier.PARSER
+      .followedBy(term(":"))
+      .atomic()
+      .map(name -> stmt -> new LabelStatement(name, stmt));
   
-  static final Parser<Statement> BREAK = curry(BreakStatement.class)
-      .sequence(term("break"), Terminals.Identifier.PARSER.optional(), term(";"));
+  static final Parser<Statement> BREAK =
+      between(term("break"), Terminals.Identifier.PARSER.optional(), term(";"))
+          .map(BreakStatement::new);
   
-  static final Parser<Statement> CONTINUE = curry(ContinueStatement.class)
-      .sequence(term("continue"), Terminals.Identifier.PARSER.optional(), term(";"));
+  static final Parser<Statement> CONTINUE =
+      between(term("continue"), Terminals.Identifier.PARSER.optional(), term(";"))
+          .map(ContinueStatement::new);
   
   static Parser<Statement> returnStatement(Parser<Expression> expr) {
-    return curry(ReturnStatement.class)
-        .sequence(term("return"), expr.optional(), term(";"));
+    return between(term("return"), expr.optional(), term(";")).map(ReturnStatement::new);
   }
   
-  static Parser<Statement> blockStatement(Parser<Statement> stmt) {
-    return curry(BlockStatement.class).sequence(term("{"), stmt.many(), term("}"));
+  static Parser<BlockStatement> blockStatement(Parser<Statement> stmt) {
+    return between(term("{"), stmt.many(), term("}")).map(BlockStatement::new);
   }
   
   static Parser<Statement> whileStatement(Parser<Expression> expr, Parser<Statement> stmt) {
-    return curry(WhileStatement.class).sequence(
-        phrase("while ("), expr, term(")"), stmt);
+    return Parsers.sequence(
+        between(phrase("while ("), expr, term(")")), stmt,
+        WhileStatement::new);
   }
   
   static Parser<Statement> doWhileStatement(Parser<Statement> stmt, Parser<Expression> expr) {
-    return curry(DoWhileStatement.class)
-        .sequence(term("do"), stmt, phrase("while ("), expr, phrase(") ;"));
+    return Parsers.sequence(
+        term("do").next(stmt),
+        between(phrase("while ("),  expr, phrase(") ;")),
+        DoWhileStatement::new);
   }
   
   static Parser<Statement> ifStatement(Parser<Expression> expr, Parser<Statement> stmt) {
-    return curry(IfStatement.class)
-        .sequence(phrase("if ("), expr, term(")"), stmt, 
-            Parsers.pair(between(phrase("else if ("), expr, term(")")), stmt).many(),
-            term("else").next(stmt).optional());
+    return Parsers.sequence(
+        between(phrase("if ("), expr, term(")")),
+        stmt, 
+        Parsers.pair(between(phrase("else if ("), expr, term(")")), stmt).many(),
+        term("else").next(stmt).optional(),
+        IfStatement::new);
   }
   
   static Parser<Statement> switchStatement(Parser<Expression> expr, Parser<Statement> stmt) {
-    return curry(SwitchStatement.class)
-        .sequence(phrase("switch ("), expr, phrase(") {"),
+    return Parsers.sequence(
+        between(phrase("switch ("), expr, phrase(") {")),
             Parsers.pair(between(term("case"), expr, term(":")), stmt.optional()).many(),
-            phrase("default :").next(stmt.optional()).optional(), term("}"));
+            phrase("default :").next(stmt.optional()).optional().followedBy(term("}")),
+            SwitchStatement::new);
   }
   
   static Parser<Statement> foreachStatement(Parser<Expression> expr, Parser<Statement> stmt) {
-    return curry(ForeachStatement.class).sequence(
-        phrase("for ("), TypeLiteralParser.TYPE_LITERAL, Terminals.Identifier.PARSER, term(":"),
-        expr, term(")"), stmt);
+    return Parsers.sequence(
+        phrase("for (").next(TypeLiteralParser.TYPE_LITERAL),
+        Terminals.Identifier.PARSER,
+        term(":").next(expr),
+        term(")").next(stmt),
+        ForeachStatement::new);
   }
   
   static Parser<Statement> forStatement(Parser<Expression> expr, Parser<Statement> stmt) {
-    return curry(ForStatement.class).sequence(
-        phrase("for ("), Parsers.or(varStatement(expr), expressionList(expr), NOP),
-        expr.optional(), term(";"), expr.sepBy(term(",")), term(")"),
-        stmt);
+    return Parsers.sequence(
+        phrase("for (").next(Parsers.or(varStatement(expr), expressionList(expr), NOP)),
+        expr.optional(),
+        between(term(";"), expr.sepBy(term(",")), term(")")),
+        stmt,
+        ForStatement::new);
   }
   
   static Parser<Statement> thisCall(Parser<Expression> expr) {
-    return curry(ThisCallStatement.class)
-        .sequence(term("this"), term("("), expr.sepBy(term(",")), term(")"), term(";"));
+    return between(phrase("this ("), expr.sepBy(term(",")), phrase(") ;"))
+        .map(ThisCallStatement::new);
   }
   
   static Parser<Statement> superCall(Parser<Expression> expr) {
-    return curry(SuperCallStatement.class)
-    .sequence(term("super"), term("("), expr.sepBy(term(",")), term(")"), term(";"));
+    return between(phrase("super ("), expr.sepBy(term(",")), phrase(") ;"))
+        .map(SuperCallStatement::new);
   }
   
   static Parser<Statement> varStatement(Parser<Expression> expr) {
     Parser<Expression> initializer =
         term("=").next(ExpressionParser.arrayInitializerOrRegularExpression(expr));
-    Parser<VarStatement.Var> var = Mapper.curry(VarStatement.Var.class).sequence(
-        Terminals.Identifier.PARSER, initializer.optional());
-    return curry(VarStatement.class).sequence(
-        modifier(expr).many(), TypeLiteralParser.TYPE_LITERAL,
-        var.sepBy1(term(",")), term(";"));
+    Parser<VarStatement.Var> var = Parsers.sequence(
+        Terminals.Identifier.PARSER, initializer.optional(), VarStatement.Var::new);
+    return Parsers.sequence(
+        modifier(expr).many(),
+        TypeLiteralParser.TYPE_LITERAL,
+        var.sepBy1(term(",")).followedBy(term(";")),
+        VarStatement::new);
   }
 
   static Parser<Statement> expressionList(Parser<Expression> expr) {
-    return curry(ExpressionListStatement.class).sequence(
-        expr.sepBy1(term(",")), term(";"));
+    return expr.sepBy1(term(",")).followedBy(term(";")).map(ExpressionListStatement::new);
   }
   
   static Parser<Statement> synchronizedBlock(Parser<Statement> stmt) {
-    return curry(SynchronizedBlockStatement.class)
-        .sequence(term("synchronized"), blockStatement(stmt));
+    return term("synchronized").next(blockStatement(stmt)).map(SynchronizedBlockStatement::new);
   }
   
   static Parser<Statement> assertStatement(Parser<Expression> expr) {
-    return curry(AssertStatement.class)
-        .sequence(term("assert"), expr, term(":").next(expr).optional(), term(";"));
+    return Parsers.sequence(
+        term("assert").next(expr), term(":").next(expr).optional().followedBy(term(";")),
+        AssertStatement::new);
   }
   
   static Parser<Statement> expression(Parser<Expression> expr) {
-    return curry(ExpressionStatement.class).sequence(expr, term(";"));
+    return expr.followedBy(term(";")).map(ExpressionStatement::new);
   }
   
   static Parser<ParameterDef> parameter(Parser<Modifier> mod) {
-    return Mapper.curry(ParameterDef.class).sequence(
-      mod.many(), TYPE_LITERAL, term("...").succeeds(), Terminals.Identifier.PARSER);
+    return Parsers.sequence(
+        mod.many(), TYPE_LITERAL, term("...").succeeds(), Terminals.Identifier.PARSER,
+        ParameterDef::new);
   }
   
   static Parser<Statement> tryStatement(Parser<Modifier> mod, Parser<Statement> stmt) {
-    Parser<Statement> block = blockStatement(stmt);
-    return curry(TryStatement.class).sequence(
-        term("try"), block,
-        Mapper.curry(TryStatement.CatchBlock.class).sequence(
-            term("catch"), term("("), parameter(mod), term(")"), block).many(),
-        term("finally").next(block).optional());
+    Parser<BlockStatement> block = blockStatement(stmt);
+    return Parsers.sequence(
+        term("try").next(block),
+        Parsers.sequence(
+            term("catch").next(between(term("("), parameter(mod), term(")"))), block,
+            TryStatement.CatchBlock::new).many(),
+        term("finally").next(block).optional(),
+        TryStatement::new);
   }
   
   static Parser<Statement> throwStatement(Parser<Expression> thrown) {
-    return curry(ThrowStatement.class).sequence(term("throw"), thrown, term(";"));
+    return between(term("throw"), thrown, term(";")).map(ThrowStatement::new);
   }
   
   static Parser<Statement> statement(Parser<Expression> expr) {
@@ -216,9 +235,5 @@ public final class StatementParser {
         expression(expr), NOP).prefix(LABEL).label("statement");
     ref.set(parser);
     return parser;
-  }
-  
-  private static Mapper<Statement> curry(Class<? extends Statement> clazz, Object... curryArgs) {
-    return Mapper.curry(clazz, curryArgs);
   }
 }

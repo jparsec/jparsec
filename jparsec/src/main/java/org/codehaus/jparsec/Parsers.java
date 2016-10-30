@@ -18,17 +18,22 @@ package org.codehaus.jparsec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.BiFunction;
 
 import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Map3;
 import org.codehaus.jparsec.functors.Map4;
 import org.codehaus.jparsec.functors.Map5;
+import org.codehaus.jparsec.functors.Map6;
+import org.codehaus.jparsec.functors.Map7;
+import org.codehaus.jparsec.functors.Map8;
 import org.codehaus.jparsec.functors.Maps;
 import org.codehaus.jparsec.functors.Pair;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
+import org.codehaus.jparsec.functors.Tuples;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
 
@@ -139,14 +144,7 @@ public final class Parsers {
 
   /** Converts a parser of a collection of {@link Token} to a parser of an array of {@code Token}.*/
   static Parser<Token[]> tokens(final Parser<? extends Collection<Token>> parser) {
-    return parser.map(new Map<Collection<Token>, Token[]>() {
-      @Override public Token[] map(Collection<Token> list) {
-        return list.toArray(new Token[list.size()]);
-      }
-      @Override public String toString() {
-        return parser.toString();
-      }
-    });
+    return parser.map(list -> list.toArray(new Token[list.size()]));
   }
   
   /**
@@ -220,15 +218,21 @@ public final class Parsers {
   /**
    * A {@link Parser} that sequentially runs {@code p1} and {@code p2} and collects the results in a
    * {@link Pair} object. Is equivalent to {@link #tuple(Parser, Parser)}.
+   *
+   * @deprecated Prefer to converting to your own object with a lambda.
    */
+  @Deprecated
   public static <A,B> Parser<Pair<A,B>> pair(Parser<? extends A> p1, Parser<? extends B> p2) {
-    return sequence(p1, p2, Maps.<A, B > toPair());
+    return sequence(p1, p2, Pair::new);
   }
 
   /**
    * A {@link Parser} that sequentially runs {@code p1} and {@code p2} and collects the results in a
    * {@link Pair} object. Is equivalent to {@link #pair(Parser, Parser)}.
+   *
+   * @deprecated Prefer to converting to your own object with a lambda.
    */
+  @Deprecated
   public static <A,B> Parser<Pair<A,B>> tuple(Parser<? extends A> p1, Parser<? extends B> p2) {
     return pair(p1, p2);
   }
@@ -236,30 +240,39 @@ public final class Parsers {
   /**
    * A {@link Parser} that sequentially runs 3 parser objects and collects the results in a
    * {@link Tuple3} object.
+   *
+   * @deprecated Prefer to converting to your own object with a lambda.
    */
+  @Deprecated
   public static <A,B,C> Parser<Tuple3<A,B,C>> tuple(
       Parser<? extends A> p1, Parser<? extends B> p2, Parser<? extends C> p3) {
-    return sequence(p1, p2, p3, Maps.<A, B, C > toTuple3());
+    return sequence(p1, p2, p3, Tuple3::new);
   }
 
   /**
    * A {@link Parser} that sequentially runs 4 parser objects and collects the results in a
    * {@link Tuple4} object.
+   *
+   * @deprecated Prefer to converting to your own object with a lambda.
    */
+  @Deprecated
   public static <A,B,C,D> Parser<Tuple4<A,B,C,D>> tuple(
       Parser<? extends A> p1, Parser<? extends B> p2,
       Parser<? extends C> p3, Parser<? extends D> p4) {
-    return sequence(p1, p2, p3, p4, Maps.<A, B, C, D > toTuple4());
+    return sequence(p1, p2, p3, p4, Tuple4::new);
   }
 
   /**
    * A {@link Parser} that sequentially runs 5 parser objects and collects the results in a
    * {@link Tuple5} object.
+   *
+   * @deprecated Prefer to converting to your own object with a lambda.
    */
+  @Deprecated
   public static <A,B,C,D,E> Parser<Tuple5<A,B,C,D,E>> tuple(
       Parser<? extends A> p1, Parser<? extends B> p2, Parser<? extends C> p3,
       Parser<? extends D> p4, Parser<? extends E> p5) {
-    return sequence(p1, p2, p3, p4, p5, Maps.<A, B, C, D, E > toTuple5());
+    return sequence(p1, p2, p3, p4, p5, Tuple5::new);
   }
   
   /**
@@ -321,7 +334,7 @@ public final class Parsers {
    * and transforms the return values using {@code map}.
    */
   public static <A, B, T> Parser<T> sequence(
-      final Parser<A> p1, final Parser<B> p2, final Map2<? super A, ? super B, ? extends T> map) {
+      final Parser<A> p1, final Parser<B> p2, final BiFunction<? super A, ? super B, ? extends T> map) {
     return new Parser<T>() {
       @Override boolean apply(ParseContext ctxt) {
         boolean r1 = p1.apply(ctxt);
@@ -330,7 +343,7 @@ public final class Parsers {
         boolean r2 = p2.apply(ctxt);
         if (!r2) return false;
         B o2 = p2.getReturn(ctxt);
-        ctxt.result = map.map(o1, o2);
+        ctxt.result = map.apply(o1, o2);
         return true;
       }
       @Override public String toString() {
@@ -421,6 +434,132 @@ public final class Parsers {
         if (!r5) return false;
         E o5 = p5.getReturn(ctxt);
         ctxt.result = map.map(o1, o2, o3, o4, o5);
+        return true;
+      }
+      @Override public String toString() {
+        return map.toString();
+      }
+    };
+  }
+
+  /** 
+   * A {@link Parser} that runs 6 parser objects sequentially and transforms the return values
+   * using {@code map}.
+   *
+   * @since 3.0
+   */
+  public static <A, B, C, D, E, F, T> Parser<T> sequence(
+      final Parser<A> p1, final Parser<B> p2, final Parser<C> p3,
+      final Parser<D> p4, final Parser<E> p5, final Parser<F> p6,
+      final Map6<? super A, ? super B, ? super C, ? super D, ? super E, ? super F, ? extends T> map) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        boolean r1 = p1.apply(ctxt);
+        if (!r1) return false;
+        A o1 = p1.getReturn(ctxt);
+        boolean r2 = p2.apply(ctxt);
+        if (!r2) return false;
+        B o2 = p2.getReturn(ctxt);
+        boolean r3 = p3.apply(ctxt);
+        if (!r3) return false;
+        C o3 = p3.getReturn(ctxt);
+        boolean r4 = p4.apply(ctxt);
+        if (!r4) return false;
+        D o4 = p4.getReturn(ctxt);
+        boolean r5 = p5.apply(ctxt);
+        if (!r5) return false;
+        E o5 = p5.getReturn(ctxt);
+        boolean r6 = p6.apply(ctxt);
+        if (!r6) return false;
+        F o6 = p6.getReturn(ctxt);
+        ctxt.result = map.map(o1, o2, o3, o4, o5, o6);
+        return true;
+      }
+      @Override public String toString() {
+        return map.toString();
+      }
+    };
+  }
+
+  /** 
+   * A {@link Parser} that runs 7 parser objects sequentially and transforms the return values
+   * using {@code map}.
+   *
+   * @since 3.0
+   */
+  public static <A, B, C, D, E, F, G, T> Parser<T> sequence(
+      final Parser<A> p1, final Parser<B> p2, final Parser<C> p3,
+      final Parser<D> p4, final Parser<E> p5, final Parser<F> p6, final Parser<G> p7,
+      final Map7<? super A, ? super B, ? super C, ? super D, ? super E, ? super F, ? super G, ? extends T> map) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        boolean r1 = p1.apply(ctxt);
+        if (!r1) return false;
+        A o1 = p1.getReturn(ctxt);
+        boolean r2 = p2.apply(ctxt);
+        if (!r2) return false;
+        B o2 = p2.getReturn(ctxt);
+        boolean r3 = p3.apply(ctxt);
+        if (!r3) return false;
+        C o3 = p3.getReturn(ctxt);
+        boolean r4 = p4.apply(ctxt);
+        if (!r4) return false;
+        D o4 = p4.getReturn(ctxt);
+        boolean r5 = p5.apply(ctxt);
+        if (!r5) return false;
+        E o5 = p5.getReturn(ctxt);
+        boolean r6 = p6.apply(ctxt);
+        if (!r6) return false;
+        F o6 = p6.getReturn(ctxt);
+        boolean r7 = p7.apply(ctxt);
+        if (!r7) return false;
+        G o7 = p7.getReturn(ctxt);
+        ctxt.result = map.map(o1, o2, o3, o4, o5, o6, o7);
+        return true;
+      }
+      @Override public String toString() {
+        return map.toString();
+      }
+    };
+  }
+
+  /** 
+   * A {@link Parser} that runs 7 parser objects sequentially and transforms the return values
+   * using {@code map}.
+   *
+   * @since 3.0
+   */
+  public static <A, B, C, D, E, F, G, H, T> Parser<T> sequence(
+      final Parser<A> p1, final Parser<B> p2, final Parser<C> p3, final Parser<D> p4,
+      final Parser<E> p5, final Parser<F> p6, final Parser<G> p7, final Parser<H> p8,
+      final Map8<? super A, ? super B, ? super C, ? super D, ? super E, ? super F, ? super G, ? super H, ? extends T> map) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        boolean r1 = p1.apply(ctxt);
+        if (!r1) return false;
+        A o1 = p1.getReturn(ctxt);
+        boolean r2 = p2.apply(ctxt);
+        if (!r2) return false;
+        B o2 = p2.getReturn(ctxt);
+        boolean r3 = p3.apply(ctxt);
+        if (!r3) return false;
+        C o3 = p3.getReturn(ctxt);
+        boolean r4 = p4.apply(ctxt);
+        if (!r4) return false;
+        D o4 = p4.getReturn(ctxt);
+        boolean r5 = p5.apply(ctxt);
+        if (!r5) return false;
+        E o5 = p5.getReturn(ctxt);
+        boolean r6 = p6.apply(ctxt);
+        if (!r6) return false;
+        F o6 = p6.getReturn(ctxt);
+        boolean r7 = p7.apply(ctxt);
+        if (!r7) return false;
+        G o7 = p7.getReturn(ctxt);
+        boolean r8 = p8.apply(ctxt);
+        if (!r8) return false;
+        H o8 = p8.getReturn(ctxt);
+        ctxt.result = map.map(o1, o2, o3, o4, o5, o6, o7, o8);
         return true;
       }
       @Override public String toString() {
@@ -730,15 +869,9 @@ public final class Parsers {
     return parsers.toArray(new Parser[parsers.size()]);
   }
 
-  @SuppressWarnings("rawtypes")
-  static final Map2 PREFIX_OPERATOR_MAP2 = prefixOperatorMap2("prefix");
-
-  @SuppressWarnings("rawtypes")
-  static final Map2 POSTFIX_OPERATOR_MAP2 = postfixOperatorMap2("postfix");
-
   /**
    * Non-associative infix operator. Runs {@code p} and then runs {@code op}
-   * and {@code p} optionally. The {@link Map2} objects returned from {@code op}
+   * and {@code p} optionally. The {@link BiFunction} objects returned from {@code op}
    * is applied to the return values of the two {@code this} pattern, if any.
    * <p>
    * {@code infixn(p, op)} is equivalent to {@code p (op p)?} in EBNF.
@@ -747,24 +880,11 @@ public final class Parsers {
    * @return the new Parser object
    */
   static <T> Parser<T> infixn(
-      final Parser<T> p, final Parser<? extends Map2<? super T, ? super T, ? extends T>> op) {
-    return p.next(new Map<T, Parser<T>>() {
-      @Override public Parser<T> map(final T a) {
-        final Parser<T> shift = sequence(op, p,
-            new Map2<Map2<? super T, ? super T, ? extends T>, T, T>() {
-              @Override public T map(Map2<? super T, ? super T, ? extends T> m2, T b) {
-                return m2.map(a, b);
-              }
-              @Override public String toString() {
-                return "shift right operand";
-              }
-            });
+      final Parser<T> p, final Parser<? extends BiFunction<? super T, ? super T, ? extends T>> op) {
+    return p.next(a -> {
+        Parser<T> shift = sequence(op, p, (m2, b) -> m2.apply(a, b));
         return or(shift, constant(a));
-      }
-      @Override public String toString() {
-        return "infixn";
-      }
-    });
+      });
   }
 
   /**
@@ -780,26 +900,11 @@ public final class Parsers {
    * @return the new Parser object
    */
    static <T> Parser<T> infixl(
-       Parser<T> p, Parser<? extends Map2<? super T, ? super T, ? extends T>> op) {
-    @SuppressWarnings("unchecked")
-    Parser<Map<T, T>> opAndRhs = sequence(op, p, MAP_OPERATOR_AND_RHS_TO_CLOSURE);
-    final Parser<List<Map<T, T>>> afterFirstOperand = opAndRhs.many();
-    Map<T, Parser<T>> next = new Map<T, Parser<T>>() {
-      @Override public Parser<T> map(final T first) {
-        return afterFirstOperand.map(new Map<List<Map<T, T>>, T>() {
-          @Override public T map(List<Map<T, T>> maps) {
-            return applyInfixOperators(first, maps);
-          }
-          @Override public String toString() {
-            return "reduce";
-          }
-        });
-      }
-      @Override public String toString() {
-        return "infixl";
-      }
-    };
-    return p.next(next);
+       Parser<T> p, Parser<? extends BiFunction<? super T, ? super T, ? extends T>> op) {
+    return p.next(first ->
+        sequence(op, p, fromOperatorAndRhsToClosure())
+            .many()
+            .map(maps -> applyInfixOperators(first, maps)));
   }
 
   /**
@@ -817,66 +922,47 @@ public final class Parsers {
    */
   @SuppressWarnings("unchecked")
   static <T> Parser<T> infixr(
-      Parser<T> p, Parser<? extends Map2<? super T, ? super T, ? extends T>> op) {
-    Parser<Rhs<T>> rhs = sequence(op, p, INFIXR_OPERATOR_MAP2);
+      Parser<T> p, Parser<? extends BiFunction<? super T, ? super T, ? extends T>> op) {
+    Parser<Rhs<T>> rhs = sequence(op, p, toInfixRhs());
     return sequence(p, rhs.many(), APPLY_INFIXR_OPERATORS);
   }
 
-  private static <T> Map2<List<? extends Map<? super T, ? extends T>>, T, T> prefixOperatorMap2(
-      final String name) {
-    return new Map2<List<? extends Map<? super T, ? extends T>>, T, T>() {
-      @Override public T map(List<? extends Map<? super T, ? extends T>> ops, T a) {
-        return applyPrefixOperators(a, ops);
-      }
-      @Override public String toString() {
-        return name;
-      }
-    };
+  static <T> BiFunction<List<? extends Function<? super T, ? extends T>>, T, T> prefixOperatorBiFunction() {
+    return (ops, a) -> applyPrefixOperators(a, ops);
   }
 
-  private static <T> T applyInfixOperators(T initialValue, List<Map<T, T>> maps) {
+  private static <T> T applyInfixOperators(
+      T initialValue, List<? extends Function<? super T, ? extends T>> functions) {
     T result = initialValue;
-    for (Map<T, T> map : maps) {
-      result = map.map(result);
+    for (Function<? super T, ? extends T> function : functions) {
+      result = function.apply(result);
     }
     return result;
   }
 
   private static <T> T applyPrefixOperators(
-      T a, final List<? extends Map<? super T, ? extends T>> ms) {
+      T a, List<? extends Function<? super T, ? extends T>> ms) {
     for (int i = ms.size() - 1; i >= 0; i--) {
-      Map<? super T, ? extends T> m = ms.get(i);
-      a = m.map(a);
+      Function<? super T, ? extends T> m = ms.get(i);
+      a = m.apply(a);
     }
     return a;
   }
 
-  private static <T> Map2<T, List<? extends Map<? super T, ? extends T>>, T> postfixOperatorMap2(
-      final String name) {
-    return new Map2<T, List<? extends Map<? super T, ? extends T>>, T>() {
-      @Override public T map(T a, List<? extends Map<? super T, ? extends T>> ops) {
-        return applyPostfixOperators(a, ops);
-      }
-      @Override public String toString() {
-        return name;
-      }
-    };
-  }
-
-  private static <T> T applyPostfixOperators(
-      T a, final Iterable<? extends Map<? super T, ? extends T>> ms) {
-    for (Map<? super T, ? extends T> m : ms) {
-      a = m.map(a);
+  static <T> T applyPostfixOperators(
+      T a, Iterable<? extends Function<? super T, ? extends T>> ms) {
+    for (Function<? super T, ? extends T> m : ms) {
+      a = m.apply(a);
     }
     return a;
   }
 
   // 1+ 1+ 1+ ..... 1
   private static final class Rhs<T> {
-    final Map2<? super T, ? super T, ? extends T> op;
+    final BiFunction<? super T, ? super T, ? extends T> op;
     final T rhs;
 
-    Rhs(Map2<? super T, ? super T, ? extends T> op, T rhs) {
+    Rhs(BiFunction<? super T, ? super T, ? extends T> op, T rhs) {
       this.op = op;
       this.rhs = rhs;
     }
@@ -886,61 +972,30 @@ public final class Parsers {
     }
   }
 
-  @SuppressWarnings("rawtypes")
-  private static final Map2 INFIXR_OPERATOR_MAP2 = toInfixRhs();
-
-  private static <T> Map2<Map2<? super T, ? super T, ? extends T>, T, Rhs<T>> toInfixRhs() {
-    return new Map2<Map2<? super T, ? super T, ? extends T>, T, Rhs<T>>() {
-      @Override public Rhs<T> map(Map2<? super T, ? super T, ? extends T> m2, T b) {
-        return new Rhs<T>(m2, b);
-      }
-      @Override public String toString() {
-        return "operator and right operand";
-      }
-    };
+  @SuppressWarnings("unchecked")
+  private static <T> BiFunction<BiFunction<? super T, ? super T, ? extends T>, T, Rhs<T>> toInfixRhs() {
+    return Rhs::new;
   }
 
   @SuppressWarnings("rawtypes")
-  private static final Map2 APPLY_INFIXR_OPERATORS = applyInfixrOperators();
+  private static final BiFunction APPLY_INFIXR_OPERATORS = applyInfixrOperators();
 
-  private static final <T> Map2<T, List<Rhs<T>>, T> applyInfixrOperators() {
-    return new Map2<T, List<Rhs<T>>, T>() {
-      @Override public T map(final T first, final List<Rhs<T>> rhss) {
+  private static final <T> BiFunction<T, List<Rhs<T>>, T> applyInfixrOperators() {
+    return (first, rhss) -> {
         if (rhss.isEmpty())
           return first;
         int lastIndex = rhss.size() - 1;
         T o2 = rhss.get(lastIndex).rhs;
         for (int i = lastIndex; i > 0; i--) {
           T o1 = rhss.get(i - 1).rhs;
-          o2 = rhss.get(i).op.map(o1, o2);
+          o2 = rhss.get(i).op.apply(o1, o2);
         }
-        return rhss.get(0).op.map(first, o2);
-      }
-      @Override public String toString() {
-        return "infixr";
-      }
-    };
+        return rhss.get(0).op.apply(first, o2);
+      };
   }
 
-  @SuppressWarnings("rawtypes")
-  static final Map2 MAP_OPERATOR_AND_RHS_TO_CLOSURE = fromOperatorAndRhsToClosure();
-
-  private static <A, B, R> Map2<Map2<A, B, R>, B, Map<A, R>> fromOperatorAndRhsToClosure() {
-    return new Map2<Map2<A, B, R>, B, Map<A, R>>() {
-      @Override public Map<A, R> map(final Map2<A, B, R> op, final B b) {
-        return new Map<A, R>() {
-          @Override public R map(A a) {
-            return op.map(a, b);
-          }
-          @Override public String toString() {
-            return "reduce left operand";
-          }
-        };
-      }
-      @Override public String toString() {
-        return "operator and right operand";
-      }
-    };
+  private static <A, B, R> BiFunction<BiFunction<A, B, R>, B, Function<A, R>> fromOperatorAndRhsToClosure() {
+    return (op, b) -> a -> op.apply(a, b);
   }
   
   private Parsers() {}

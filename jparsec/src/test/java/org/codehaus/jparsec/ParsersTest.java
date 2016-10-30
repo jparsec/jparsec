@@ -11,10 +11,10 @@ import static org.junit.Assert.assertSame;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
 
 import org.codehaus.jparsec.Parser.Mode;
 import org.codehaus.jparsec.easymock.BaseMockTest;
-import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Map3;
 import org.codehaus.jparsec.functors.Map4;
 import org.codehaus.jparsec.functors.Map5;
@@ -487,11 +487,11 @@ public class ParsersTest extends BaseMockTest {
     assertEquals("foo", Parsers.unexpected("foo").toString());
   }
   
-  @Mock Map2<Character, Character, Integer> map2;
+  @Mock BiFunction<Character, Character, Integer> map2;
 
   @Test
   public void testSequence_withMap2() {
-    expect(map2.map('a', 'b')).andReturn(1);
+    expect(map2.apply('a', 'b')).andReturn(1);
     replay();
     Parser<Integer> parser = Parsers.sequence(isChar('a'), isChar('b'), map2);
     assertEquals(map2.toString(), parser.toString());

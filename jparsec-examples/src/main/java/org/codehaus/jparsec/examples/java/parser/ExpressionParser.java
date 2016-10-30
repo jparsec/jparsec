@@ -20,6 +20,8 @@ import static org.codehaus.jparsec.examples.java.parser.TerminalParser.phrase;
 import static org.codehaus.jparsec.examples.java.parser.TerminalParser.term;
 
 import java.util.List;
+import java.util.function.BinaryOperator;
+import java.util.function.UnaryOperator;
 
 import org.codehaus.jparsec.OperatorTable;
 import org.codehaus.jparsec.Parser;
@@ -51,11 +53,6 @@ import org.codehaus.jparsec.examples.java.ast.expression.ScientificNumberLiteral
 import org.codehaus.jparsec.examples.java.ast.expression.StringLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.SuperExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.ThisExpression;
-import org.codehaus.jparsec.examples.java.ast.type.ArrayTypeLiteral;
-import org.codehaus.jparsec.examples.java.ast.type.TypeLiteral;
-import org.codehaus.jparsec.functors.Binary;
-import org.codehaus.jparsec.functors.Unary;
-import org.codehaus.jparsec.misc.Mapper;
 
 /**
  * Parses java expression.
@@ -64,10 +61,11 @@ import org.codehaus.jparsec.misc.Mapper;
  */
 public final class ExpressionParser {
 
-  static Parser<Binary<Expression>> conditional(Parser<Expression> consequence) {
+  static Parser<BinaryOperator<Expression>> conditional(Parser<Expression> consequence) {
     // "? consequence :" can be think of as a right associative infix operator.
     // consequence can be the lazy expression, which is everything
-    return curry(ConditionalExpression.class).infix(term("?"), consequence, term(":"));
+    return consequence.between(term("?"), term(":"))
+        .map(cons -> (cond, alt) -> new ConditionalExpression(cond, cons, alt));
   }
   
   static final Parser<Expression> NULL = term("null").retn(NullExpression.instance);
@@ -77,75 +75,68 @@ public final class ExpressionParser {
    * depending on whether there's an expression following.
    */
   static final Parser<Expression> castOrExpression(Parser<Expression> expr) {
-    return curry(CastExpression.class)
-        .sequence(term("("), TypeLiteralParser.TYPE_LITERAL, term(")"), expr)
-        .or(paren(expr));
+    Parser<Expression> explicitCast =
+        Parsers.sequence(paren(TypeLiteralParser.TYPE_LITERAL), expr, CastExpression::new);
+    return explicitCast.or(paren(expr));
   }
   
-  static final Parser<Unary<Expression>> INSTANCE_OF = curry(InstanceOfExpression.class)
-      .postfix(term("instanceof"), TypeLiteralParser.TYPE_LITERAL);
+  static final Parser<UnaryOperator<Expression>> INSTANCE_OF =
+      term("instanceof").next(TypeLiteralParser.TYPE_LITERAL)
+          .map(t -> e -> new InstanceOfExpression(e, t));
   
-  static final Parser<Unary<Expression>> QUALIFIED_EXPR =
-      curry(QualifiedExpression.class).postfix(term("."), Terminals.Identifier.PARSER);
+  static final Parser<UnaryOperator<Expression>> QUALIFIED_EXPR =
+      term(".").next(Terminals.Identifier.PARSER).map(n -> e -> new QualifiedExpression(e, n));
 
-  static Parser<Unary<Expression>> subscript(Parser<Expression> expr) {
-    return curry(ArraySubscriptExpression.class).postfix(term("["), expr, term("]"));
+  static Parser<UnaryOperator<Expression>> subscript(Parser<Expression> expr) {
+    return expr.between(term("["), term("]")).map(i -> a -> new ArraySubscriptExpression(a, i));
   }
   
-  static Parser<Unary<Expression>> qualifiedMethodCall(Parser<Expression> arg) {
-    return curry(MethodCallExpression.class).postfix(
-        term("."), TypeLiteralParser.optionalTypeArgs(TypeLiteralParser.TYPE_LITERAL),
-        Terminals.Identifier.PARSER, argumentList(arg));
+  static Parser<UnaryOperator<Expression>> qualifiedMethodCall(Parser<Expression> arg) {
+    return Parsers.sequence(
+        term(".").next(TypeLiteralParser.optionalTypeArgs(TypeLiteralParser.TYPE_LITERAL)),
+        Terminals.Identifier.PARSER,
+        argumentList(arg),
+        (t, m, a) -> q -> new MethodCallExpression(q, t, m, a));
   }
   
-  static Parser<Unary<Expression>> qualifiedNew(Parser<Expression> arg, Parser<DefBody> body) {
-    return curry(NewExpression.class).postfix(
-        phrase(". new"), TypeLiteralParser.ELEMENT_TYPE_LITERAL,
-        argumentList(arg), body.optional());
+  static Parser<UnaryOperator<Expression>> qualifiedNew(Parser<Expression> arg, Parser<DefBody> body) {
+    return Parsers.sequence(
+        phrase(". new").next(TypeLiteralParser.ELEMENT_TYPE_LITERAL),
+        argumentList(arg),
+        body.optional(),
+        (t, a, b) -> q -> new NewExpression(q, t, a, b));
   }
   
   static Parser<Expression> simpleMethodCall(Parser<Expression> arg) {
-    return new Mapper<Expression>() {
-      @SuppressWarnings("unused")
-      Expression map(String name, List<Expression> args) {
-        return new MethodCallExpression(
-            null, TypeLiteralParser.EMPTY_TYPE_ARGUMENT_LIST, name, args);
-      }
-    }.sequence(Terminals.Identifier.PARSER, argumentList(arg));
+    return Parsers.sequence(
+        Terminals.Identifier.PARSER, argumentList(arg),
+        (name, args) ->
+            new MethodCallExpression(null, TypeLiteralParser.EMPTY_TYPE_ARGUMENT_LIST, name, args));
   }
   
   // new a class instance
   static Parser<Expression> simpleNewExpression(Parser<Expression> arg, Parser<DefBody> body) {
-    return new Mapper<Expression>() {
-      @SuppressWarnings("unused")
-      Expression map(TypeLiteral type, List<Expression> args, DefBody defBody) {
-        return new NewExpression(null, type, args, defBody);
-      }
-    }.sequence(term("new"), TypeLiteralParser.ELEMENT_TYPE_LITERAL,
-        argumentList(arg), body.optional());
+    return Parsers.sequence(
+        term("new").next(TypeLiteralParser.ELEMENT_TYPE_LITERAL),
+        argumentList(arg),
+        body.optional(),
+        (type, args, defBody) -> new NewExpression(null, type, args, defBody));
   }
   
   // new int[5]
   static Parser<Expression> newArrayWithExplicitLength(Parser<Expression> expr) {
-    return new Mapper<Expression>() {
-      @SuppressWarnings("unused")
-      Expression map(TypeLiteral type, Expression length, List<Expression> values) {
-        return new NewArrayExpression(type, length, values);
-      }
-    }.sequence(term("new"), TypeLiteralParser.TYPE_LITERAL,
-        term("["), expr, term("]"),
-        between(term("{"), expr.sepBy(term(",")), term("}")).optional());
+    return Parsers.sequence(term("new").next(TypeLiteralParser.TYPE_LITERAL),
+        expr.between(term("["), term("]")),
+        between(term("{"), expr.sepBy(term(",")), term("}")).optional(),
+        NewArrayExpression::new);
   }
   
   // new int[] {...}
   static Parser<Expression> newArrayWithoutExplicitLength(Parser<Expression> expr) {
-    return new Mapper<Expression>() {
-      @SuppressWarnings("unused")
-      Expression map(ArrayTypeLiteral type, List<Expression> values) {
-        return new NewArrayExpression(type.elementType, null, values);
-      }
-    }.sequence(term("new"), TypeLiteralParser.ARRAY_TYPE_LITERAL,
-        term("{"), expr.sepBy(term(",")), term("}"));
+    return Parsers.sequence(
+        term("new").next(TypeLiteralParser.ARRAY_TYPE_LITERAL),
+        between(term("{"), expr.sepBy(term(",")), term("}")),
+        (type, values) -> new NewArrayExpression(type.elementType, null, values));
   }
   
   static <T> Parser<T> paren(Parser<T> parser) {
@@ -156,16 +147,17 @@ public final class ExpressionParser {
     return paren(arg.sepBy(term(",")));
   }
   
-  static final Parser<Expression> THIS = curry(ThisExpression.class).sequence(
-      Terminals.Identifier.PARSER.followedBy(term(".")).many(), term("this"));
+  static final Parser<Expression> THIS = Terminals.Identifier.PARSER.followedBy(term(".")).many()
+      .followedBy(term("this"))
+      .map(ThisExpression::new);
   
   static final Parser<Expression> SUPER = term("super").<Expression>retn(new SuperExpression());
   
-  static final Parser<Expression> IDENTIFIER =
-      curry(Identifier.class).sequence(Terminals.Identifier.PARSER);
+  static final Parser<Expression> IDENTIFIER = Terminals.Identifier.PARSER.map(Identifier::new);
   
-  static final Parser<Expression> CLASS_LITERAL = curry(ClassLiteral.class)
-      .sequence(TypeLiteralParser.TYPE_LITERAL, phrase(". class"));
+  static final Parser<Expression> CLASS_LITERAL = TypeLiteralParser.TYPE_LITERAL
+      .followedBy(phrase(". class"))
+      .map(ClassLiteral::new);
   
   static final Parser<Expression> INTEGER_LITERAL =
       Parsers.<Expression>tokenType(IntegerLiteral.class, "integer literal");
@@ -173,11 +165,9 @@ public final class ExpressionParser {
   static final Parser<Expression> DECIMAL_LITERAL =
       Parsers.<Expression>tokenType(DecimalPointNumberLiteral.class, "decimal number literal");
   
-  static final Parser<Expression> STRING_LITERAL = 
-      curry(StringLiteral.class).sequence(Terminals.StringLiteral.PARSER);
+  static final Parser<Expression> STRING_LITERAL = Terminals.StringLiteral.PARSER.map(StringLiteral::new);
   
-  static final Parser<Expression> CHAR_LITERAL =
-      curry(CharLiteral.class).sequence(Terminals.CharLiteral.PARSER);
+  static final Parser<Expression> CHAR_LITERAL = Terminals.CharLiteral.PARSER.map(CharLiteral::new);
   
   static final Parser<Expression> BOOLEAN_LITERAL = Parsers.or(
       term("true").<Expression>retn(new BooleanLiteral(true)),
@@ -257,27 +247,22 @@ public final class ExpressionParser {
   }
   
   public static Parser<Expression> arrayInitializer(Parser<Expression> expr) {
-    return curry(ArrayInitializer.class)
-        .sequence(term("{"), expr.sepEndBy(term(",")), term("}"));
+    return expr.sepEndBy(term(",")).between(term("{"), term("}")).map(ArrayInitializer::new);
   }
 
   static Parser<Expression> arrayInitializerOrRegularExpression(Parser<Expression> expr) {
     return arrayInitializer(expr).or(expr);
   }
   
-  private static Parser<Binary<Expression>> binary(Operator op) {
-    return term(op.toString()).next(curry(BinaryExpression.class, op).binary());
+  private static Parser<BinaryOperator<Expression>> binary(Operator op) {
+    return term(op.toString()).retn((l, r) -> new BinaryExpression(l, op, r));
   }
   
-  private static Parser<Unary<Expression>> prefix(Operator op) {
-    return term(op.toString()).next(curry(PrefixUnaryExpression.class, op).unary());
+  private static Parser<UnaryOperator<Expression>> prefix(Operator op) {
+    return term(op.toString()).retn(e -> new PrefixUnaryExpression(op, e));
   }
   
-  private static Parser<Unary<Expression>> postfix(Operator op) {
-    return term(op.toString()).next(curry(PostfixUnaryExpression.class, op).unary());
-  }
-  
-  static Mapper<Expression> curry(Class<? extends Expression> clazz, Object... args) {
-    return Mapper.curry(clazz, args);
+  private static Parser<UnaryOperator<Expression>> postfix(Operator op) {
+    return term(op.toString()).retn(e -> new PostfixUnaryExpression(e, op));
   }
 }

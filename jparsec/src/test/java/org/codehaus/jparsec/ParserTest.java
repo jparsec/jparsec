@@ -16,12 +16,12 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.codehaus.jparsec.Parser.Mode;
 import org.codehaus.jparsec.easymock.BaseMockTest;
 import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.functors.Maps;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +35,7 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class ParserTest extends BaseMockTest {
   
-  private static final Parser<Integer> INTEGER = Scanners.INTEGER.source().map(Maps.TO_INTEGER);
+  private static final Parser<Integer> INTEGER = Scanners.INTEGER.source().map(Integer::valueOf);
   private static final Parser<String> FOO = constant("foo");
   private static final Parser<String> FAILURE = Parsers.fail("failure");
   private static final Parser<Void> COMMA = Scanners.isChar(',');
@@ -97,11 +97,11 @@ public class ParserTest extends BaseMockTest {
     assertFailure(mode, INTEGER.withSource(), "a", 1, 1);
   }
   
-  @Mock Map<Object, Parser<String>> next;
+  @Mock Function<Object, Parser<String>> next;
 
   @Test
   public void testNext_withMap() {
-    expect(next.map(1)).andReturn(FOO);
+    expect(next.apply(1)).andReturn(FOO);
     replay();
     assertEquals("foo", INTEGER.next(next).parse("1", mode));
     assertEquals(next.toString(), INTEGER.next(next).toString());
@@ -115,7 +115,7 @@ public class ParserTest extends BaseMockTest {
 
   @Test
   public void testNext_nextParserFails() {
-    expect(next.map(123)).andReturn(FAILURE);
+    expect(next.apply(123)).andReturn(FAILURE);
     replay();
     assertFailure(mode, INTEGER.next(next), "123", 1, 4, "failure");
   }
@@ -347,7 +347,7 @@ public class ParserTest extends BaseMockTest {
 
   @Test
   public void testIfElse_withNext() {
-    expect(next.map('b')).andReturn(FOO);
+    expect(next.apply('b')).andReturn(FOO);
     replay();
     assertEquals("foo", areChars("ab").ifelse(next, constant("bar")).parse("ab", mode));
   }
@@ -464,11 +464,11 @@ public class ParserTest extends BaseMockTest {
     assertEquals((Object) 123, INTEGER.between(isChar('('), isChar(')')).parse("(123)", mode));
   }
   
-  @Mock Map<Integer, String> map;
+  @Mock Function<Integer, String> map;
 
   @Test
   public void testMap() {
-    expect(map.map(12)).andReturn("foo");
+    expect(map.apply(12)).andReturn("foo");
     replay();
     assertEquals("foo", INTEGER.map(map).parse("12", mode));
     assertEquals(map.toString(), INTEGER.map(map).toString());
@@ -597,24 +597,22 @@ public class ParserTest extends BaseMockTest {
     assertEquals("[]", EmptyListParser.instance().toString());
   }
   
-  @Mock Map<Integer, Integer> unaryOp;
+  @Mock Function<Integer, Integer> unaryOp;
 
   @Test
   public void testPrefix_noOperator() {
     replay();
     Parser<Integer> parser = INTEGER.prefix(isChar('-').retn(unaryOp));
-    assertEquals("prefix", parser.toString());
     assertEquals((Object) 123, parser.parse("123", mode));
   }
 
   @Test
   public void testPrefix() {
-    expect(unaryOp.map(1)).andReturn(-1);
-    expect(unaryOp.map(-1)).andReturn(1);
-    expect(unaryOp.map(1)).andReturn(-1);
+    expect(unaryOp.apply(1)).andReturn(-1);
+    expect(unaryOp.apply(-1)).andReturn(1);
+    expect(unaryOp.apply(1)).andReturn(-1);
     replay();
     Parser<Integer> parser = INTEGER.prefix(isChar('-').retn(unaryOp));
-    assertEquals("prefix", parser.toString());
     assertEquals(Integer.valueOf(-1), parser.parse("---1", mode));
   }
 
@@ -622,36 +620,32 @@ public class ParserTest extends BaseMockTest {
   public void testPostfix_noOperator() {
     replay();
     Parser<Integer> parser = INTEGER.postfix(isChar('^').retn(unaryOp));
-    assertEquals("postfix", parser.toString());
     assertEquals((Object) 123, parser.parse("123", mode));
   }
 
   @Test
   public void testPostfix() {
-    expect(unaryOp.map(2)).andReturn(4);
-    expect(unaryOp.map(4)).andReturn(256);
+    expect(unaryOp.apply(2)).andReturn(4);
+    expect(unaryOp.apply(4)).andReturn(256);
     replay();
     Parser<Integer> parser = INTEGER.postfix(isChar('^').retn(unaryOp));
-    assertEquals("postfix", parser.toString());
     assertEquals((Object) 256, parser.parse("2^^", mode));
   }
   
-  @Mock Map2<Integer, Integer, Integer> binaryOp;
+  @Mock BiFunction<Integer, Integer, Integer> binaryOp;
 
   @Test
   public void testInfixn_noOperator() {
     replay();
     Parser<Integer> parser = INTEGER.infixn(isChar('+').retn(binaryOp));
-    assertEquals("infixn", parser.toString());
     assertEquals((Object) 1, parser.parse("1", mode));
   }
 
   @Test
   public void testInfixn() {
-    expect(binaryOp.map(1, 2)).andReturn(3);
+    expect(binaryOp.apply(1, 2)).andReturn(3);
     replay();
     Parser<Integer> parser = INTEGER.infixn(isChar('+').retn(binaryOp));
-    assertEquals("infixn", parser.toString());
     assertParser(mode, parser, "1+2+3", 3, "+3");
   }
 
@@ -659,17 +653,15 @@ public class ParserTest extends BaseMockTest {
   public void testInfixl_noOperator() {
     replay();
     Parser<Integer> parser = INTEGER.infixl(isChar('+').retn(binaryOp));
-    assertEquals("infixl", parser.toString());
     assertEquals((Object) 1, parser.parse("1", mode));
   }
 
   @Test
   public void testInfixl() {
-    expect(binaryOp.map(4, 1)).andReturn(3);
-    expect(binaryOp.map(3, 2)).andReturn(1);
+    expect(binaryOp.apply(4, 1)).andReturn(3);
+    expect(binaryOp.apply(3, 2)).andReturn(1);
     replay();
     Parser<Integer> parser = INTEGER.infixl(isChar('-').retn(binaryOp));
-    assertEquals("infixl", parser.toString());
     assertEquals((Object) 1, parser.parse("4-1-2", mode));
   }
 
@@ -683,17 +675,15 @@ public class ParserTest extends BaseMockTest {
   public void testInfixr_noOperator() {
     replay();
     Parser<Integer> parser = INTEGER.infixr(isChar('+').retn(binaryOp));
-    assertEquals("infixr", parser.toString());
     assertEquals((Object) 1, parser.parse("1", mode));
   }
 
   @Test
   public void testInfixr() {
-    expect(binaryOp.map(1, 2)).andReturn(12);
-    expect(binaryOp.map(4, 12)).andReturn(412);
+    expect(binaryOp.apply(1, 2)).andReturn(12);
+    expect(binaryOp.apply(4, 12)).andReturn(412);
     replay();
     Parser<Integer> parser = INTEGER.infixr(string("->").retn(binaryOp));
-    assertEquals("infixr", parser.toString());
     assertEquals((Object) 412, parser.parse("4->1->2", mode));
   }
 

@@ -15,13 +15,22 @@
  *****************************************************************************/
 package org.codehaus.jparsec.functors;
 
+import java.util.function.Function;
+
 /**
  * Maps object of type {@code From} to an object of type {@code To}.
- * 
+ *
+ * @deprecated Use {@link java.util.function.Function} instead.
  * @author Ben Yu
  */
-public interface Map<From, To> {
+@Deprecated
+@FunctionalInterface
+public interface Map<From, To> extends Function<From, To> {
   
   /** Maps {@code from} to the target object. */
   To map(From from);
+
+  @Override default public To apply(From from) {
+    return map(from);
+  }
 }

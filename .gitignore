@@ -19,3 +19,5 @@ bin/
 *.zip
 ErrorLogs/
 testResults/
+
+uk.mdr

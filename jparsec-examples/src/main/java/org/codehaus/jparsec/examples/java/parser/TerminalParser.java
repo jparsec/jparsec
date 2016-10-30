@@ -15,8 +15,6 @@
  *****************************************************************************/
 package org.codehaus.jparsec.examples.java.parser;
 
-import static org.codehaus.jparsec.misc.Mapper.skip;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,11 +103,11 @@ public final class TerminalParser {
     if (name.equals("<<") || name.equals(">>>")) {
       return adjacent(name);
     }
-    return skip(TERMS.token(name));
+    return TERMS.token(name);
   }
   
   static Parser<?> oneOf(String... names) {
-    return skip(TERMS.token(names));
+    return TERMS.token(names);
   }
   
   static <T> T parse(Parser<T> parser, String source) {
@@ -121,6 +119,6 @@ public final class TerminalParser {
   }
   
   public static Parser<?> phrase(String phrase) {
-    return skip(TERMS.phrase(phrase.split("\\s+")));
+    return TERMS.phrase(phrase.split("\\s+"));
   }
 }

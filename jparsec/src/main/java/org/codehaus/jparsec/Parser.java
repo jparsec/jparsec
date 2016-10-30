@@ -20,6 +20,8 @@ import java.nio.CharBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.codehaus.jparsec.error.ParserException;
 import org.codehaus.jparsec.functors.Map;
@@ -67,7 +69,7 @@ public abstract class Parser<T> {
    * <p>For example, the following is a recursive grammar for a simple calculator: <pre>   {@code
    *   Terminals terms = Terminals.operators("(", ")", "+", "-");
    *   Parser.Reference<Integer> ref = Parser.newReference();
-   *   Parser<Integer> literal = Terminals.IntegerLiteral.PARSER.map(new Map<String, Integer>() {
+   *   Parser<Integer> literal = Terminals.IntegerLiteral.PARSER.map(new Function<String, Integer>() {
    *      ...
    *      return Integer.parseInt(s);
    *   });
@@ -170,7 +172,7 @@ public abstract class Parser<T> {
    * to be executed as the next step.
    */
   public final <To> Parser<To> next(
-      final Map<? super T, ? extends Parser<? extends To>> map) {
+      final Function<? super T, ? extends Parser<? extends To>> map) {
     return new Parser<To>() {
       @Override boolean apply(ParseContext ctxt) {
         return Parser.this.apply(ctxt) && runNext(ctxt);
@@ -180,7 +182,7 @@ public abstract class Parser<T> {
       }
       private boolean runNext(ParseContext state) {
         T from = Parser.this.getReturn(state);
-        return map.map(from).apply(state);
+        return map.apply(from).apply(state);
       }
     };
   }
@@ -293,12 +295,12 @@ public abstract class Parser<T> {
   /**
    * A {@link Parser} that runs {@code this} parser and transforms the return value using {@code map}.
    */
-  public final <R> Parser<R> map(final Map<? super T, ? extends R> map) {
+  public final <R> Parser<R> map(final Function<? super T, ? extends R> map) {
     return new Parser<R>() {
       @Override boolean apply(final ParseContext ctxt) {
         final boolean r = Parser.this.apply(ctxt);
         if (r) {
-          ctxt.result = map.map(Parser.this.getReturn(ctxt));
+          ctxt.result = map.apply(Parser.this.getReturn(ctxt));
         }
         return r;
       }
@@ -318,8 +320,8 @@ public abstract class Parser<T> {
   }
 
   /**
-   * {@code p.optional()} is equivalent to {@code p?} in EBNF. {@code null} is the result when {@code this} fails with
-   * no partial match.
+   * {@code p.optional()} is equivalent to {@code p?} in EBNF. {@code null} is the result when
+   * {@code this} fails with no partial match.
    */
   public final Parser<T> optional() {
     return Parsers.or(this, Parsers.<T>always());
@@ -410,14 +412,14 @@ public abstract class Parser<T> {
    * A {@link Parser} that runs {@code consequence} if {@code this} succeeds, or {@code alternative} otherwise.
    */
   public final <R> Parser<R> ifelse(Parser<? extends R> consequence, Parser<? extends R> alternative) {
-    return ifelse(Maps.constant(consequence), alternative);
+    return ifelse(__ -> consequence, alternative);
   }
 
   /**
    * A {@link Parser} that runs {@code consequence} if {@code this} succeeds, or {@code alternative} otherwise.
    */
   public final <R> Parser<R> ifelse(
-      final Map<? super T, ? extends Parser<? extends R>> consequence,
+      final Function<? super T, ? extends Parser<? extends R>> consequence,
       final Parser<? extends R> alternative) {
     return new Parser<R>() {
       @Override boolean apply(ParseContext ctxt) {
@@ -425,7 +427,7 @@ public abstract class Parser<T> {
         final int step = ctxt.step;
         final int at = ctxt.at;
         if (ctxt.withErrorSuppressed(Parser.this)) {
-          Parser<? extends R> parser = consequence.map(Parser.this.getReturn(ctxt));
+          Parser<? extends R> parser = consequence.apply(Parser.this.getReturn(ctxt));
           return parser.apply(ctxt);
         }
         ctxt.set(step, at, ret);
@@ -497,13 +499,9 @@ public abstract class Parser<T> {
    */
   public final Parser<List<T>> sepBy1(Parser<?> delim) {
     final Parser<T> afterFirst = delim.asDelimiter().next(this);
-    Map<T, Parser<List<T>>> binder = new Map<T, Parser<List<T>>>() {
-      @Override public Parser<List<T>> map(T firstValue) {
-        return new RepeatAtLeastParser<T>(
-            afterFirst, 0, ListFactory.arrayListFactoryWithFirstElement(firstValue));
-      }
-    };
-    return next(binder);
+    return next((Function<T, Parser<List<T>>>) firstValue ->
+        new RepeatAtLeastParser<T>(
+            afterFirst, 0, ListFactory.arrayListFactoryWithFirstElement(firstValue)));
   }
 
   /**
@@ -541,12 +539,8 @@ public abstract class Parser<T> {
    * <p>The return values are collected in a {@link List}.
    */
   public final Parser<List<T>> sepEndBy1(final Parser<?> delim) {
-    return next(new Map<T, Parser<List<T>>>() {
-      @Override public Parser<List<T>> map(T first) {
-        return new DelimitedParser<T>(
-            Parser.this, delim, ListFactory.arrayListFactoryWithFirstElement(first));
-      }
-    });
+    return next(first ->
+        new DelimitedParser<T>(this, delim, ListFactory.arrayListFactoryWithFirstElement(first)));
   }
 
   /**
@@ -565,9 +559,8 @@ public abstract class Parser<T> {
    *
    * <p> {@code p.prefix(op)} is equivalent to {@code op* p} in EBNF.
    */
-  @SuppressWarnings("unchecked")
-  public final Parser<T> prefix(Parser<? extends Map<? super T, ? extends T>> op) {
-    return Parsers.sequence(op.many(), this, Parsers.PREFIX_OPERATOR_MAP2);
+  public final Parser<T> prefix(Parser<? extends Function<? super T, ? extends T>> op) {
+    return Parsers.sequence(op.many(), this, Parsers.prefixOperatorBiFunction());
   }
 
   /**
@@ -610,9 +603,8 @@ public abstract class Parser<T> {
    *
    * <p> {@code p.postfix(op)} is equivalent to {@code p op*} in EBNF.
    */
-  @SuppressWarnings("unchecked")
-  public final Parser<T> postfix(Parser<? extends Map<? super T, ? extends T>> op) {
-    return Parsers.sequence(this, op.many(), Parsers.POSTFIX_OPERATOR_MAP2);
+  public final Parser<T> postfix(Parser<? extends Function<? super T, ? extends T>> op) {
+    return Parsers.sequence(this, op.many(), Parsers::applyPostfixOperators);
   }
 
   /**
@@ -622,7 +614,7 @@ public abstract class Parser<T> {
    *
    * <p> {@code p.infixn(op)} is equivalent to {@code p (op p)?} in EBNF.
    */
-  public final Parser<T> infixn(Parser<? extends Map2<? super T, ? super T, ? extends T>> op) {
+  public final Parser<T> infixn(Parser<? extends BiFunction<? super T, ? super T, ? extends T>> op) {
     return Parsers.infixn(this, op);
   }
 
@@ -634,7 +626,7 @@ public abstract class Parser<T> {
    *
    * <p> {@code p.infixl(op)} is equivalent to {@code p (op p)*} in EBNF.
    */
-  public final Parser<T> infixl(Parser<? extends Map2<? super T, ? super T, ? extends T>> op) {
+  public final Parser<T> infixl(Parser<? extends BiFunction<? super T, ? super T, ? extends T>> op) {
     // somehow generics doesn't work if we inline the code here.
     return Parsers.infixl(this, op);
   }
@@ -647,7 +639,7 @@ public abstract class Parser<T> {
    *
    * <p> {@code p.infixr(op)} is equivalent to {@code p (op p)*} in EBNF.
    */
-  public final Parser<T> infixr(Parser<? extends Map2<? super T, ? super T, ? extends T>> op) {
+  public final Parser<T> infixr(Parser<? extends BiFunction<? super T, ? super T, ? extends T>> op) {
     return Parsers.infixr(this, op);
   }
 

@@ -21,6 +21,7 @@ import static org.codehaus.jparsec.examples.java.parser.TerminalParser.term;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
@@ -31,8 +32,6 @@ import org.codehaus.jparsec.examples.java.ast.type.SimpleTypeLiteral;
 import org.codehaus.jparsec.examples.java.ast.type.TypeLiteral;
 import org.codehaus.jparsec.examples.java.ast.type.UpperBoundWildcard;
 import org.codehaus.jparsec.functors.Maps;
-import org.codehaus.jparsec.functors.Unary;
-import org.codehaus.jparsec.misc.Mapper;
 
 /**
  * Parses any type literal.
@@ -43,14 +42,14 @@ public final class TypeLiteralParser {
 
   static final List<TypeLiteral> EMPTY_TYPE_ARGUMENT_LIST = Collections.<TypeLiteral>emptyList();
 
-  static final Parser<Unary<TypeLiteral>> ARRAY_OF =
-      phrase("[ ]").next(curry(ArrayTypeLiteral.class).unary());
+  static final Parser<UnaryOperator<TypeLiteral>> ARRAY_OF =
+      phrase("[ ]").retn(ArrayTypeLiteral::new);
   
   static final Parser<TypeLiteral> ELEMENT_TYPE_LITERAL = TypeLiteralParser.elementTypeLiteral();
   
   // at least one "[]" followed by any number of "[]".
-  static final Parser<TypeLiteral> ARRAY_TYPE_LITERAL = curry(ArrayTypeLiteral.class)
-      .sequence(ELEMENT_TYPE_LITERAL, phrase("[ ]")).postfix(ARRAY_OF);
+  static final Parser<ArrayTypeLiteral> ARRAY_TYPE_LITERAL =
+      ELEMENT_TYPE_LITERAL.followedBy(phrase("[ ]")).postfix(ARRAY_OF).map(ArrayTypeLiteral::new);
   
   // an element type optionally followed by some "[]".
   static final Parser<TypeLiteral> TYPE_LITERAL = ELEMENT_TYPE_LITERAL.postfix(ARRAY_OF);
@@ -63,8 +62,9 @@ public final class TypeLiteralParser {
         "byte", "short", "int", "long", "boolean", "char", "float", "double", "void")
         .map(Maps.mapToString());
     Parser<String> typeName = nativeTypeName.or(Terminals.Identifier.PARSER);
-    Parser<TypeLiteral> parser = Mapper.<TypeLiteral>curry(SimpleTypeLiteral.class)
-        .sequence(typeName.sepBy1(term(".")), TypeLiteralParser.optionalTypeArgs(arg));
+    Parser<TypeLiteral> parser = Parsers.sequence(
+        typeName.sepBy1(term(".")), TypeLiteralParser.optionalTypeArgs(arg),
+        SimpleTypeLiteral::new);
     ref.set(parser.postfix(ARRAY_OF));
     return parser;
   }
@@ -76,13 +76,8 @@ public final class TypeLiteralParser {
   
   static Parser<TypeLiteral> wildcard(Parser<TypeLiteral> type) {
     return Parsers.or(
-        curry(UpperBoundWildcard.class).sequence(phrase("? extends"), type),
-        curry(LowerBoundWildcard.class).sequence(phrase("? super"), type),
+        phrase("? extends").next(type).map(UpperBoundWildcard::new),
+        phrase("? super").next(type).map(LowerBoundWildcard::new),
         term("?").retn(new UpperBoundWildcard(null)));
-  }
-  
-  private static Mapper<TypeLiteral> curry(
-      Class<? extends TypeLiteral> clazz, Object... curryArgs) {
-    return Mapper.curry(clazz, curryArgs);
   }
 }

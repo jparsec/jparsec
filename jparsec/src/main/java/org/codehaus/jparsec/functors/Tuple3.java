@@ -19,9 +19,11 @@ import org.codehaus.jparsec.internal.util.Objects;
 
 /**
  * Immutable data holder for 3 values.
- * 
+ *
+ * @deprecated Prefer to using a lambda expression to convert to your own type.
  * @author Ben Yu
  */
+@Deprecated
 public class Tuple3<A, B, C> extends Pair<A, B> {
   
   public final C c;

@@ -109,7 +109,7 @@ public class StatementParserTest {
 
   @Test
   public void testBlockStatement() {
-    Parser<Statement> parser = StatementParser.blockStatement(NOP);
+    Parser<BlockStatement> parser = StatementParser.blockStatement(NOP);
     assertResult(parser, "{}", BlockStatement.class, "{}");
     assertResult(parser, "{;}", BlockStatement.class, "{;}");
     assertResult(parser, "{;;}", BlockStatement.class, "{; ;}");

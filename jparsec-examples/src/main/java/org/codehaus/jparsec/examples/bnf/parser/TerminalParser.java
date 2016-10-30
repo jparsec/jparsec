@@ -21,7 +21,6 @@ import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.misc.Mapper;
 
 /**
  * Parses terminals in a bnf.
@@ -41,7 +40,7 @@ public final class TerminalParser {
   static final Indentation INDENTATION = new Indentation();
   
   static Parser<?> term(String name) {
-    return Mapper.skip(TERMS.token(name));
+    return TERMS.token(name);
   }
   
   static <T> T parse(Parser<T> parser, String source) {

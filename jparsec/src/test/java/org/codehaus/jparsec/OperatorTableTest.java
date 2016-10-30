@@ -5,10 +5,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
 import org.codehaus.jparsec.OperatorTable.Associativity;
 import org.codehaus.jparsec.OperatorTable.Operator;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
 import org.junit.Test;
 
 /**
@@ -18,8 +19,8 @@ import org.junit.Test;
  */
 public class OperatorTableTest {
   private static final Parser<?> OP = Parsers.never();
-  private static final Parser<Map<Integer, Integer>> UNARY_OP = Parsers.never();
-  private static final Parser<Map2<Integer, Integer, Integer>> BINARY_OP = Parsers.never();
+  private static final Parser<Function<Integer, Integer>> UNARY_OP = Parsers.never();
+  private static final Parser<BiFunction<Integer, Integer, Integer>> BINARY_OP = Parsers.never();
 
   @Test
   public void testAssociativityOrder() {

@@ -22,7 +22,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.codehaus.jparsec.functors.Maps;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
 
@@ -54,7 +53,7 @@ final class Operators {
       operators.put(s, value);
       lexers[i] = scanner.retn(value);
     }
-    return new Lexicon(Maps.map(operators), Parsers.or(lexers));
+    return new Lexicon(operators::get, Parsers.or(lexers));
   }
   
   private static final Comparator<String> LONGER_STRING_FIRST = new Comparator<String>() {

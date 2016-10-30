@@ -20,9 +20,11 @@ package org.codehaus.jparsec.functors;
  * 
  * <p> These data holders can be used to hold temporary results during parsing so you don't have to
  * create your own data types.
- * 
+ *
+ * @deprecated Prefer to using a lambda expression to convert to your own type.
  * @author Ben Yu
  */
+@Deprecated
 public final class Tuples {
   
   /** Returns a {@link Pair} of 2 objects. Is equivalent to {@link #tuple(Object, Object)}. */

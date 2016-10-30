@@ -17,7 +17,8 @@ package org.codehaus.jparsec;
 
 import static org.codehaus.jparsec.internal.util.Checks.checkArgument;
 
-import org.codehaus.jparsec.functors.Map;
+import java.util.function.Function;
+
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Strings;
 
@@ -29,12 +30,12 @@ import org.codehaus.jparsec.internal.util.Strings;
 class Lexicon {
   
   /** Maps lexical word name to token value. */
-  final Map<String, Object> words;
+  final Function<String, Object> words;
   
   /** The scanner that recognizes any of the lexical word. */
   final Parser<?> tokenizer;
   
-  Lexicon(Map<String, Object> words, Parser<?> tokenizer) {
+  Lexicon(Function<String, Object> words, Parser<?> tokenizer) {
     this.words = words;
     this.tokenizer = tokenizer;
   }
@@ -84,7 +85,7 @@ class Lexicon {
    * @exception IllegalArgumentException if the token object does not exist.
    */
   @Private Object word(String name) {
-    Object p = words.map(name);
+    Object p = words.apply(name);
     checkArgument(p != null, "token %s unavailable", name);
     return p;
   }
@@ -100,16 +101,11 @@ class Lexicon {
    * Returns a {@link Map} that delegates to {@code map} and falls back to {@code defaultMap} for
    * null return values.
    */
-  private static <F, T> Map<F, T> fallback(
-      final Map<F, T> map, final Map<? super F, ? extends T> defaultMap) {
-    return new Map<F, T>() {
-      @Override public T map(F v) {
-        T result = map.map(v);
-        return (result == null) ? defaultMap.map(v) : result;
-      }
-      @Override public String toString() {
-        return "fallback";
-      }
+  private static <F, T> Function<F, T> fallback(
+      final Function<F, T> function, final Function<? super F, ? extends T> defaultFunction) {
+    return from -> {
+      T result = function.apply(from);
+      return result == null ? defaultFunction.apply(from) : result;
     };
   }
 }

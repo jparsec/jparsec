@@ -15,6 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec.functors;
 
+import java.util.function.UnaryOperator;
+
 /**
  * Represents a unary operation on the same type {@code T}.
  * 
@@ -22,4 +24,4 @@ package org.codehaus.jparsec.functors;
  * 
  * @author Ben Yu
  */
-public interface Unary<T> extends Map<T, T> {}
+public interface Unary<T> extends UnaryOperator<T>, Map<T, T> {}

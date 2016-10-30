@@ -50,10 +50,9 @@ import org.codehaus.jparsec.examples.java.ast.declaration.Program;
 import org.codehaus.jparsec.examples.java.ast.declaration.QualifiedName;
 import org.codehaus.jparsec.examples.java.ast.declaration.TypeParameterDef;
 import org.codehaus.jparsec.examples.java.ast.expression.Expression;
+import org.codehaus.jparsec.examples.java.ast.statement.BlockStatement;
 import org.codehaus.jparsec.examples.java.ast.statement.Modifier;
 import org.codehaus.jparsec.examples.java.ast.statement.Statement;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.misc.Mapper;
 
 /**
  * Parses class, interface, enum, annotation declarations.
@@ -63,107 +62,114 @@ import org.codehaus.jparsec.misc.Mapper;
 public final class DeclarationParser {
   static Parser<DefBody> body(Parser<Member> member) {
     Parser<Member> empty = term(";").retn(null);
-    return Mapper.curry(DefBody.class).sequence(
-        term("{"), empty.or(member).many().map(new Map<List<Member>, List<Member>>() {
-          @Override public List<Member> map(List<Member> from) {
-            removeNulls(from);
-            return from;
-          }
-        }), term("}"));
+    return Parsers.between(term("{"), empty.or(member).many().map(DeclarationParser::removeNulls), term("}"))
+        .map(DefBody::new);
   }
 
-  static void removeNulls(List<?> list) {
+  static <T> List<T> removeNulls(List<T> list) {
     for (Iterator<?> it = list.iterator(); it.hasNext();) {
       if (it.next() == null) {
         it.remove();
       }
     }
+    return list;
   }
   
   static Parser<Member> fieldDef(Parser<Expression> initializer) {
-    return Mapper.<Member>curry(FieldDef.class).sequence(
+    return Parsers.sequence(
         modifier(initializer).many(), TYPE_LITERAL, Terminals.Identifier.PARSER,
         term("=").next(ExpressionParser.arrayInitializerOrRegularExpression(initializer))
             .optional(),
-        term(";"));
+        term(";"),
+        (modifiers, type, name, value, __) -> new FieldDef(modifiers, type, name ,value));
   }
   
-  static final Parser<TypeParameterDef> TYPE_PARAMETER =
-      Mapper.curry(TypeParameterDef.class).sequence(
-          Terminals.Identifier.PARSER, term("extends").next(TypeLiteralParser.TYPE_LITERAL)
-              .optional());
+  static final Parser<TypeParameterDef> TYPE_PARAMETER = Parsers.sequence(
+      Terminals.Identifier.PARSER, term("extends").next(TypeLiteralParser.TYPE_LITERAL).optional(),
+      TypeParameterDef::new);
   
   static final Parser<List<TypeParameterDef>> TYPE_PARAMETERS =
       between(term("<"), TYPE_PARAMETER.sepBy1(term(",")), term(">"));
   
   static Parser<Member> constructorDef(Parser<Modifier> mod, Parser<Statement> stmt) {
-    return Mapper.<Member>curry(ConstructorDef.class).sequence(
+    return Parsers.sequence(
         mod.many(), Terminals.Identifier.PARSER,
-        term("("), StatementParser.parameter(mod).sepBy(term(",")), term(")"),
+        term("(").next(StatementParser.parameter(mod).sepBy(term(","))).followedBy(term(")")),
         term("throws").next(ELEMENT_TYPE_LITERAL.sepBy1(term(","))).optional(),
-        StatementParser.blockStatement(stmt));
+        StatementParser.blockStatement(stmt),
+        ConstructorDef::new);
   }
   
   static Parser<Member> methodDef(
       Parser<Modifier> mod, Parser<Expression> defaultValue, Parser<Statement> stmt) {
-    return Mapper.<Member>curry(MethodDef.class).sequence(
+    return Parsers.sequence(
         mod.many(), TYPE_PARAMETERS.optional(),
         TYPE_LITERAL, Terminals.Identifier.PARSER,
-        term("("), StatementParser.parameter(mod).sepBy(term(",")), term(")"),
+        term("(").next(StatementParser.parameter(mod).sepBy(term(","))).followedBy(term(")")),
         term("throws").next(ELEMENT_TYPE_LITERAL.sepBy1(term(","))).optional(),
         term("default").next(ExpressionParser.arrayInitializerOrRegularExpression(defaultValue))
             .optional(),
         Parsers.or(
             StatementParser.blockStatement(stmt),
-            term(";").retn(null)));
+            term(";").retn((BlockStatement) null)),
+        MethodDef::new);
   }
   
   static Parser<Member> initializerDef(Parser<Statement> stmt) {
-    return Mapper.<Member>curry(ClassInitializerDef.class).sequence(
-        term("static").succeeds(), StatementParser.blockStatement(stmt));
+    return Parsers.sequence(
+        term("static").succeeds(), StatementParser.blockStatement(stmt),
+        ClassInitializerDef::new);
   }
   
   static Parser<Member> nestedDef(Parser<Declaration> dec) {
-    return Mapper.<Member>curry(NestedDef.class).sequence(dec);
+    return dec.map(NestedDef::new);
   }
   
   static Parser<Declaration> classDef(Parser<Modifier> mod, Parser<Member> member) {
-    return curry(ClassDef.class).sequence(
-        mod.many(), term("class"), Terminals.Identifier.PARSER, TYPE_PARAMETERS.optional(),
+    return Parsers.sequence(
+        mod.many(), term("class").next(Terminals.Identifier.PARSER), TYPE_PARAMETERS.optional(),
         term("extends").next(ELEMENT_TYPE_LITERAL).optional(),
         term("implements").next(ELEMENT_TYPE_LITERAL.sepBy1(term(","))).optional(),
-        body(member));
+        body(member),
+        ClassDef::new);
   }
   
   static Parser<Declaration> interfaceDef(Parser<Modifier> mod, Parser<Member> member) {
-    return curry(InterfaceDef.class).sequence(
-        mod.many(), term("interface"), Terminals.Identifier.PARSER, TYPE_PARAMETERS.optional(),
+    return Parsers.sequence(
+        mod.many(), term("interface").next(Terminals.Identifier.PARSER), TYPE_PARAMETERS.optional(),
         term("extends").next(ELEMENT_TYPE_LITERAL.sepBy1(term(","))).optional(),
-        body(member));
+        body(member),
+        InterfaceDef::new);
   }
   
   static Parser<Declaration> annotationDef(Parser<Modifier> mod, Parser<Member> member) {
-    return curry(AnnotationDef.class).sequence(
-        mod.many(), phrase("@ interface"), Terminals.Identifier.PARSER, body(member));
+    return Parsers.sequence(
+        mod.many(), phrase("@ interface").next(Terminals.Identifier.PARSER), body(member),
+        AnnotationDef::new);
   }
   
   static Parser<Declaration> enumDef(Parser<Expression> expr, Parser<Member> member) {
-    Parser<EnumDef.Value> enumValue = Mapper.curry(EnumDef.Value.class).sequence(
+    Parser<EnumDef.Value> enumValue = Parsers.sequence(
         Terminals.Identifier.PARSER, between(term("("), expr.sepBy(term(",")), term(")"))
             .optional(),
-        between(term("{"), member.many(), term("}")).optional());
-    return curry(EnumDef.class).sequence(
-        modifier(expr).many(), term("enum"), Terminals.Identifier.PARSER,
+        between(term("{"), member.many(), term("}")).optional(),
+        EnumDef.Value::new);
+    return Parsers.sequence(
+        modifier(expr).many(),
+        term("enum").next(Terminals.Identifier.PARSER),
         term("implements").next(ELEMENT_TYPE_LITERAL.sepBy1(term(","))).optional(),
-        term("{"), enumValue.sepBy(term(",")),term(";").next(member.many()).optional(), term("}"));
+        term("{").next(enumValue.sepBy(term(","))),
+        term(";").next(member.many()).optional().followedBy(term("}")),
+        EnumDef::new);
   }
   
   static final Parser<QualifiedName> QUALIFIED_NAME =
-      Mapper.curry(QualifiedName.class).sequence(Terminals.Identifier.PARSER.sepBy1(term(".")));
+      Terminals.Identifier.PARSER.sepBy1(term(".")).map(QualifiedName::new);
   
-  static final Parser<Import> IMPORT = Mapper.curry(Import.class).sequence(
-      term("import"), term("static").succeeds(),
-      QUALIFIED_NAME, phrase(". *").succeeds(), term(";"));
+  static final Parser<Import> IMPORT = Parsers.sequence(
+      term("import").next(term("static").succeeds()),
+      QUALIFIED_NAME, phrase(". *").succeeds().followedBy(term(";")),
+      Import::new);
   
   static final Parser<QualifiedName> PACKAGE = between(term("package"), QUALIFIED_NAME, term(";"));
   
@@ -181,8 +187,7 @@ public final class DeclarationParser {
         classDef(mod, member), interfaceDef(mod, member),
         enumDef(expr, member), annotationDef(mod, member));
     decRef.set(declaration);
-    return Mapper.curry(Program.class).sequence(
-        PACKAGE.optional(), IMPORT.many(), declaration.many());
+    return Parsers.sequence(PACKAGE.optional(), IMPORT.many(), declaration.many(), Program::new);
   }
   
   /** Parses any Java source.  */
@@ -199,10 +204,5 @@ public final class DeclarationParser {
     } finally {
       in.close();
     }
-  }
-  
-  private static Mapper<Declaration> curry(
-      Class<? extends Declaration> clazz, Object... curryArgs) {
-    return Mapper.curry(clazz, curryArgs);
   }
 }

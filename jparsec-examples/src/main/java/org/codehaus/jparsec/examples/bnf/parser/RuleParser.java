@@ -31,7 +31,6 @@ import org.codehaus.jparsec.examples.bnf.ast.RuleDef;
 import org.codehaus.jparsec.examples.bnf.ast.RuleReference;
 import org.codehaus.jparsec.examples.bnf.ast.SequentialRule;
 import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.misc.Mapper;
 
 /**
  * Parser for bnf rules.
@@ -40,14 +39,13 @@ import org.codehaus.jparsec.misc.Mapper;
  */
 public final class RuleParser {
   
-  static final Parser<Rule> LITERAL =
-      curry(LiteralRule.class).sequence(Terminals.StringLiteral.PARSER);
+  static final Parser<Rule> LITERAL = Terminals.StringLiteral.PARSER.map(LiteralRule::new);
   
-  static final Parser<Rule> IDENT = curry(RuleReference.class).sequence(
-          Terminals.Identifier.PARSER.notFollowedBy(term("::=")));
+  static final Parser<Rule> IDENT = Terminals.Identifier.PARSER.notFollowedBy(term("::="))
+      .map(RuleReference::new);
   
-  static Parser<RuleDef> RULE_DEF = Mapper.curry(RuleDef.class)
-      .sequence(Terminals.Identifier.PARSER, term("::="), rule());
+  static Parser<RuleDef> RULE_DEF = Parsers.sequence(
+      Terminals.Identifier.PARSER, term("::="), rule(), (name, __, r) -> new RuleDef(name, r));
   
   public static Parser<List<RuleDef>> RULE_DEFS = RULE_DEF.many();
   
@@ -79,9 +77,5 @@ public final class RuleParser {
         return list.size() == 1 ? list.get(0) : new AltRule(list);
       }
     });
-  }
-  
-  private static Mapper<Rule> curry(Class<? extends Rule> ruleClass, Object... curryArgs) {
-    return Mapper.curry(ruleClass, curryArgs);
   }
 }

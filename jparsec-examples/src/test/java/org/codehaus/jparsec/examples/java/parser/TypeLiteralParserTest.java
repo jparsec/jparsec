@@ -23,7 +23,7 @@ public class TypeLiteralParserTest {
     SimpleTypeLiteral intType =
         new SimpleTypeLiteral(Arrays.asList("int"), TypeLiteralParser.EMPTY_TYPE_ARGUMENT_LIST);
     TerminalParserTest.assertToString(ArrayTypeLiteral.class, "int[]",
-        TerminalParser.parse(TypeLiteralParser.ARRAY_OF, "[]").map(intType));
+        TerminalParser.parse(TypeLiteralParser.ARRAY_OF, "[]").apply(intType));
   }
 
   @Test
@@ -54,7 +54,7 @@ public class TypeLiteralParserTest {
 
   @Test
   public void testArrayTypeLiteral() {
-    Parser<TypeLiteral> parser = TypeLiteralParser.ARRAY_TYPE_LITERAL;
+    Parser<ArrayTypeLiteral> parser = TypeLiteralParser.ARRAY_TYPE_LITERAL;
     assertResult(parser, "int[]", ArrayTypeLiteral.class, "int[]");
     assertFailure(parser, "int", 1, 4);
   }

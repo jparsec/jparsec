@@ -19,9 +19,11 @@ import org.codehaus.jparsec.internal.util.Objects;
 
 /**
  * Immutable data holder for 2 values.
- * 
+ *
+ * @deprecated Prefer to using a lambda expression to convert to your own type.
  * @author Ben Yu
  */
+@Deprecated
 public class Pair<A, B> {
   
   public final A a;

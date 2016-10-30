@@ -17,6 +17,8 @@ package org.codehaus.jparsec;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map2;
@@ -87,7 +89,7 @@ public final class OperatorTable<T> {
    * @return this.
    */
   public OperatorTable<T> prefix(
-      Parser<? extends Map<? super T, ? extends T>> parser, int precedence) {
+      Parser<? extends Function<? super T, ? extends T>> parser, int precedence) {
     ops.add(new Operator(parser, precedence, Associativity.PREFIX));
     return this;
   }
@@ -100,7 +102,7 @@ public final class OperatorTable<T> {
    * @return this.
    */
   public OperatorTable<T> postfix(
-      Parser<? extends Map<? super T, ? extends T>> parser, int precedence) {
+      Parser<? extends Function<? super T, ? extends T>> parser, int precedence) {
     ops.add(new Operator(parser, precedence, Associativity.POSTFIX));
     return this;
   }
@@ -113,7 +115,7 @@ public final class OperatorTable<T> {
    * @return this.
    */
   public OperatorTable<T> infixl(
-      Parser<? extends Map2<? super T, ? super T, ? extends T>> parser, int precedence) {
+      Parser<? extends BiFunction<? super T, ? super T, ? extends T>> parser, int precedence) {
     ops.add(new Operator(parser, precedence, Associativity.LASSOC));
     return this;
   }
@@ -126,7 +128,7 @@ public final class OperatorTable<T> {
    * @return this.
    */
   public OperatorTable<T> infixr(
-      Parser<? extends Map2<? super T, ? super T, ? extends T>> parser, int precedence) {
+      Parser<? extends BiFunction<? super T, ? super T, ? extends T>> parser, int precedence) {
     ops.add(new Operator(parser, precedence, Associativity.RASSOC));
     return this;
   }
@@ -138,7 +140,7 @@ public final class OperatorTable<T> {
    * @return this.
    */
   public OperatorTable<T> infixn(
-      Parser<? extends Map2<? super T, ? super T, ? extends T>> parser, int precedence) {
+      Parser<? extends BiFunction<? super T, ? super T, ? extends T>> parser, int precedence) {
     ops.add(new Operator(parser, precedence, Associativity.NASSOC));
     return this;
   }

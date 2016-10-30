@@ -15,11 +15,16 @@
  *****************************************************************************/
 package org.codehaus.jparsec.functors;
 
+import java.util.function.BinaryOperator;
+
 /**
  * Represents a binary operation on the same type {@code T}.
  * 
  * <p> Implement this interface for binary operator instead of {@link Map2} for brevity.
- * 
+ *
+ * @deprecated Use {@link java.util.function.BinaryOperator} instead.
+ *
  * @author Ben Yu
  */
-public interface Binary<T> extends Map2<T, T, T> {}
+@Deprecated
+public interface Binary<T> extends BinaryOperator<T>, Map2<T, T, T> {}

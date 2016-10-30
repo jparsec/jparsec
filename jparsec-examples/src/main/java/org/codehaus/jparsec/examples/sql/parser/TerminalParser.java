@@ -24,7 +24,6 @@ import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
 import org.codehaus.jparsec.Tokens.Tag;
 import org.codehaus.jparsec.examples.sql.ast.QualifiedName;
-import org.codehaus.jparsec.misc.Mapper;
 
 /**
  * Lexers and terminal level parsers for SQL.
@@ -59,17 +58,17 @@ final class TerminalParser {
       .or(Terminals.Identifier.PARSER);
   
   static final Parser<QualifiedName> QUALIFIED_NAME =
-      Mapper.curry(QualifiedName.class).sequence(NAME.sepBy1(term(".")));
+      NAME.sepBy1(term(".")).map(QualifiedName::new);
   
   static <T> T parse(Parser<T> parser, String source) {
     return parser.from(TOKENIZER, Scanners.SQL_DELIMITER).parse(source);
   }
   
   public static Parser<?> term(String term) {
-    return Mapper.skip(TERMS.token(term));
+    return TERMS.token(term);
   }
   
   public static Parser<?> phrase(String phrase) {
-    return Mapper.skip(TERMS.phrase(phrase.split("\\s")));
+    return TERMS.phrase(phrase.split("\\s"));
   }
 }

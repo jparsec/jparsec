@@ -20,10 +20,11 @@ import static org.codehaus.jparsec.examples.sql.parser.TerminalParser.phrase;
 import static org.codehaus.jparsec.examples.sql.parser.TerminalParser.term;
 
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Parser.Reference;
+import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.examples.sql.ast.AliasedRelation;
 import org.codehaus.jparsec.examples.sql.ast.CrossJoinRelation;
 import org.codehaus.jparsec.examples.sql.ast.Expression;
@@ -36,8 +37,6 @@ import org.codehaus.jparsec.examples.sql.ast.Relation;
 import org.codehaus.jparsec.examples.sql.ast.Select;
 import org.codehaus.jparsec.examples.sql.ast.TableRelation;
 import org.codehaus.jparsec.examples.sql.ast.UnionRelation;
-import org.codehaus.jparsec.functors.Unary;
-import org.codehaus.jparsec.misc.Mapper;
 
 /**
  * Parser for relation.
@@ -54,16 +53,15 @@ public final class RelationParser {
   static final Parser<JoinType> LEFT_JOIN = joinType(JoinType.LEFT, "left join", "left outer join");
   static final Parser<JoinType> INNER_JOIN = joinType(JoinType.INNER, "join", "inner join");
   
-  static final Parser<Relation> TABLE =
-      curry(TableRelation.class).sequence(TerminalParser.QUALIFIED_NAME);
+  static final Parser<Relation> TABLE = TerminalParser.QUALIFIED_NAME.map(TableRelation::new);
   static final Parser<Boolean> SELECT_CLAUSE = term("select").next(term("distinct").succeeds());
   
   static final Parser<Projection> projection(Parser<Expression> expr) {
-    return Mapper.curry(Projection.class).sequence(expr, ALIAS.optional());
+    return Parsers.sequence(expr, ALIAS.optional(), Projection::new);
   }
   
   static final Parser<Relation> alias(Parser<Relation> rel) {
-    return curry(AliasedRelation.class).sequence(rel, ALIAS);
+    return Parsers.sequence(rel, ALIAS, AliasedRelation::new);
   }
   
   static final Parser<Relation> aliasable(Parser<Relation> rel) {
@@ -83,8 +81,9 @@ public final class RelationParser {
   }
   
   static Parser<GroupBy> groupByClause(Parser<Expression> expr, Parser<Expression> cond) {
-    return Mapper.curry(GroupBy.class).sequence(
-        phrase("group by").next(list(expr)), phrase("having").next(cond).optional());
+    return Parsers.sequence(
+        phrase("group by").next(list(expr)), phrase("having").next(cond).optional(),
+        GroupBy::new);
   }
   
   static Parser<Expression> havingClause(Parser<Expression> cond) {
@@ -92,15 +91,13 @@ public final class RelationParser {
   }
   
   static Parser<OrderBy.Item> orderByItem(Parser<Expression> expr) {
-    return Mapper.curry(OrderBy.Item.class).sequence(expr, Parsers.or(
-        term("asc").retn(true),
-        term("desc").retn(false)
-    ).optional(true));
+    return Parsers.sequence(
+        expr, Parsers.or(term("asc").retn(true), term("desc").retn(false)).optional(true),
+        OrderBy.Item::new);
   }
   
   static Parser<OrderBy> orderByClause(Parser<Expression> expr) {
-    return Mapper.curry(OrderBy.class).sequence(
-        phrase("order by").next(list(orderByItem(expr))));
+    return phrase("order by").next(list(orderByItem(expr))).map(OrderBy::new);
   }
   
   static Parser<Relation> join(Parser<Relation> rel, Parser<Expression> cond) {
@@ -109,31 +106,35 @@ public final class RelationParser {
     Parser<Relation> atom = aliasable(paren(lazy).or(rel));
     
     // Cannot use regular infix operator because of the "join ... on ..." syntax.
+    Parser<UnaryOperator<Relation>> crossJoin =
+        phrase("cross join").next(atom).map(r -> l -> new CrossJoinRelation(l, r));
     Parser<Relation> parser = atom.postfix(Parsers.or(
         joinOn(INNER_JOIN, lazy, cond), 
         joinOn(LEFT_JOIN, lazy, cond),
         joinOn(RIGHT_JOIN, lazy, cond),
         joinOn(FULL_JOIN, lazy, cond),
-        curry(CrossJoinRelation.class).postfix(phrase("cross join"), atom)
-    ));
+        crossJoin));
     ref.set(parser);
     return parser;
   }
   
   static Parser<Relation> select(
       Parser<Expression> expr, Parser<Expression> cond, Parser<Relation> rel) {
-    return curry(Select.class).sequence(
+    return Parsers.sequence(
         SELECT_CLAUSE, list(projection(expr)),
         fromClause(join(rel, cond)),
         whereClause(cond).optional(),
         groupByClause(expr, cond).optional(),
-        orderByClause(expr).optional());
+        orderByClause(expr).optional(),
+        Select::new);
   }
   
   static Parser<Relation> union(Parser<Relation> rel) {
     Reference<Relation> ref = Parser.newReference();
     Parser<Relation> parser = paren(ref.lazy()).or(rel).infixl(
-        curry(UnionRelation.class).infix(term("union"), term("all").succeeds())).label("relation");
+        term("union").next(term("all").succeeds())
+            .label("relation")
+            .map(a -> (l, r) -> new UnionRelation(l, a, r)));
     ref.set(parser);
     return parser;
   }
@@ -160,16 +161,14 @@ public final class RelationParser {
     return Parsers.or(phrase(phrase1), phrase(phrase2)).retn(joinType);
   }
   
-  private static Parser<Unary<Relation>> joinOn(
+  private static Parser<UnaryOperator<Relation>> joinOn(
       Parser<JoinType> joinType, Parser<Relation> right, Parser<Expression> cond) {
-    return curry(JoinRelation.class).postfix(joinType, right, term("on"), cond);
+    return Parsers.sequence(
+        joinType, right, term("on").next(cond),
+        (t, r, c) -> l -> new JoinRelation(l, t, r, c));
   }
   
   private static <T> Parser<List<T>> list(Parser<T> p) {
     return p.sepBy1(term(","));
-  }
-  
-  private static Mapper<Relation> curry(Class<? extends Relation> clazz, Object... args) {
-    return Mapper.curry(clazz, args);
   }
 }

@@ -19,9 +19,11 @@ import org.codehaus.jparsec.internal.util.Objects;
 
 /**
  * Immutable data holder for 4 values.
- * 
+ *
+ * @deprecated Prefer to using a lambda expression to convert to your own type.
  * @author Ben Yu
  */
+@Deprecated
 public class Tuple4<A, B, C, D> extends Tuple3<A, B, C> {
   
   public final D d;

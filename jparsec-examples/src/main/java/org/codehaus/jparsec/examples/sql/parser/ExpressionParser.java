@@ -19,11 +19,13 @@ import static org.codehaus.jparsec.examples.sql.parser.TerminalParser.phrase;
 import static org.codehaus.jparsec.examples.sql.parser.TerminalParser.term;
 
 import java.util.List;
+import java.util.function.BinaryOperator;
+import java.util.function.UnaryOperator;
 
 import org.codehaus.jparsec.OperatorTable;
 import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Parser.Reference;
+import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.examples.sql.ast.BetweenExpression;
 import org.codehaus.jparsec.examples.sql.ast.BinaryExpression;
 import org.codehaus.jparsec.examples.sql.ast.BinaryRelationalExpression;
@@ -43,10 +45,7 @@ import org.codehaus.jparsec.examples.sql.ast.TupleExpression;
 import org.codehaus.jparsec.examples.sql.ast.UnaryExpression;
 import org.codehaus.jparsec.examples.sql.ast.UnaryRelationalExpression;
 import org.codehaus.jparsec.examples.sql.ast.WildcardExpression;
-import org.codehaus.jparsec.functors.Binary;
 import org.codehaus.jparsec.functors.Pair;
-import org.codehaus.jparsec.functors.Unary;
-import org.codehaus.jparsec.misc.Mapper;
 
 /**
  * Parser for expressions.
@@ -57,44 +56,44 @@ public final class ExpressionParser {
   
   static final Parser<Expression> NULL = term("null").<Expression>retn(NullExpression.instance);
   
-  static final Parser<Expression> NUMBER =
-      curry(NumberExpression.class).sequence(TerminalParser.NUMBER);
+  static final Parser<Expression> NUMBER = TerminalParser.NUMBER.map(NumberExpression::new);
   
-  static final Parser<Expression> QUALIFIED_NAME =
-      curry(QualifiedNameExpression.class).sequence(TerminalParser.QUALIFIED_NAME);
+  static final Parser<Expression> QUALIFIED_NAME = TerminalParser.QUALIFIED_NAME
+      .map(QualifiedNameExpression::new);
   
-  static final Parser<Expression> QUALIFIED_WILDCARD =
-      curry(WildcardExpression.class)
-      .sequence(TerminalParser.QUALIFIED_NAME, phrase(". *"));
+  static final Parser<Expression> QUALIFIED_WILDCARD = TerminalParser.QUALIFIED_NAME
+      .followedBy(phrase(". *"))
+      .map(WildcardExpression::new);
   
   static final Parser<Expression> WILDCARD =
       term("*").<Expression>retn(new WildcardExpression(QualifiedName.of()))
       .or(QUALIFIED_WILDCARD);
   
-  static final Parser<Expression> STRING =
-       curry(StringExpression.class).sequence(TerminalParser.STRING);
+  static final Parser<Expression> STRING = TerminalParser.STRING.map(StringExpression::new);
   
   static Parser<Expression> functionCall(Parser<Expression> param) {
-    return curry(FunctionExpression.class)
-        .sequence(TerminalParser.QUALIFIED_NAME,
-            term("("), param.sepBy(TerminalParser.term(",")), term(")"));
+    return Parsers.sequence(
+        TerminalParser.QUALIFIED_NAME, paren(param.sepBy(TerminalParser.term(","))),
+        FunctionExpression::new);
   }
   
   static Parser<Expression> tuple(Parser<Expression> expr) {
-    return curry(TupleExpression.class)
-        .sequence(term("("), expr.sepBy(term(",")), term(")"));
+    return paren(expr.sepBy(term(","))).map(TupleExpression::new);
   }
   
   static Parser<Expression> simpleCase(Parser<Expression> expr) {
-    return curry(SimpleCaseExpression.class).sequence(
-        term("case"), expr, whenThens(expr, expr),
-        term("else").next(expr).optional(), term("end"));
+    return Parsers.sequence(
+        term("case").next(expr),
+        whenThens(expr, expr),
+        term("else").next(expr).optional().followedBy(term("end")),
+        SimpleCaseExpression::new);
   }
   
   static Parser<Expression> fullCase(Parser<Expression> cond, Parser<Expression> expr) {
-    return curry(FullCaseExpression.class).sequence(
-        term("case"), whenThens(cond, expr),
-        term("else").next(expr).optional(), term("end"));
+    return Parsers.sequence(
+        term("case").next(whenThens(cond, expr)),
+        term("else").next(expr).optional().followedBy(term("end")),
+        FullCaseExpression::new);
   }
 
   private static Parser<List<Pair<Expression, Expression>>> whenThens(
@@ -142,15 +141,16 @@ public final class ExpressionParser {
   }
 
   static Parser<Expression> like(Parser<Expression> expr) {
-    return curry(LikeExpression.class)
-        .sequence(expr, Parsers.or(
-            term("like").retn(true), phrase("not like").retn(false)),
-            expr, term("escape").next(expr).optional());
+    return Parsers.sequence(
+        expr, Parsers.or(term("like").retn(true), phrase("not like").retn(false)),
+        expr, term("escape").next(expr).optional(),
+        LikeExpression::new);
   }
 
   static Parser<Expression> nullCheck(Parser<Expression> expr) {
-    return curry(BinaryExpression.class)
-        .sequence(expr, phrase("is not").retn(Op.NOT).or(phrase("is").retn(Op.IS)), NULL);
+    return Parsers.sequence(
+        expr, phrase("is not").retn(Op.NOT).or(phrase("is").retn(Op.IS)), NULL,
+        BinaryExpression::new);
   }
   
   static Parser<Expression> logical(Parser<Expression> expr) {
@@ -165,37 +165,43 @@ public final class ExpressionParser {
   }
   
   static Parser<Expression> between(Parser<Expression> expr) {
-    return curry(BetweenExpression.class).sequence(
+    return Parsers.sequence(
         expr, Parsers.or(term("between").retn(true), phrase("not between").retn(false)),
-        expr, term("and"), expr);
+        expr, term("and").next(expr),
+        BetweenExpression::new);
   }
   
   static Parser<Expression> exists(Parser<Relation> relation) {
-    return curry(UnaryRelationalExpression.class, Op.EXISTS)
-        .sequence(term("exists"), relation);
+    return term("exists").next(relation).map(e -> new UnaryRelationalExpression(e, Op.EXISTS));
   }
   
   static Parser<Expression> notExists(Parser<Relation> relation) {
-    return curry(UnaryRelationalExpression.class, Op.NOT_EXISTS)
-        .sequence(phrase("not exists"), relation);
+    return phrase("not exists").next(relation)
+        .map(e -> new UnaryRelationalExpression(e, Op.NOT_EXISTS));
   }
   
   static Parser<Expression> inRelation(Parser<Expression> expr, Parser<Relation> relation) {
-    return curry(BinaryRelationalExpression.class, Op.IN)
-        .sequence(expr, term("in"), term("("), relation, term(")"));
+    return Parsers.sequence(
+        expr, Parsers.between(phrase("in ("), relation, term(")")),
+        (e, r) -> new BinaryRelationalExpression(e, Op.IN, r));
   }
   
   static Parser<Expression> notInRelation(Parser<Expression> expr, Parser<Relation> relation) {
-    return curry(BinaryRelationalExpression.class, Op.NOT_IN)
-        .sequence(expr, phrase("not in"), term("("), relation, term(")"));
+    return Parsers.sequence(
+        expr, Parsers.between(phrase("not in ("), relation, term(")")),
+        (e, r) -> new BinaryRelationalExpression(e, Op.NOT_IN, r));
   }
   
   static Parser<Expression> in(Parser<Expression> expr) {
-    return binaryExpression(Op.IN).sequence(expr, term("in"), tuple(expr));
+    return Parsers.sequence(
+        expr, term("in").next(tuple(expr)),
+        (e, t) -> new BinaryExpression(e, Op.IN, t));
   }
   
   static Parser<Expression> notIn(Parser<Expression> expr) {
-    return binaryExpression(Op.NOT_IN).sequence(expr, phrase("not in"), tuple(expr));
+    return Parsers.sequence(
+        expr, phrase("not in").next(tuple(expr)),
+        (e, t) -> new BinaryExpression(e, Op.NOT_IN, t));
   }
   
   static Parser<Expression> condition(Parser<Expression> expr, Parser<Relation> rel) {
@@ -209,26 +215,16 @@ public final class ExpressionParser {
   
   private static Parser<Expression> compare(
       Parser<Expression> operand, String name, Op op) {
-    return curry(BinaryExpression.class).sequence(operand, term(name).retn(op), operand);
+    return Parsers.sequence(
+        operand, term(name).retn(op), operand,
+        BinaryExpression::new);
   }
   
-  private static Parser<Binary<Expression>> binary(String name, Op op) {
-    return term(name).next(binaryExpression(op).binary());
+  private static Parser<BinaryOperator<Expression>> binary(String name, Op op) {
+    return term(name).retn((l, r) -> new BinaryExpression(l, op, r));
   }
   
-  private static Parser<Unary<Expression>> unary(String name, Op op) {
-    return term(name).next(unaryExpression(op).unary());
-  }
-  
-  private static Mapper<Expression> binaryExpression(Op op) {
-    return curry(BinaryExpression.class, op);
-  }
-  
-  private static Mapper<Expression> unaryExpression(Op op) {
-    return curry(UnaryExpression.class, op);
-  }
-  
-  private static Mapper<Expression> curry(Class<? extends Expression> clazz, Object... args) {
-    return Mapper.curry(clazz, args);
+  private static Parser<UnaryOperator<Expression>> unary(String name, Op op) {
+    return term(name).retn(e -> new UnaryExpression(op, e));
   }
 }

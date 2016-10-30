@@ -21,6 +21,7 @@ package org.codehaus.jparsec.functors;
  * 
  * @author Ben Yu
  */
+@FunctionalInterface
 public interface Map4<A, B, C, D, T> {
   
   /** Maps {@code a}, {@code b}, {@code c} and {@code d} to the target object. */

@@ -16,6 +16,8 @@
 package org.codehaus.jparsec.functors;
 
 import java.util.Locale;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 /**
  * Provides common implementations of {@link Map} interface and the variants.
@@ -27,23 +29,19 @@ public final class Maps {
   /**
    * The {@link Map} that maps a {@link String} to {@link Integer} by calling
    * {@link Integer#valueOf(String)}.
+   *
+   * @deprecated Use {@code Integer::valueOf} directly.
    */
-  public static final Map<String, Integer> TO_INTEGER = new Map<String, Integer>() {
-    @Override public Integer map(String v) {
-      return Integer.valueOf(v);
-    }
-    @Override public String toString() {
-      return "integer";
-    }
-  };
+  @Deprecated
+  public static final Function<String, Integer> TO_INTEGER = Integer::valueOf;
 
   /** The {@link Unary} that maps a {@link String} to lower case using {@link Locale#US}. */
-  public static Unary<String> TO_LOWER_CASE = toLowerCase(Locale.US);
+  public static UnaryOperator<String> TO_LOWER_CASE = toLowerCase(Locale.US);
 
   /** Returns a {@link Unary} that maps a {@link String} to lower case using {@code locale}. */
-  public static Unary<String> toLowerCase(final Locale locale) {
-    return  new Unary<String>() {
-      @Override public String map(String s) {
+  public static UnaryOperator<String> toLowerCase(final Locale locale) {
+    return  new UnaryOperator<String>() {
+      @Override public String apply(String s) {
         return s.toLowerCase(locale);
       }
       @Override public String toString() {
@@ -53,12 +51,12 @@ public final class Maps {
   }
 
   /** The {@link Unary} that maps a {@link String} to upper case using {@link Locale#US}. */
-  public static Unary<String> TO_UPPER_CASE = toUpperCase(Locale.US);
+  public static UnaryOperator<String> TO_UPPER_CASE = toUpperCase(Locale.US);
 
   /** Returns a {@link Unary} that maps a {@link String} to upper case using {@code locale}. */
-  public static Unary<String> toUpperCase(final Locale locale) {
-    return  new Unary<String>() {
-      @Override public String map(String s) {
+  public static UnaryOperator<String> toUpperCase(Locale locale) {
+    return  new UnaryOperator<String>() {
+      @Override public String apply(String s) {
         return s.toUpperCase(locale);
       }
       @Override public String toString() {
@@ -68,21 +66,20 @@ public final class Maps {
   }
   
   /**
-   * A {@link Map} instance that maps its parameter to a {@link String} by calling
-   * {@link Object#toString()} against it.
+   * @Deprecated Use {@code String::valueOf} directly.
    */
-  @SuppressWarnings("unchecked")
+  @Deprecated
   public static <T> Map<T, String> mapToString() {
-    return TO_STRING;
+    return String::valueOf;
   }
   
   /**
    * Returns a {@link Map} that maps the string representation of an enum
    * to the corresponding enum value by calling {@link Enum#valueOf(Class, String)}.
    */
-  public static <E extends Enum<E>> Map<String, E> toEnum(final Class<E> enumType) {
-    return new Map<String, E>() {
-      @Override public E map(String name) {
+  public static <E extends Enum<E>> Function<String, E> toEnum(Class<E> enumType) {
+    return new Function<String, E>() {
+      @Override public E apply(String name) {
         return Enum.valueOf(enumType, name);
       }
       @Override public String toString() {
@@ -91,114 +88,62 @@ public final class Maps {
     };
   }
   
-  /** Returns an identity map that maps parameter to itself. */
-  @SuppressWarnings("unchecked")
-  public static <T> Unary<T> identity() {
-    return (Unary<T>) ID;
+  /**
+   * Returns an identity map that maps parameter to itself.
+   *
+   * @deprecated Use {@link Function#identity} instead.
+   */
+  @Deprecated
+  public static <T> UnaryOperator<T> identity() {
+    return v -> v;
   }
   
-  /** Returns a {@link Map} that always maps any object to {@code v}. */
-  public static <F, T> Map <F, T> constant(final T v) {
-    return new Map <F, T>() {
-      @Override public T map(F from) { return v; }
-      @Override public String toString() {
-        return String.valueOf(v);
-      }
-    };
+  /**
+   * Returns a {@link Map} that always maps any object to {@code v}.
+   *
+   * @deprecated Use {@code from -> to} directly.
+   */
+  @Deprecated
+  public static <F, T> Function <F, T> constant(T v) {
+    return from -> v;
   }
   
-  /** Adapts a {@link java.util.Map} to {@link Map}. */
-  public static <K, V> Map<K, V> map(final java.util.Map<K, V> m) {
-    return new Map<K, V>() {
-      @Override public V map(K k) {
-        return m.get(k);
-      }
-      @Override public String toString() {
-        return m.toString();
-      }
-    };
+  /**
+   * Adapts a {@link java.util.Map} to {@link Map}.
+   *
+   * @deprecated Use {@code Map::get} instead.
+   */
+  @Deprecated
+  public static <K, V> Function<K, V> map(java.util.Map<K, V> m) {
+    return m::get;
   }
-  
-  @SuppressWarnings("rawtypes")
-  private static final Map2 ID2 = new Map2() {
-    @Override public Pair map(Object a, Object b) {
-      return Tuples.pair(a, b);
-    }
-    @Override public String toString() {
-      return "pair";
-    }
-  };
-  
-  @SuppressWarnings("rawtypes")
-  private static final Map3 ID3 = new Map3() {
-    @Override public Tuple3 map(Object a, Object b, Object c) {
-      return Tuples.tuple(a, b, c);
-    }
-    @Override public String toString() {
-      return "tuple";
-    }
-  };
-  
-  @SuppressWarnings("rawtypes")
-  private static final Map4 ID4 = new Map4() {
-    @Override public Tuple4 map(Object a, Object b, Object c, Object d) {
-      return Tuples.tuple(a, b, c, d);
-    }
-    @Override public String toString() {
-      return "tuple";
-    }
-  };
-      
-  @SuppressWarnings("rawtypes")
-  private static final Map5 ID5 = new Map5() {
-    @Override public Tuple5 map(Object a, Object b, Object c, Object d, Object e) {
-      return Tuples.tuple(a, b, c, d, e);
-    }
-    @Override public String toString() {
-      return "tuple";
-    }
-  };
   
   /** A {@link Map2} object that maps 2 values into a {@link Pair} object. */
   @SuppressWarnings("unchecked")
   public static <A, B> Map2<A, B, Pair<A, B>> toPair() {
-    return ID2;
+    return Pair::new;
   }
   
   /** A {@link Map3} object that maps 3 values to a {@link Tuple3} object. */
+  @Deprecated
   @SuppressWarnings("unchecked")
   public static <A, B, C> Map3<A, B, C, Tuple3<A, B, C>> toTuple3() {
-    return ID3;
+    return Tuple3::new;
   }
   
   /** A {@link Map4} object that maps 4 values to a {@link Tuple4} object. */
+  @Deprecated
   @SuppressWarnings("unchecked")
   public static <A, B, C, D> Map4<A, B, C, D, Tuple4<A, B, C, D>> toTuple4() {
-    return ID4;
+    return Tuple4::new;
   }
   
   /** A {@link Map5} object that maps 5 values to a {@link Tuple5} object. */
   @SuppressWarnings("unchecked")
+  @Deprecated
   public static <A, B, C, D, E> Map5<A, B, C, D, E, Tuple5<A, B, C, D, E>> toTuple5() {
-    return ID5;
+    return Tuple5::new;
   }
-  
-  private static final Unary<Object> ID = new Unary<Object>() {
-    @Override public Object map(Object v) {
-      return v;
-    }
-    @Override public String toString() {return "identity";}
-  };
-  
-  @SuppressWarnings("rawtypes")
-  private static final Map TO_STRING = new Map<Object, String>() {
-    @Override public String map(Object obj) {
-      return String.valueOf(obj);
-    }
-    @Override public String toString() {
-      return "toString";
-    }
-  };
   
   private Maps() {}
 }

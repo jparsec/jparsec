@@ -6,6 +6,8 @@ import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.asser
 import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.assertResult;
 import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.assertToString;
 
+import java.util.function.UnaryOperator;
+
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.examples.java.ast.declaration.DefBody;
@@ -131,39 +133,39 @@ public class ExpressionParserTest {
   @Test
   public void testInstanceOf() {
     assertToString(InstanceOfExpression.class, "(1 instanceof int)",
-        parse(ExpressionParser.INSTANCE_OF, "instanceof int").map(literal(1)));
+        parse(ExpressionParser.INSTANCE_OF, "instanceof int").apply(literal(1)));
     assertToString(InstanceOfExpression.class, "(1 instanceof List<int>)",
-        parse(ExpressionParser.INSTANCE_OF, "instanceof List<int>").map(literal(1)));
+        parse(ExpressionParser.INSTANCE_OF, "instanceof List<int>").apply(literal(1)));
   }
 
   @Test
   public void testQualifiedExpr() {
     assertToString(QualifiedExpression.class, "(1.foo)",
-        parse(ExpressionParser.QUALIFIED_EXPR, ".foo").map(literal(1)));
+        parse(ExpressionParser.QUALIFIED_EXPR, ".foo").apply(literal(1)));
   }
 
   @Test
   public void testSubscript() {
     assertToString(ArraySubscriptExpression.class, "1[foo]",
-        parse(ExpressionParser.subscript(IDENTIFIER), "[foo]").map(literal(1)));
+        parse(ExpressionParser.subscript(IDENTIFIER), "[foo]").apply(literal(1)));
   }
 
   @Test
   public void testQualifiedMethodCall() {
-    Parser<Unary<Expression>> parser = ExpressionParser.qualifiedMethodCall(IDENTIFIER);
+    Parser<UnaryOperator<Expression>> parser = ExpressionParser.qualifiedMethodCall(IDENTIFIER);
     assertToString(MethodCallExpression.class, "1.f(a, b)",
-        parse(parser, ".f(a,b)").map(literal(1)));
+        parse(parser, ".f(a,b)").apply(literal(1)));
     assertToString(MethodCallExpression.class, "1.f()",
-        parse(parser, ".f()").map(literal(1)));
+        parse(parser, ".f()").apply(literal(1)));
   }
 
   @Test
   public void testQualifiedNew() {
-    Parser<Unary<Expression>> parser = ExpressionParser.qualifiedNew(IDENTIFIER, EMPTY_BODY);
+    Parser<UnaryOperator<Expression>> parser = ExpressionParser.qualifiedNew(IDENTIFIER, EMPTY_BODY);
     assertToString(NewExpression.class, "1.new int(a, b) {}",
-        parse(parser, ".new int(a,b){}").map(literal(1)));
+        parse(parser, ".new int(a,b){}").apply(literal(1)));
     assertToString(NewExpression.class, "1.new int(a)",
-        parse(parser, ".new int(a)").map(literal(1)));
+        parse(parser, ".new int(a)").apply(literal(1)));
   }
 
   @Test
@@ -199,7 +201,7 @@ public class ExpressionParserTest {
   @Test
   public void testConditional() {
     assertToString(ConditionalExpression.class, "(1 ? a : 2)",
-        parse(ExpressionParser.conditional(IDENTIFIER), "?a:").map(literal(1), literal(2)));
+        parse(ExpressionParser.conditional(IDENTIFIER), "?a:").apply(literal(1), literal(2)));
   }
 
   @Test
