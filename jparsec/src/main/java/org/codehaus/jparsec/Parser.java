@@ -325,6 +325,8 @@ public abstract class Parser<T> {
   /**
    * {@code p.optional_()} is equivalent to {@code p?} in EBNF. {@code Optional.empty()}
    * is the result when {@code this} fails with no partial match.
+   *
+   * @since 3.0
    */
   public final Parser<Optional<T>> asOptional() {
     return map(Optional::of).optional(Optional.empty());
