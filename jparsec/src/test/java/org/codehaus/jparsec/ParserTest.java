@@ -16,13 +16,13 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.codehaus.jparsec.Parser.Mode;
 import org.codehaus.jparsec.easymock.BaseMockTest;
 import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.functors.Maps;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -35,7 +35,8 @@ import org.junit.runners.Parameterized;
 @RunWith(Parameterized.class)
 public class ParserTest extends BaseMockTest {
   
-  private static final Parser<Integer> INTEGER = Scanners.INTEGER.source().map(Integer::valueOf);
+  private static final Parser<Integer> INTEGER =
+      Scanners.INTEGER.source().map(Integer::valueOf).label("integer");
   private static final Parser<String> FOO = constant("foo");
   private static final Parser<String> FAILURE = Parsers.fail("failure");
   private static final Parser<Void> COMMA = Scanners.isChar(',');
@@ -279,6 +280,13 @@ public class ParserTest extends BaseMockTest {
     assertEquals((Object) 12, INTEGER.optional().parse("12", mode));
     assertEquals(null, INTEGER.optional().parse("", mode));
     assertFailure(mode, areChars("ab").optional(), "a", 1, 2);
+  }
+
+  @Test
+  public void testOptional_() {
+    assertEquals(Optional.of(12), INTEGER.optional_().parse("12", mode));
+    assertEquals(Optional.empty(), INTEGER.optional_().parse("", mode));
+    assertFailure(mode, areChars("ab").optional_(), "a", 1, 2);
   }
 
   @Test

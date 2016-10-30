@@ -18,6 +18,9 @@ import org.codehaus.jparsec.easymock.BaseMockTest;
 import org.codehaus.jparsec.functors.Map3;
 import org.codehaus.jparsec.functors.Map4;
 import org.codehaus.jparsec.functors.Map5;
+import org.codehaus.jparsec.functors.Map6;
+import org.codehaus.jparsec.functors.Map7;
+import org.codehaus.jparsec.functors.Map8;
 import org.codehaus.jparsec.functors.Tuples;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -170,7 +173,6 @@ public class ParsersTest extends BaseMockTest {
   @Test
   public void testPair() {
     Parser<?> parser = Parsers.pair(isChar('a'), isChar('b'));
-    assertEquals("pair", parser.toString());
     assertEquals(Tuples.pair('a', 'b'), parser.parse("ab", mode));
     assertFailure(mode, parser, "xb", 1, 1);
     assertFailure(mode, parser, "ax", 1, 2);
@@ -179,7 +181,6 @@ public class ParsersTest extends BaseMockTest {
   @Test
   public void testTuple_2Parsers() {
     Parser<?> parser = Parsers.tuple(isChar('a'), isChar('b'));
-    assertEquals("pair", parser.toString());
     assertEquals(Tuples.pair('a', 'b'), parser.parse("ab", mode));
     assertFailure(mode, parser, "xb", 1, 1);
     assertFailure(mode, parser, "ax", 1, 2);
@@ -188,7 +189,6 @@ public class ParsersTest extends BaseMockTest {
   @Test
   public void testTuple_3Parsers() {
     Parser<?> parser = Parsers.tuple(isChar('a'), isChar('b'), isChar('c'));
-    assertEquals("tuple", parser.toString());
     assertEquals(Tuples.tuple('a', 'b', 'c'), parser.parse("abc", mode));
     assertFailure(mode, parser, "xbc", 1, 1);
     assertFailure(mode, parser, "axc", 1, 2);
@@ -198,7 +198,6 @@ public class ParsersTest extends BaseMockTest {
   @Test
   public void testTuple_4Parsers() {
     Parser<?> parser = Parsers.tuple(isChar('a'), isChar('b'), isChar('c'), isChar('d'));
-    assertEquals("tuple", parser.toString());
     assertEquals(Tuples.tuple('a', 'b', 'c', 'd'), parser.parse("abcd", mode));
     assertFailure(mode, parser, "xbcd", 1, 1);
     assertFailure(mode, parser, "axcd", 1, 2);
@@ -210,7 +209,6 @@ public class ParsersTest extends BaseMockTest {
   public void testTuple_5Parsers() {
     Parser<?> parser =
         Parsers.tuple(isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'));
-    assertEquals("tuple", parser.toString());
     assertEquals(Tuples.tuple('a', 'b', 'c', 'd', 'e'), parser.parse("abcde", mode));
     assertFailure(mode, parser, "xbcde", 1, 1);
     assertFailure(mode, parser, "axcde", 1, 2);
@@ -559,6 +557,42 @@ public class ParsersTest extends BaseMockTest {
         Parsers.sequence(isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'), map5);
     assertEquals(map5.toString(), parser.toString());
     assertEquals((Object) 1, parser.parse("abcde", mode));
+  }
+  
+  @Mock Map6<Character, Character, Character, Character, Character, Character, Integer> map6;
+
+  @Test
+  public void testSequence_withMap6() {
+    expect(map6.map('a', 'b', 'c', 'd', 'e', 'f')).andReturn(1);
+    replay();
+    Parser<Integer> parser =
+        Parsers.sequence(isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'), isChar('f'), map6);
+    assertEquals(map6.toString(), parser.toString());
+    assertEquals((Object) 1, parser.parse("abcdef", mode));
+  }
+  
+  @Mock Map7<Character, Character, Character, Character, Character, Character, Character, Integer> map7;
+
+  @Test
+  public void testSequence_withMap7() {
+    expect(map7.map('a', 'b', 'c', 'd', 'e', 'f', 'g')).andReturn(1);
+    replay();
+    Parser<Integer> parser = Parsers.sequence(
+        isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'), isChar('f'), isChar('g'), map7);
+    assertEquals(map7.toString(), parser.toString());
+    assertEquals((Object) 1, parser.parse("abcdefg", mode));
+  }
+  
+  @Mock Map8<Character, Character, Character, Character, Character, Character, Character, Character, Integer> map8;
+
+  @Test
+  public void testSequence_withMap8() {
+    expect(map8.map('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h')).andReturn(1);
+    replay();
+    Parser<Integer> parser = Parsers.sequence(
+        isChar('a'), isChar('b'), isChar('c'), isChar('d'), isChar('e'), isChar('f'), isChar('g'), isChar('h'), map8);
+    assertEquals(map8.toString(), parser.toString());
+    assertEquals((Object) 1, parser.parse("abcdefgh", mode));
   }
 
   @Test

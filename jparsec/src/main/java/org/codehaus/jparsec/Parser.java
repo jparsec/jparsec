@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.CharBuffer;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -322,9 +323,20 @@ public abstract class Parser<T> {
   /**
    * {@code p.optional()} is equivalent to {@code p?} in EBNF. {@code null} is the result when
    * {@code this} fails with no partial match.
+   *
+   * @deprecated since 3.0. Use {@link #optional(null)} or {@link #optional_} instead.
    */
+  @Deprecated
   public final Parser<T> optional() {
     return Parsers.or(this, Parsers.<T>always());
+  }
+
+  /**
+   * {@code p.optional_()} is equivalent to {@code p?} in EBNF. {@code Optional.empty()}
+   * is the result when {@code this} fails with no partial match.
+   */
+  public final Parser<Optional<T>> optional_() {
+    return map(Optional::of).optional(Optional.empty());
   }
 
   /**
