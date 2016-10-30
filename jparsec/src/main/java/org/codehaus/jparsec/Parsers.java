@@ -893,15 +893,15 @@ public final class Parsers {
    * <p> {@code infixl(p, op)} is equivalent to {@code p (op p)*} in EBNF.
    * 
    * @param p the operand
-   * @param op the operator
+   * @param operator the operator
    * @return the new Parser object
    */
    static <T> Parser<T> infixl(
-       Parser<T> p, Parser<? extends BiFunction<? super T, ? super T, ? extends T>> op) {
+       Parser<T> p, Parser<? extends BiFunction<? super T, ? super T, ? extends T>> operator) {
+    BiFunction<BiFunction<? super T, ? super T, ? extends T>, T, Function<? super T, ? extends T>>
+    rightToLeft = (op, r) -> l -> op.apply(l, r);
     return p.next(first ->
-        sequence(op, p, fromOperatorAndRhsToClosure())
-            .many()
-            .map(maps -> applyInfixOperators(first, maps)));
+        sequence(operator, p, rightToLeft).many().map(maps -> applyInfixOperators(first, maps)));
   }
 
   /**
@@ -989,12 +989,6 @@ public final class Parsers {
         }
         return rhss.get(0).op.apply(first, o2);
       };
-  }
-
-  private static <A, B, R>
-  BiFunction<? super BiFunction<? super A, ? super B, ? extends R>, ? super B, Function<A, R>>
-  fromOperatorAndRhsToClosure() {
-    return (op, b) -> a -> op.apply(a, b);
   }
   
   private Parsers() {}
