@@ -991,7 +991,9 @@ public final class Parsers {
       };
   }
 
-  private static <A, B, R> BiFunction<BiFunction<A, B, R>, B, Function<A, R>> fromOperatorAndRhsToClosure() {
+  private static <A, B, R>
+  BiFunction<? super BiFunction<? super A, ? super B, ? extends R>, ? super B, Function<A, R>>
+  fromOperatorAndRhsToClosure() {
     return (op, b) -> a -> op.apply(a, b);
   }
   
