@@ -13,6 +13,14 @@
 
   <url>http://github.com/jparsec/jparsec</url>
 
+  <organization>
+    <name>jparsec</name>
+    <url>http://jparsec.org</url>
+  </organization>
+
+  <!-- Note this is the date the project's source code was ported to Github -->
+  <inceptionYear>2013</inceptionYear>
+  
   <distributionManagement>
     <repository>
       <id>sonatype</id>
@@ -55,6 +63,33 @@
     </developer>
   </developers>
 
+  <contributors>
+    <contributor>
+      <name>Alex Michael Berry</name>
+      <url>https://github.com/almibe</url>
+    </contributor>
+    <contributor>
+      <name>Gregory Ssi-Yan-Kai</name>
+      <url>https://github.com/gssiyankai</url>
+    </contributor>
+    <contributor>
+      <name>Michael</name>
+      <url>https://github.com/michbarsinai</url>
+    </contributor>
+    <contributor>
+      <name>Stepan Koltsov</name>
+      <url>https://github.com/stepancheg</url>
+    </contributor>
+    <contributor>
+      <name>Antoine Musso</name>
+      <url>https://github.com/hashar</url>
+    </contributor>
+    <contributor>
+      <name>Sergey</name>
+      <url>https://github.com/hsestupin</url>
+    </contributor>
+  </contributors>
+    
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
