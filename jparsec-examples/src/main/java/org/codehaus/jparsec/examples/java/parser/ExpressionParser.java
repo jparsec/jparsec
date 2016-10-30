@@ -19,8 +19,12 @@ import static org.codehaus.jparsec.Parsers.between;
 import static org.codehaus.jparsec.examples.java.parser.TerminalParser.phrase;
 import static org.codehaus.jparsec.examples.java.parser.TerminalParser.term;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import org.codehaus.jparsec.OperatorTable;
@@ -36,12 +40,16 @@ import org.codehaus.jparsec.examples.java.ast.expression.CastExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.CharLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.ClassLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.ConditionalExpression;
+import org.codehaus.jparsec.examples.java.ast.expression.ConstructorReference;
 import org.codehaus.jparsec.examples.java.ast.expression.DecimalPointNumberLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.Expression;
 import org.codehaus.jparsec.examples.java.ast.expression.Identifier;
 import org.codehaus.jparsec.examples.java.ast.expression.InstanceOfExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral;
+import org.codehaus.jparsec.examples.java.ast.expression.LambdaExpression;
+import org.codehaus.jparsec.examples.java.ast.expression.LambdaExpression.Parameter;
 import org.codehaus.jparsec.examples.java.ast.expression.MethodCallExpression;
+import org.codehaus.jparsec.examples.java.ast.expression.MethodReference;
 import org.codehaus.jparsec.examples.java.ast.expression.NewArrayExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.NewExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.NullExpression;
@@ -53,6 +61,9 @@ import org.codehaus.jparsec.examples.java.ast.expression.ScientificNumberLiteral
 import org.codehaus.jparsec.examples.java.ast.expression.StringLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.SuperExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.ThisExpression;
+import org.codehaus.jparsec.examples.java.ast.statement.ExpressionStatement;
+import org.codehaus.jparsec.examples.java.ast.statement.Statement;
+import org.codehaus.jparsec.examples.java.ast.type.TypeLiteral;
 
 /**
  * Parses java expression.
@@ -90,6 +101,15 @@ public final class ExpressionParser {
   static Parser<UnaryOperator<Expression>> subscript(Parser<Expression> expr) {
     return expr.between(term("["), term("]")).map(i -> a -> new ArraySubscriptExpression(a, i));
   }
+
+  static final Parser<UnaryOperator<Expression>> METHOD_REFERENCE = Parsers.sequence(
+      term("::"),
+      TypeLiteralParser.optionalTypeArgs(TypeLiteralParser.TYPE_LITERAL),
+      Terminals.Identifier.PARSER,
+      (__, typeParams, name) -> qualifier -> new MethodReference(qualifier, typeParams, name));
+
+  static final Parser<UnaryOperator<Expression>> CONSTRUCTOR_REFERENCE =
+      phrase(":: new").retn(ConstructorReference::new);
   
   static Parser<UnaryOperator<Expression>> qualifiedMethodCall(Parser<Expression> arg) {
     return Parsers.sequence(
@@ -180,18 +200,36 @@ public final class ExpressionParser {
   static final Parser<Expression> ATOM = Parsers.or(
         NULL, THIS, SUPER, CLASS_LITERAL, BOOLEAN_LITERAL, CHAR_LITERAL, STRING_LITERAL,
         SCIENTIFIC_LITERAL, INTEGER_LITERAL, DECIMAL_LITERAL, IDENTIFIER);
-  
-  static Parser<Expression> expression(Parser<Expression> atom, Parser<DefBody> classBody) {
+
+  static Parser<LambdaExpression> lambdaExpression(
+      Parser<Expression> expression, Parser<Statement> stmt) {
+    Parser<LambdaExpression.Parameter> typedParam = Parsers.sequence(
+        TypeLiteralParser.TYPE_LITERAL, Terminals.Identifier.PARSER,
+        LambdaExpression.Parameter::new);
+    Parser<Parameter> simpleParam = Terminals.Identifier.PARSER.map(LambdaExpression.Parameter::new);
+    Parser<LambdaExpression.Parameter> lambdaParam = typedParam.or(simpleParam);
+    Parser<List<LambdaExpression.Parameter>> params =
+        paren(lambdaParam.sepBy(term(","))).or(lambdaParam.map(Collections::singletonList));
+    Parser<Statement> body = StatementParser.blockStatement(stmt).<Statement>cast()
+        .or(expression.map(ExpressionStatement::new));
+    return Parsers.sequence(params, term("->").next(body), LambdaExpression::new);
+  }
+ 
+  static Parser<Expression> expression(
+      Parser<Expression> atom, Parser<DefBody> classBody, Parser<Statement> statement) {
     // atom is literal, name, "a.b.c.this", "super".
     Parser.Reference<Expression> ref = Parser.newReference();
     Parser<Expression> lazy = ref.lazy();
     atom = Parsers.or(castOrExpression(lazy), simpleNewExpression(lazy, classBody),
                 newArrayWithExplicitLength(lazy), newArrayWithoutExplicitLength(lazy),
-                simpleMethodCall(lazy), atom);
+                simpleMethodCall(lazy), lambdaExpression(lazy, statement),
+                atom);
     Parser<Expression> parser = new OperatorTable<Expression>()
         .postfix(subscript(lazy), 200)
         .postfix(qualifiedMethodCall(lazy), 200)
         .postfix(qualifiedNew(lazy, classBody), 200)
+        .postfix(METHOD_REFERENCE,  200)
+        .postfix(CONSTRUCTOR_REFERENCE, 20)
         .postfix(QUALIFIED_EXPR, 200)
         .postfix(postfix(Operator.POST_INC), 200)
         .postfix(postfix(Operator.POST_DEC), 200)
@@ -242,8 +280,9 @@ public final class ExpressionParser {
     return parser;
   }
   
-  public static Parser<Expression> expression(Parser<DefBody> classBody) {
-    return expression(ATOM, classBody);
+  public static Parser<Expression> expression(
+      Parser<DefBody> classBody, Parser<Statement> statement) {
+    return expression(ATOM, classBody, statement);
   }
   
   public static Parser<Expression> arrayInitializer(Parser<Expression> expr) {

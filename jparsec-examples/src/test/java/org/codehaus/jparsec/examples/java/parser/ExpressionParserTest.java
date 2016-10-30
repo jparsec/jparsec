@@ -20,12 +20,16 @@ import org.codehaus.jparsec.examples.java.ast.expression.CastExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.CharLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.ClassLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.ConditionalExpression;
+import org.codehaus.jparsec.examples.java.ast.expression.ConstructorReference;
 import org.codehaus.jparsec.examples.java.ast.expression.DecimalPointNumberLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.Expression;
 import org.codehaus.jparsec.examples.java.ast.expression.Identifier;
 import org.codehaus.jparsec.examples.java.ast.expression.InstanceOfExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral;
+import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral.Radix;
+import org.codehaus.jparsec.examples.java.ast.expression.LambdaExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.MethodCallExpression;
+import org.codehaus.jparsec.examples.java.ast.expression.MethodReference;
 import org.codehaus.jparsec.examples.java.ast.expression.NewArrayExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.NewExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.NullExpression;
@@ -37,8 +41,6 @@ import org.codehaus.jparsec.examples.java.ast.expression.ScientificNumberLiteral
 import org.codehaus.jparsec.examples.java.ast.expression.StringLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.SuperExpression;
 import org.codehaus.jparsec.examples.java.ast.expression.ThisExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral.Radix;
-import org.codehaus.jparsec.functors.Unary;
 import org.junit.Test;
 
 /**
@@ -225,7 +227,8 @@ public class ExpressionParserTest {
 
   @Test
   public void testExpression() {
-    Parser<Expression> parser = ExpressionParser.expression(IDENTIFIER, EMPTY_BODY);
+    Parser<Expression> parser =
+        ExpressionParser.expression(IDENTIFIER, EMPTY_BODY, StatementParser.expression(IDENTIFIER));
     assertResult(parser, "foo", Identifier.class, "foo");
     assertResult(parser, "(foo)", Identifier.class, "foo");
     assertResult(parser, "((foo))", Identifier.class, "foo");
@@ -286,6 +289,21 @@ public class ExpressionParserTest {
     assertResult(parser, "a>>>=b>>>=c", BinaryExpression.class, "(a >>>= (b >>>= c))");
     assertResult(parser, "a<<=b<<=c", BinaryExpression.class, "(a <<= (b <<= c))");
     assertResult(parser, "a^=b^=c", BinaryExpression.class, "(a ^= (b ^= c))");
+    assertResult(parser, "Foo::new", ConstructorReference.class, "Foo::new");
+    assertResult(parser, "Foo.Bar::new", ConstructorReference.class, "(Foo.Bar)::new");
+    assertResult(parser, "x::new", ConstructorReference.class, "x::new");
+    assertResult(parser, "Foo::create", MethodReference.class, "Foo::create");
+    assertResult(parser, "Foo.Bar::create", MethodReference.class, "(Foo.Bar)::create");
+    assertResult(parser, "x::create", MethodReference.class, "x::create");
+    assertResult(parser, "Foo::<T>create", MethodReference.class, "Foo::<T>create");
+    assertResult(parser, "Foo.Bar::<T>create", MethodReference.class, "(Foo.Bar)::<T>create");
+    assertResult(parser, "x::<String>create", MethodReference.class, "x::<String>create");
+    assertResult(parser, "() -> a", LambdaExpression.class, "() -> a;");
+    assertResult(parser, "() -> {a;}", LambdaExpression.class, "() -> {a;}");
+    assertResult(parser, "x -> {}", LambdaExpression.class, "(x) -> {}");
+    assertResult(parser, "(x, y) -> {}", LambdaExpression.class, "(x, y) -> {}");
+    assertResult(parser, "(String x, int y) -> {}", LambdaExpression.class, "(String x, int y) -> {}");
+    assertResult(parser, "(String x, int y) -> {xyz;}", LambdaExpression.class, "(String x, int y) -> {xyz;}");
   }
 
   @Test

@@ -220,7 +220,7 @@ public class TerminalsTest {
     parser.parse("hello   world");
     assertFailure(mode, parser, "hello hell", 1, 7, "world");
     assertFailure(mode, parser, "hell", 1, 1, "hello world");
-    assertParser(mode, parser.optional(), "hello hell", null, "hello hell");
+    assertParser(mode, parser.optional(null), "hello hell", null, "hello hell");
   }
 
   @Test

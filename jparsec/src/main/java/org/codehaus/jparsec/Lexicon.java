@@ -92,17 +92,15 @@ class Lexicon {
   
   /** Returns a {@link Lexicon} instance that's a union of {@code this} and {@code that}. */
   Lexicon union(Lexicon that) {
-    return new Lexicon(
-        fallback(words, that.words),
-        Parsers.or(tokenizer, that.tokenizer));
+    return new Lexicon(fallback(words, that.words), Parsers.or(tokenizer, that.tokenizer));
   }
 
   /**
-   * Returns a {@link Map} that delegates to {@code map} and falls back to {@code defaultMap} for
-   * null return values.
+   * Returns a {@link Function} that delegates to {@code function} and falls back to
+   * {@code defaultFunction} for null return values.
    */
-  private static <F, T> Function<F, T> fallback(
-      final Function<F, T> function, final Function<? super F, ? extends T> defaultFunction) {
+  static <F, T> Function<F, T> fallback(
+      Function<F, T> function, Function<? super F, ? extends T> defaultFunction) {
     return from -> {
       T result = function.apply(from);
       return result == null ? defaultFunction.apply(from) : result;

@@ -4,7 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
-import org.codehaus.jparsec.functors.Map2;
+import java.util.function.BiFunction;
+
 import org.codehaus.jparsec.functors.Map3;
 import org.codehaus.jparsec.functors.Map4;
 import org.codehaus.jparsec.functors.Map5;
@@ -31,16 +32,16 @@ public class InternalFunctorsTest {
 
   @Test
   public void testFirstOfTwo() {
-    Map2<String, Integer, String> map = InternalFunctors.firstOfTwo();
+    BiFunction<String, Integer, String> map = InternalFunctors.firstOfTwo();
     assertEquals("followedBy", map.toString());
-    assertEquals("one", map.map("one", 2));
+    assertEquals("one", map.apply("one", 2));
   }
 
   @Test
   public void testLastOfTwo() {
-    Map2<Integer, String, String> map = InternalFunctors.lastOfTwo();
+    BiFunction<Integer, String, String> map = InternalFunctors.lastOfTwo();
     assertEquals("sequence", map.toString());
-    assertEquals("two", map.map(1, "two"));
+    assertEquals("two", map.apply(1, "two"));
   }
 
   @Test

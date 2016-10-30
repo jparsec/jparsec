@@ -2,6 +2,7 @@ package org.codehaus.jparsec;
 
 import java.util.Comparator;
 import java.util.Locale;
+import java.util.function.Function;
 
 enum StringCase implements Comparator<String> {
   CASE_SENSITIVE {
@@ -24,12 +25,7 @@ enum StringCase implements Comparator<String> {
 
   abstract String toKey(String k);
 
-  final <T> org.codehaus.jparsec.functors.Map<String, T> toMap(
-      final java.util.Map<String, T> m) {
-    return new org.codehaus.jparsec.functors.Map<String,T>() {
-      @Override public T map(String key) {
-        return m.get(toKey(key));
-      }
-    };
+  final <T> Function<String, T> byKey(Function<String, T> function) {
+    return k -> function.apply(toKey(k));
   }
 }

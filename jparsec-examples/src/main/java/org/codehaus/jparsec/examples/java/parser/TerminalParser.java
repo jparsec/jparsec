@@ -24,7 +24,6 @@ import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.Scanners;
 import org.codehaus.jparsec.Terminals;
 import org.codehaus.jparsec.Token;
-import org.codehaus.jparsec.functors.Map;
 
 /**
  * Parser for terminals.
@@ -40,7 +39,7 @@ public final class TerminalParser {
           ">", "<", "==", ">=", "<=", "!=", "&&", "||", "!",
           ".", ",",  "?", ":", ";", "...", "@",
           "=", "+=", "-=", "*=", "/=", "%=", "^=", "&=", "|=", "<<=", ">>=", ">>>=", "++", "--",
-          "(", ")", "[", "]", "{", "}")
+          "(", ")", "[", "]", "{", "}", "::", "->")
       .words(JavaLexer.IDENTIFIER)
       .keywords("private", "protected", "public", "final", "abstract", "native", "static",
           "transient", "volatile", "throws", "class", "interface", "enum", "package", "import",
@@ -66,8 +65,7 @@ public final class TerminalParser {
    * adjacent.
    */
   public static Parser<Token> adjacent(Parser<List<Token>> parser, final Parser<?> otherwise) {
-    return parser.next(new Map<List<Token>, Parser<?>>() {
-      @Override public Parser<?> map(List<Token> tokens) {
+    return parser.next(tokens -> {
         if (tokens.isEmpty()) return Parsers.always();
         int offset = tokens.get(0).index();
         for (Token token : tokens) {
@@ -77,8 +75,7 @@ public final class TerminalParser {
           offset += token.length();
         }
         return Parsers.always();
-      }
-    }).atomic().source().token();
+      }).atomic().source().token();
   }
   
   /**

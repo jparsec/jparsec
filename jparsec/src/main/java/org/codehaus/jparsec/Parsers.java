@@ -18,22 +18,19 @@ package org.codehaus.jparsec;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
-import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.functors.Map3;
 import org.codehaus.jparsec.functors.Map4;
 import org.codehaus.jparsec.functors.Map5;
 import org.codehaus.jparsec.functors.Map6;
 import org.codehaus.jparsec.functors.Map7;
 import org.codehaus.jparsec.functors.Map8;
-import org.codehaus.jparsec.functors.Maps;
 import org.codehaus.jparsec.functors.Pair;
 import org.codehaus.jparsec.functors.Tuple3;
 import org.codehaus.jparsec.functors.Tuple4;
 import org.codehaus.jparsec.functors.Tuple5;
-import org.codehaus.jparsec.functors.Tuples;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
 
@@ -909,7 +906,7 @@ public final class Parsers {
 
   /**
    * Right associative infix operator. Runs Parser {@code p} and then runs
-   * {@code op} and {@code p} for 0 or more times greedily. The {@link Map}
+   * {@code op} and {@code p} for 0 or more times greedily. The {@link Function}
    * objects returned from {@code op} are applied from right to left to the
    * return values of {@code p}. For example: {@code a + b+c + d} is evaluated as
    * {@code a+(b+(c + d))}.

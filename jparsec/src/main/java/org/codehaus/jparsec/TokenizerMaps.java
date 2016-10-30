@@ -15,37 +15,38 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
+import java.util.function.Function;
+
 import org.codehaus.jparsec.Tokens.Fragment;
 import org.codehaus.jparsec.Tokens.ScientificNotation;
 import org.codehaus.jparsec.Tokens.Tag;
-import org.codehaus.jparsec.functors.Map;
 
 /**
- * Common {@link Map} implementations that maps from {@link String}.
+ * Common {@link Function} implementations that maps from {@link String}.
  * 
  * @author Ben Yu
  */
 final class TokenizerMaps {
 
-  /** A {@link Map} that returns a {@link Tokens.Fragment} tagged as {@link Tag#RESERVED}. */
-  static final Map<String, Fragment> RESERVED_FRAGMENT = fragment(Tag.RESERVED);
+  /** A {@link Function} that returns a {@link Tokens.Fragment} tagged as {@link Tag#RESERVED}. */
+  static final Function<String, Fragment> RESERVED_FRAGMENT = fragment(Tag.RESERVED);
   
-  /** A {@link Map} that returns a {@link Tokens.Fragment} tagged as {@link Tag#IDENTIFIER}. */
-  static final Map<String, Fragment> IDENTIFIER_FRAGMENT = fragment(Tag.IDENTIFIER);
+  /** A {@link Function} that returns a {@link Tokens.Fragment} tagged as {@link Tag#IDENTIFIER}. */
+  static final Function<String, Fragment> IDENTIFIER_FRAGMENT = fragment(Tag.IDENTIFIER);
   
-  /** A {@link Map} that returns a {@link Tokens.Fragment} tagged as {@link Tag#INTEGER}. */
-  static final Map<String, Fragment> INTEGER_FRAGMENT = fragment(Tag.INTEGER);
+  /** A {@link Function} that returns a {@link Tokens.Fragment} tagged as {@link Tag#INTEGER}. */
+  static final Function<String, Fragment> INTEGER_FRAGMENT = fragment(Tag.INTEGER);
   
-  /** A {@link Map} that returns a {@link Tokens.Fragment} tagged as {@link Tag#DECIMAL}. */
-  static final Map<String, Fragment> DECIMAL_FRAGMENT = fragment(Tag.DECIMAL);
+  /** A {@link Function} that returns a {@link Tokens.Fragment} tagged as {@link Tag#DECIMAL}. */
+  static final Function<String, Fragment> DECIMAL_FRAGMENT = fragment(Tag.DECIMAL);
   
   /**
-   * A {@link Map} that recognizes a scientific notation
+   * A {@link Function} that recognizes a scientific notation
    * and tokenizes to a {@link ScientificNotation}.
    */
-  static final Map<String, ScientificNotation> SCIENTIFIC_NOTATION =
-      new Map<String, ScientificNotation>() {
-        @Override public ScientificNotation map(String text) {
+  static final Function<String, ScientificNotation> SCIENTIFIC_NOTATION =
+      new Function<String, ScientificNotation>() {
+        @Override public ScientificNotation apply(String text) {
           int e = text.indexOf('e');
           if (e < 0) {
             e = text.indexOf('E');
@@ -61,12 +62,12 @@ final class TokenizerMaps {
       };
   
   /**
-   * A {@link Map} that recognizes a string literal quoted by double quote character
+   * A {@link Function} that recognizes a string literal quoted by double quote character
    * ({@code "}) and tokenizes to a {@code String}. The backslash character ({@code \}) is
    * interpreted as escape.
    */
-  static final Map<String, String> DOUBLE_QUOTE_STRING = new Map<String, String>() {
-    @Override public String map(String text) {
+  static final Function<String, String> DOUBLE_QUOTE_STRING = new Function<String, String>() {
+    @Override public String apply(String text) {
       return StringLiteralsTranslator.tokenizeDoubleQuote(text);
     }
     @Override public String toString() {
@@ -75,12 +76,12 @@ final class TokenizerMaps {
   };
 
   /**
-   * A {@link Map} that tokenizes a SQL style string literal quoted by single quote character
+   * A {@link Function} that tokenizes a SQL style string literal quoted by single quote character
    * ({@code '}) and tokenizes to a {@code String}. Two adjacent single quote characters
    * ({@code ''}) are escaped as one single quote character.
    */
-  static final Map<String, String> SINGLE_QUOTE_STRING = new Map<String, String>() {
-    @Override public String map(String text) {      
+  static final Function<String, String> SINGLE_QUOTE_STRING = new Function<String, String>() {
+    @Override public String apply(String text) {      
       return StringLiteralsTranslator.tokenizeSingleQuote(text);
     }
     @Override public String toString() {
@@ -89,12 +90,12 @@ final class TokenizerMaps {
   };
   
   /**
-   * A {@link Map} that recognizes a character literal quoted by single quote characte
+   * A {@link Function} that recognizes a character literal quoted by single quote characte
    * ({@code '} and tokenizes to a {@link Character}. The backslash character ({@code \}) is
    * interpreted as escape. 
    */
-  static final Map<String, Character> SINGLE_QUOTE_CHAR = new Map<String, Character>() {
-    @Override public Character map(String text) {
+  static final Function<String, Character> SINGLE_QUOTE_CHAR = new Function<String, Character>() {
+    @Override public Character apply(String text) {
       int len = text.length();
       if (len == 3) return text.charAt(1);
       else if (len == 4) return text.charAt(2);
@@ -106,11 +107,11 @@ final class TokenizerMaps {
   };
   
   /**
-   * A {@link Map} that interprets the recognized character range
+   * A {@link Function} that interprets the recognized character range
    * as a decimal integer and tokenizes to a {@link Long}.
    */
-  static final Map<String, Long> DEC_AS_LONG = new Map<String, Long>() {
-    @Override public Long map(String text) {
+  static final Function<String, Long> DEC_AS_LONG = new Function<String, Long>() {
+    @Override public Long apply(String text) {
       return NumberLiteralsTranslator.tokenizeDecimalAsLong(text);
     }
     @Override public String toString() {
@@ -119,11 +120,11 @@ final class TokenizerMaps {
   };
   
   /**
-   * A {@link Map} that interprets the recognized character range
+   * A {@link Function} that interprets the recognized character range
    * as a octal integer and tokenizes to a {@link Long}.
    */
-  static final Map<String, Long> OCT_AS_LONG = new Map<String, Long>() {
-    @Override public Long map(String text) {
+  static final Function<String, Long> OCT_AS_LONG = new Function<String, Long>() {
+    @Override public Long apply(String text) {
       return NumberLiteralsTranslator.tokenizeOctalAsLong(text);
     }
     @Override public String toString() {
@@ -132,11 +133,11 @@ final class TokenizerMaps {
   };
   
   /**
-   * A {@link Map} that interprets the recognized character range
+   * A {@link Function} that interprets the recognized character range
    * as a hexadecimal integer and tokenizes to a {@link Long}.
    */
-  static final Map<String, Long> HEX_AS_LONG = new Map<String, Long>() {
-    @Override public Long map(String text) {
+  static final Function<String, Long> HEX_AS_LONG = new Function<String, Long>() {
+    @Override public Long apply(String text) {
       return NumberLiteralsTranslator.tokenizeHexAsLong(text);
     }
     @Override public String toString() {
@@ -148,9 +149,9 @@ final class TokenizerMaps {
    * Returns a map that tokenizes the recognized character range to a
    * {@link Tokens.Fragment} object tagged with {@code tag}.
    */
-  static Map<String, Fragment> fragment(final Object tag) {
-    return new Map<String, Fragment>() {
-      @Override public Fragment map(String text) {
+  static Function<String, Fragment> fragment(final Object tag) {
+    return new Function<String, Fragment>() {
+      @Override public Fragment apply(String text) {
         return Tokens.fragment(text, tag);
       }
       @Override public String toString() {

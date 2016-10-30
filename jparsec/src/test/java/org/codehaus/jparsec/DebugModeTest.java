@@ -9,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.pattern.CharPredicates;
 import org.junit.Test;
 
@@ -18,11 +17,9 @@ public class DebugModeTest {
   @Test
   public void runtimeExceptionPopulatesErrorParseTree() {
     Parser<?> parser = Scanners.string("hello").source().label("word")
-        .map(new Map<Object, String>() {
-          @Override public String map(Object from) {
+        .map(from -> {
             throw new RuntimeException("intentional");
-          }
-        }).label("throws");
+         }).label("throws");
     try {
       parser.parse("hello", Parser.Mode.DEBUG);
       fail();
@@ -251,7 +248,7 @@ public class DebugModeTest {
 
   @Test
   public void failedOptionalAttemptDoesNotPopulateErrorParseTree() {
-    Parser<?> parser = Scanners.string("hello ").label("hi").optional().source();
+    Parser<?> parser = Scanners.string("hello ").label("hi").asOptional().source();
     try {
       parser.parse("helloworld", Parser.Mode.DEBUG);
       fail();
@@ -262,7 +259,14 @@ public class DebugModeTest {
 
   @Test
   public void succeededOptionalAttemptDoesNotPopulateParseTree() {
-    Parser<?> parser = Scanners.string("hello").label("hi").optional().source();
+    Parser<?> parser = Scanners.string("hello").label("hi").optional(null).source();
+    ParseTree tree = parser.parseTree("hello");
+    assertParseTree(rootNode("hello", node("hi", null, "hello")), tree);
+  }
+
+  @Test
+  public void succeededAsOptionalAttemptDoesNotPopulateParseTree() {
+    Parser<?> parser = Scanners.string("hello").label("hi").source().asOptional();
     ParseTree tree = parser.parseTree("hello");
     assertParseTree(rootNode("hello", node("hi", null, "hello")), tree);
   }

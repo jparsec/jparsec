@@ -31,7 +31,6 @@ import org.codehaus.jparsec.examples.java.ast.type.LowerBoundWildcard;
 import org.codehaus.jparsec.examples.java.ast.type.SimpleTypeLiteral;
 import org.codehaus.jparsec.examples.java.ast.type.TypeLiteral;
 import org.codehaus.jparsec.examples.java.ast.type.UpperBoundWildcard;
-import org.codehaus.jparsec.functors.Maps;
 
 /**
  * Parses any type literal.
@@ -60,7 +59,7 @@ public final class TypeLiteralParser {
     Parser<TypeLiteral> arg = wildcard(lazy).or(lazy);
     Parser<String> nativeTypeName = TerminalParser.oneOf(
         "byte", "short", "int", "long", "boolean", "char", "float", "double", "void")
-        .map(Maps.mapToString());
+        .map(Object::toString);
     Parser<String> typeName = nativeTypeName.or(Terminals.Identifier.PARSER);
     Parser<TypeLiteral> parser = Parsers.sequence(
         typeName.sepBy1(term(".")), TypeLiteralParser.optionalTypeArgs(arg),

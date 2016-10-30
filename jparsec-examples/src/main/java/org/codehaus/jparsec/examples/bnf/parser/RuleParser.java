@@ -30,7 +30,6 @@ import org.codehaus.jparsec.examples.bnf.ast.Rule;
 import org.codehaus.jparsec.examples.bnf.ast.RuleDef;
 import org.codehaus.jparsec.examples.bnf.ast.RuleReference;
 import org.codehaus.jparsec.examples.bnf.ast.SequentialRule;
-import org.codehaus.jparsec.functors.Map;
 
 /**
  * Parser for bnf rules.
@@ -64,18 +63,10 @@ public final class RuleParser {
   }
   
   static Parser<Rule> sequential(Parser<Rule> rule) {
-    return rule.many1().map(new Map<List<Rule>, Rule>() {
-      @Override public Rule map(List<Rule> list) {
-        return list.size() == 1 ? list.get(0) : new SequentialRule(list);
-      }
-    });
+    return rule.many1().map(list -> list.size() == 1 ? list.get(0) : new SequentialRule(list));
   }
-  
+
   static Parser<Rule> alternative(Parser<Rule> rule) {
-    return rule.sepBy1(term("|")).map(new Map<List<Rule>, Rule>() {
-      @Override public Rule map(List<Rule> list) {
-        return list.size() == 1 ? list.get(0) : new AltRule(list);
-      }
-    });
+    return rule.sepBy1(term("|")).map(list -> list.size() == 1 ? list.get(0) : new AltRule(list));
   }
 }

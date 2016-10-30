@@ -48,7 +48,8 @@ public class ReluctantBetweenTest {
 		assertEquals("hello",
 		    Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')).parse("(hello)", mode));
 		assertEquals("hello",
-		    Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')').optional()).parse("(hello", mode));
+		    Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')').optional(null))
+		        .parse("(hello", mode));
 		assertEquals("",
 		    Scanners.IDENTIFIER.many().source().reluctantBetween(isChar('('), isChar(')')).parse("()", mode));
 	}

@@ -15,7 +15,8 @@
  *****************************************************************************/
 package org.codehaus.jparsec;
 
-import org.codehaus.jparsec.functors.Map2;
+import java.util.function.BiFunction;
+
 import org.codehaus.jparsec.functors.Map3;
 import org.codehaus.jparsec.functors.Map4;
 import org.codehaus.jparsec.functors.Map5;
@@ -39,8 +40,8 @@ final class InternalFunctors {
   }
   
   @SuppressWarnings("rawtypes")
-  private static final Map2 FIRST_OF_TWO = new Map2() {
-    @Override public Object map(Object first, Object b) {
+  private static final BiFunction FIRST_OF_TWO = new BiFunction() {
+    @Override public Object apply(Object first, Object b) {
       return first;
     }
     @Override public String toString() {
@@ -49,8 +50,8 @@ final class InternalFunctors {
   };
   
   @SuppressWarnings("rawtypes")
-  private static final Map2 LAST_OF_TWO = new Map2() {
-    @Override public Object map(Object a, Object last) {
+  private static final BiFunction LAST_OF_TWO = new BiFunction() {
+    @Override public Object apply(Object a, Object last) {
       return last;
     }
     @Override public String toString() {
@@ -89,12 +90,12 @@ final class InternalFunctors {
   };
   
   @SuppressWarnings("unchecked")
-  static <T, B> Map2<T, B, T> firstOfTwo() {
+  static <T, B> BiFunction<T, B, T> firstOfTwo() {
     return FIRST_OF_TWO;
   }
   
   @SuppressWarnings("unchecked")
-  static<A, T> Map2<A, T, T> lastOfTwo() {
+  static<A, T> BiFunction<A, T, T> lastOfTwo() {
     return LAST_OF_TWO;
   }
   

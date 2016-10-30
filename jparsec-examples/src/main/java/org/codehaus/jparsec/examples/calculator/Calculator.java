@@ -17,12 +17,12 @@ package org.codehaus.jparsec.examples.calculator;
 
 import static org.codehaus.jparsec.Scanners.isChar;
 
+import java.util.function.BinaryOperator;
+import java.util.function.UnaryOperator;
+
 import org.codehaus.jparsec.OperatorTable;
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.functors.Binary;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Unary;
 
 /**
  * The main calculator parser.
@@ -36,47 +36,19 @@ public final class Calculator {
     return parser().parse(source);
   }
   
-  static final Parser<Integer> NUMBER = Scanners.INTEGER.map(new Map<String, Integer>() {
-    @Override public Integer map(String text) {
-      return Integer.valueOf(text);
-    }
-  });
+  static final Parser<Integer> NUMBER = Scanners.INTEGER.map(Integer::valueOf);
   
-  static final Binary<Integer> PLUS = new Binary<Integer>() {
-    @Override public Integer map(Integer a, Integer b) {
-      return a + b;
-    }
-  };
+  static final BinaryOperator<Integer> PLUS = (a, b) -> a + b;
   
-  static final Binary<Integer> MINUS = new Binary<Integer>() {
-    @Override public Integer map(Integer a, Integer b) {
-      return a - b;
-    }
-  };
+  static final BinaryOperator<Integer> MINUS = (a, b) -> a - b;
   
-  static final Binary<Integer> MUL = new Binary<Integer>() {
-    @Override public Integer map(Integer a, Integer b) {
-      return a * b;
-    }
-  };
+  static final BinaryOperator<Integer> MUL = (a, b) -> a * b;
   
-  static final Binary<Integer> DIV = new Binary<Integer>() {
-    @Override public Integer map(Integer a, Integer b) {
-      return a / b;
-    }
-  };
+  static final BinaryOperator<Integer> DIV = (a, b) -> a / b;
   
-  static final Binary<Integer> MOD = new Binary<Integer>() {
-    @Override public Integer map(Integer a, Integer b) {
-      return a % b;
-    }
-  };
+  static final BinaryOperator<Integer> MOD = (a, b) -> a % b;
   
-  static final Unary<Integer> NEG = new Unary<Integer>() {
-    @Override public Integer map(Integer i) {
-      return -i;
-    }
-  };
+  static final UnaryOperator<Integer> NEG = a -> -a;
   
   private static <T> Parser<T> op(char ch, T value) {
     return isChar(ch).retn(value);

@@ -283,10 +283,10 @@ public class ParserTest extends BaseMockTest {
   }
 
   @Test
-  public void testOptional_() {
-    assertEquals(Optional.of(12), INTEGER.optional_().parse("12", mode));
-    assertEquals(Optional.empty(), INTEGER.optional_().parse("", mode));
-    assertFailure(mode, areChars("ab").optional_(), "a", 1, 2);
+  public void testAsOptional() {
+    assertEquals(Optional.of(12), INTEGER.asOptional().parse("12", mode));
+    assertEquals(Optional.empty(), INTEGER.asOptional().parse("", mode));
+    assertFailure(mode, areChars("ab").asOptional(), "a", 1, 2);
   }
 
   @Test

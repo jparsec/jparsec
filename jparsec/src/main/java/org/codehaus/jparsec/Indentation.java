@@ -110,14 +110,8 @@ public final class Indentation {
    */
   public Parser<List<Token>> lexer(Parser<?> tokenizer, Parser<?> delim) {
     Parser<?> lf = Scanners.isChar('\n').retn(Punctuation.LF);
-    return Parsers.or(tokenizer, lf).lexer(delim).map(new Unary<List<Token>>() {
-      @Override public List<Token> map(List<Token> tokens) {
-        return analyzeIndentations(tokens, Punctuation.LF);
-      }
-      @Override public String toString() {
-        return "lexer";
-      }
-    });
+    return Parsers.or(tokenizer, lf).lexer(delim)
+        .map(tokens -> analyzeIndentations(tokens, Punctuation.LF));
   }
   
   private static Parser<Token> token(Object value) {

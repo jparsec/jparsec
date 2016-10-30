@@ -25,9 +25,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.codehaus.jparsec.error.ParserException;
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
-import org.codehaus.jparsec.functors.Maps;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Checks;
 
@@ -105,16 +102,10 @@ public abstract class Parser<T> {
    * expression as input and outputs the full ternary expression: <pre>   {@code
    *   Parser<Expr> ternary(Parser<Expr> expr) {
    *     return expr.postfix(
-   *       Parsers.sequence(terms.token("?"), expr, terms.token(":"), expr,
-   *       new Map4<...>() {
-   *         public Unary<Expr> map(unused, consequence, unused, alternative) {
-   *           // (condition) -> Ternary(condition, consequence, alternative)
-   *           return new Unary<Expr>() {
-   *             ...
-   *             return new TernaryExpr(condition, consequence, alternative);
-   *           }
-   *         }
-   *       }));
+   *       Parsers.sequence(
+   *           terms.token("?"), expr, terms.token(":"), expr,
+   *           (unused, then, unused, orelse) -> cond ->
+   *               new TernaryExpr(cond, then, orelse)));
    *   }
    * }</pre>
    */
@@ -335,7 +326,7 @@ public abstract class Parser<T> {
    * {@code p.optional_()} is equivalent to {@code p?} in EBNF. {@code Optional.empty()}
    * is the result when {@code this} fails with no partial match.
    */
-  public final Parser<Optional<T>> optional_() {
+  public final Parser<Optional<T>> asOptional() {
     return map(Optional::of).optional(Optional.empty());
   }
 
@@ -566,8 +557,9 @@ public abstract class Parser<T> {
   }
 
   /**
-   * A {@link Parser} that runs {@code op} for 0 or more times greedily, then runs {@code this}. The {@link Map}
-   * objects returned from {@code op} are applied from right to left to the return value of {@code p}.
+   * A {@link Parser} that runs {@code op} for 0 or more times greedily, then runs {@code this}.
+   * The {@link Function} objects returned from {@code op} are applied from right to left to the
+   * return value of {@code p}.
    *
    * <p> {@code p.prefix(op)} is equivalent to {@code op* p} in EBNF.
    */
@@ -577,7 +569,7 @@ public abstract class Parser<T> {
 
   /**
    * A {@link Parser} that runs {@code this} and then runs {@code op} for 0 or more times greedily.
-   * The {@link Map} objects returned from {@code op} are applied from left to right to the return
+   * The {@link Function} objects returned from {@code op} are applied from left to right to the return
    * value of p.
    *
    * <p>This is the preferred API to avoid {@code StackOverflowError} in left-recursive parsers.
@@ -599,16 +591,10 @@ public abstract class Parser<T> {
    * expression as input and outputs the full ternary expression: <pre>   {@code
    *   Parser<Expr> ternary(Parser<Expr> expr) {
    *     return expr.postfix(
-   *       Parsers.sequence(terms.token("?"), expr, terms.token(":"), expr,
-   *       new Map4<...>() {
-   *         public Unary<Expr> map(unused, consequence, unused, alternative) {
-   *           // (condition) -> Ternary(condition, consequence, alternative)
-   *           return new Unary<Expr>() {
-   *             ...
-   *             return new TernaryExpr(condition, consequence, alternative);
-   *           }
-   *         }
-   *       }));
+   *       Parsers.sequence(
+   *           terms.token("?"), expr, terms.token(":"), expr,
+   *           (unused, then, unused, orelse) -> cond ->
+   *               new TernaryExpr(cond, then, orelse)));
    *   }
    * }</pre>
    * {@link OperatorTable} also handles left recursion transparently.
@@ -620,8 +606,10 @@ public abstract class Parser<T> {
   }
 
   /**
-   * A {@link Parser} that parses non-associative infix operator. Runs {@code this} for the left operand, and then
-   * runs {@code op} and {@code this} for the operator and the right operand optionally. The {@link Map2} objects
+   * A {@link Parser} that parses non-associative infix operator.
+   * Runs {@code this} for the left operand, and then
+   * runs {@code op} and {@code this} for the operator and the right operand optionally.
+   * The {@link BiFunction} objects
    * returned from {@code op} are applied to the return values of the two operands, if any.
    *
    * <p> {@code p.infixn(op)} is equivalent to {@code p (op p)?} in EBNF.
@@ -632,9 +620,10 @@ public abstract class Parser<T> {
 
   /**
    * A {@link Parser} for left-associative infix operator. Runs {@code this} for the left operand, and then runs
-   * {@code op} and {@code this} for the operator and the right operand for 0 or more times greedily. The {@link Map2}
-   * objects returned from {@code op} are applied from left to right to the return values of {@code this}, if any. For
-   * example: {@code a + b + c + d} is evaluated as {@code (((a + b)+c)+d)}.
+   * {@code op} and {@code this} for the operator and the right operand for 0 or more times greedily.
+   * The {@link BiFunction} objects returned from {@code op} are applied from left to right to the
+   * return values of {@code this}, if any. For example:
+   * {@code a + b + c + d} is evaluated as {@code (((a + b)+c)+d)}.
    *
    * <p> {@code p.infixl(op)} is equivalent to {@code p (op p)*} in EBNF.
    */
@@ -644,10 +633,12 @@ public abstract class Parser<T> {
   }
 
   /**
-   * A {@link Parser} for right-associative infix operator. Runs {@code this} for the left operand, and then runs
-   * {@code op} and {@code this} for the operator and the right operand for 0 or more times greedily. The {@link Map2}
-   * objects returned from {@code op} are applied from right to left to the return values of {@code this}, if any. For
-   * example: {@code a + b + c + d} is evaluated as {@code a + (b + (c + d))}.
+   * A {@link Parser} for right-associative infix operator. Runs {@code this} for the left operand,
+   * and then runs {@code op} and {@code this} for the operator and the right operand for
+   * 0 or more times greedily.
+   * The {@link BiFunction} objects returned from {@code op} are applied from right to left to the
+   * return values of {@code this}, if any. For example: {@code a + b + c + d} is evaluated as
+   * {@code a + (b + (c + d))}.
    *
    * <p> {@code p.infixr(op)} is equivalent to {@code p (op p)*} in EBNF.
    */
@@ -778,7 +769,7 @@ public abstract class Parser<T> {
    * <p> {@code this} must be a tokenizer that returns a token value.
    */
   public Parser<List<Token>> lexer(Parser<?> delim) {
-    return delim.optional().next(token().sepEndBy(delim));
+    return delim.optional(null).next(token().sepEndBy(delim));
   }
 
   /**

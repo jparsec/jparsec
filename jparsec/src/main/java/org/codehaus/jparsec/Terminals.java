@@ -21,11 +21,11 @@ import static org.codehaus.jparsec.internal.util.Checks.checkNotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.function.Function;
 
 import org.codehaus.jparsec.Tokens.Fragment;
 import org.codehaus.jparsec.Tokens.ScientificNotation;
 import org.codehaus.jparsec.Tokens.Tag;
-import org.codehaus.jparsec.functors.Map;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Objects;
 import org.codehaus.jparsec.internal.util.Strings;
@@ -349,7 +349,7 @@ public final class Terminals extends Lexicon {
    */
   @Deprecated
   public static Terminals caseInsensitive(
-      Parser<String> wordScanner, String[] ops, String[] keywords, Map<String, ?> wordMap) {
+      Parser<String> wordScanner, String[] ops, String[] keywords, Function<String, ?> wordMap) {
     return operators(ops)
         .words(wordScanner)
         .caseInsensitiveKeywords(keywords)
@@ -381,7 +381,7 @@ public final class Terminals extends Lexicon {
    */
   @Deprecated
   public static Terminals caseSensitive(
-      Parser<String> wordScanner, String[] ops, String[] keywords, Map<String, ?> wordMap) {
+      Parser<String> wordScanner, String[] ops, String[] keywords, Function<String, ?> wordMap) {
     return operators(ops)
         .words(wordScanner)
         .keywords(keywords)
@@ -457,7 +457,7 @@ public final class Terminals extends Lexicon {
 
     private Collection<String> keywords = new ArrayList<String>();
     private StringCase stringCase = StringCase.CASE_SENSITIVE;
-    private Map<String, ?> wordTokenMap = TokenizerMaps.IDENTIFIER_FRAGMENT;
+    private Function<String, ?> wordTokenMap = TokenizerMaps.IDENTIFIER_FRAGMENT;
     
     Builder(Parser<String> wordScanner) {
       this.wordScanner = checkNotNull(wordScanner);
@@ -512,7 +512,7 @@ public final class Terminals extends Lexicon {
     }
 
     /** Configures alternative tokenization strategy for words (except keywords). */
-    public Builder tokenizeWordsWith(Map<String, ?> wordMap) {
+    public Builder tokenizeWordsWith(Function<String, ?> wordMap) {
       this.wordTokenMap = checkNotNull(wordMap);
       return this;
     }

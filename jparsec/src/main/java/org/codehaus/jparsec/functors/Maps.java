@@ -35,10 +35,10 @@ public final class Maps {
   @Deprecated
   public static final Function<String, Integer> TO_INTEGER = Integer::valueOf;
 
-  /** The {@link Unary} that maps a {@link String} to lower case using {@link Locale#US}. */
+  /** The {@link UnaryOperator} that maps a {@link String} to lower case using {@link Locale#US}. */
   public static UnaryOperator<String> TO_LOWER_CASE = toLowerCase(Locale.US);
 
-  /** Returns a {@link Unary} that maps a {@link String} to lower case using {@code locale}. */
+  /** Returns a {@link UnaryOperator} that maps a {@link String} to lower case using {@code locale}. */
   public static UnaryOperator<String> toLowerCase(final Locale locale) {
     return  new UnaryOperator<String>() {
       @Override public String apply(String s) {
@@ -50,10 +50,10 @@ public final class Maps {
     };
   }
 
-  /** The {@link Unary} that maps a {@link String} to upper case using {@link Locale#US}. */
+  /** The {@link UnaryOperator} that maps a {@link String} to upper case using {@link Locale#US}. */
   public static UnaryOperator<String> TO_UPPER_CASE = toUpperCase(Locale.US);
 
-  /** Returns a {@link Unary} that maps a {@link String} to upper case using {@code locale}. */
+  /** Returns a {@link UnaryOperator} that maps a {@link String} to upper case using {@code locale}. */
   public static UnaryOperator<String> toUpperCase(Locale locale) {
     return  new UnaryOperator<String>() {
       @Override public String apply(String s) {

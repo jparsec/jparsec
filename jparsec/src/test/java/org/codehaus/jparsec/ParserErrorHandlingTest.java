@@ -198,8 +198,7 @@ public class ParserErrorHandlingTest {
     String[] keywords = { "foo", "bar", "baz" };
     Terminals terminals = Terminals.operators("+", "-").words(Scanners.IDENTIFIER).keywords(asList(keywords)).build();
     Parser<List<Token>> lexeme = terminals.tokenizer().lexer(Scanners.WHITESPACES)
-        .map(new Unary<List<Token>>() {
-          @Override public List<Token> map(List<Token> tokens) {
+        .map(tokens -> {
             List<Token> result = Lists.arrayList();
             for (Token token : tokens) {
               result.add(new Token(token.index(), 0, "("));
@@ -208,8 +207,7 @@ public class ParserErrorHandlingTest {
               result.add(new Token(index, 0, ")"));
             }
             return result;
-          }
-        });
+          });
     Parser<Token> LPAREN = Parsers.token(InternalFunctors.tokenWithSameValue("("));
     Parser<Token> RPAREN = Parsers.token(InternalFunctors.tokenWithSameValue(")"));
     Parser<?> parser = Parsers.or(

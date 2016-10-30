@@ -21,7 +21,9 @@ import java.util.function.UnaryOperator;
  * Represents a unary operation on the same type {@code T}.
  * 
  * <p> Implement this interface for unary operator instead of {@link Map} for brevity.
- * 
+ *
+ * @deprecated Use {@link java.util.UnaryOperator} instead.
  * @author Ben Yu
  */
+@Deprecated
 public interface Unary<T> extends UnaryOperator<T>, Map<T, T> {}

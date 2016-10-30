@@ -39,24 +39,20 @@ public class MapsTest {
   @Test
   public void testToPair() {
     assertEquals(Tuples.pair("one", 1), Maps.toPair().map("one", 1));
-    assertEquals("pair", Maps.toPair().toString());
   }
 
   @Test
   public void testToTuple3() {
     assertEquals(Tuples.tuple("12", 1, 2), Maps.toTuple3().map("12", 1, 2));
-    assertEquals("tuple", Maps.toTuple3().toString());
   }
 
   @Test
   public void testToTuple4() {
     assertEquals(Tuples.tuple("123", 1, 2, 3), Maps.toTuple4().map("123", 1, 2, 3));
-    assertEquals("tuple", Maps.toTuple4().toString());
   }
 
   @Test
   public void testToTuple5() {
     assertEquals(Tuples.tuple("1234", 1, 2, 3, 4), Maps.toTuple5().map("1234", 1, 2, 3, 4));
-    assertEquals("tuple", Maps.toTuple5().toString());
   }
 }

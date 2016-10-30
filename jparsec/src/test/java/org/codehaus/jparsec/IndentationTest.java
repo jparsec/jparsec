@@ -139,8 +139,7 @@ public class IndentationTest {
   @Test
   public void testLexer() {
     Parser<List<Token>> parser =
-        new Indentation().lexer(Scanners.IDENTIFIER, Indentation.WHITESPACES.optional());
-    assertEquals("lexer", parser.toString());
+        new Indentation().lexer(Scanners.IDENTIFIER, Indentation.WHITESPACES.optional(null));
     assertEquals(
         tokenList("foo", 7, "bar", 4, INDENT, "baz", 4, INDENT, "bah", 1, "bah", OUTDENT, OUTDENT),
         parser.parse("foo \\ \n\\\n bar \n  baz\n   bah bah ", mode));

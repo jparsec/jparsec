@@ -175,8 +175,10 @@ public final class DeclarationParser {
   
   public static Parser<Program> program() {
     Parser.Reference<Member> memberRef = Parser.newReference();
-    Parser<Expression> expr = ExpressionParser.expression(body(memberRef.lazy()));
+    Parser.Reference<Statement> stmtRef = Parser.newReference();
+    Parser<Expression> expr = ExpressionParser.expression(body(memberRef.lazy()), stmtRef.lazy());
     Parser<Statement> stmt = StatementParser.statement(expr);
+    stmtRef.set(stmt);
     Parser<Modifier> mod = modifier(expr);
     Parser.Reference<Declaration> decRef = Parser.newReference();
     Parser<Member> member = Parsers.or(

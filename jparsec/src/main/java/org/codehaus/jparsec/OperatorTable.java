@@ -20,8 +20,6 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import org.codehaus.jparsec.functors.Map;
-import org.codehaus.jparsec.functors.Map2;
 import org.codehaus.jparsec.internal.annotations.Private;
 import org.codehaus.jparsec.internal.util.Lists;
 
