@@ -12,12 +12,6 @@
   <name>jParsec</name>
 
   <dependencies>
-
-    <dependency>
-      <groupId>cglib</groupId>
-      <artifactId>cglib-nodep</artifactId>
-    </dependency>
-
     <dependency>
       <groupId>org.easymock</groupId>
       <artifactId>easymock</artifactId>
@@ -38,7 +32,6 @@
       <artifactId>jparsec-testutils</artifactId>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
 </project>
