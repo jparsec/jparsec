@@ -3,6 +3,15 @@ jparsec
 
 Builds mini parsers in pure Java.
 
+![](https://travis-ci.org/jparsec/jparsec.svg?branch=master)
+
+# News
+
+## 2016-10-29
+
+* Master branch is current development branch for version 3.0 that will target Java 8 ##
+* Support for OSGi is merged in master, thanks to [Alex Michael Berry](https://github.com/almibe) and [this PR](https://github.com/jparsec/jparsec/pull/47)
+
 ## How to Use?
 
 jparsec is available in maven-central. [Snapshot Javadoc](http://jparsec.github.io/jparsec/apidocs/)
@@ -38,8 +47,4 @@ Look at the [wiki](https://github.com/jparsec/jparsec/wiki) for documentation on
 * 2014-01-16 - [Nantes JUG](http://nantesjug.org/#/events/2014_01_20):
   Quickie on jparsec for local JUG
 * 2013-09-23 - [JUGSummerCamp 2013](http://www.jugsummercamp.com/edition/4): Directory `parsing-made-easy` contains material for the talk (slides + sample code)
-* 
 
-
-
-[Build Status](http://travis-ci.org/jparsec/jparsec)
