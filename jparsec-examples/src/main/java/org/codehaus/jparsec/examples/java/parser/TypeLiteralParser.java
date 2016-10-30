@@ -60,8 +60,7 @@ public final class TypeLiteralParser {
     Parser<TypeLiteral> lazy = ref.lazy();
     Parser<TypeLiteral> arg = wildcard(lazy).or(lazy);
     Parser<String> nativeTypeName = TerminalParser.oneOf(
-        "byte", "short", "int", "long", "boolean", "char", "float", "double", "void")
-        .map(Maps.mapToString());
+        "byte", "short", "int", "long", "boolean", "char", "float", "double", "void").map(Maps.<Object>mapToString());
     Parser<String> typeName = nativeTypeName.or(Terminals.Identifier.PARSER);
     Parser<TypeLiteral> parser = Mapper.<TypeLiteral>curry(SimpleTypeLiteral.class)
         .sequence(typeName.sepBy1(term(".")), TypeLiteralParser.optionalTypeArgs(arg));
