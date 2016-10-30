@@ -64,9 +64,9 @@ public final class Maps {
       }
     };
   }
-  
+
   /**
-   * @Deprecated Use {@code String::valueOf} directly.
+   * @deprecated Use {@code String::valueOf} directly.
    */
   @Deprecated
   public static <T> Map<T, String> mapToString() {

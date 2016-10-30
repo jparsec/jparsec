@@ -22,7 +22,7 @@ import java.util.function.UnaryOperator;
  * 
  * <p> Implement this interface for unary operator instead of {@link Map} for brevity.
  *
- * @deprecated Use {@link java.util.UnaryOperator} instead.
+ * @deprecated Use {@link java.util.function.UnaryOperator} instead.
  * @author Ben Yu
  */
 @Deprecated

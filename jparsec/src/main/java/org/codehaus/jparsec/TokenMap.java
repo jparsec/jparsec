@@ -21,6 +21,7 @@ package org.codehaus.jparsec;
  * 
  * @author Ben Yu
  */
+@FunctionalInterface
 public interface TokenMap<T> {
   
   /**
