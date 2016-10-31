@@ -11,6 +11,7 @@ Builds mini parsers in pure Java.
 
 * Master branch is current development branch for version 3.0 that will target Java 8 ##
 * Support for OSGi is merged in master, thanks to [Alex Michael Berry](https://github.com/almibe) and [this PR](https://github.com/jparsec/jparsec/pull/47)
+* Java 8 integration. Added Java 8 dependent API (j.u.f.Funciton, @FunctionalInterface, Parser.asOptional() etc.)
 
 ## How to Use?
 
