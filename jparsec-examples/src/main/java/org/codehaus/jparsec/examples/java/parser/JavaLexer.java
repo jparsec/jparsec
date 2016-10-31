@@ -23,7 +23,6 @@ import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral;
 import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral.Radix;
 import org.codehaus.jparsec.examples.java.ast.expression.NumberType;
 import org.codehaus.jparsec.examples.java.ast.expression.ScientificNumberLiteral;
-import org.codehaus.jparsec.pattern.CharPredicate;
 import org.codehaus.jparsec.pattern.Patterns;
 
 /**
@@ -33,20 +32,8 @@ import org.codehaus.jparsec.pattern.Patterns;
  */
 public final class JavaLexer {
   
-  private static final CharPredicate JAVA_IDENTIFIER_START = new CharPredicate() {
-    @Override public boolean isChar(char c) {
-      return Character.isJavaIdentifierStart(c);
-    }
-  };
-  
-  private static final CharPredicate JAVA_IDENTIFIER_PART = new CharPredicate() {
-    @Override public boolean isChar(char c) {
-      return Character.isJavaIdentifierPart(c);
-    }
-  };
-  
-  static final Parser<String> IDENTIFIER = Patterns.isChar(JAVA_IDENTIFIER_START)
-      .next(Patterns.isChar(JAVA_IDENTIFIER_PART).many())
+  static final Parser<String> IDENTIFIER = Patterns.isChar(Character::isJavaIdentifierStart)
+      .next(Patterns.isChar(Character::isJavaIdentifierPart).many())
       .toScanner("identifier")
       .source();
   

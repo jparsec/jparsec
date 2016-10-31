@@ -214,8 +214,7 @@ public abstract class Pattern {
   private static Pattern ifElse(
       final Pattern cond, final Pattern consequence, final Pattern alternative) {
     return new Pattern() {
-      @Override
-      public int match(CharSequence src, int begin, int end) {
+      @Override public int match(CharSequence src, int begin, int end) {
         final int conditionResult = cond.match(src, begin, end);
         if (conditionResult == MISMATCH) {
           return alternative.match(src, begin, end);
@@ -233,8 +232,7 @@ public abstract class Pattern {
   private static Pattern times(final Pattern pp, final int min, final int max) {
     Checks.checkMinMax(min, max);
     return new Pattern() {
-      @Override
-      public int match(CharSequence src, int begin, int end) {
+      @Override public int match(CharSequence src, int begin, int end) {
         int minLen = RepeatPattern.matchRepeat(min, pp, src, end, begin, 0);
         if (MISMATCH == minLen)
           return MISMATCH;

@@ -323,8 +323,9 @@ public abstract class Parser<T> {
   }
 
   /**
-   * {@code p.optional_()} is equivalent to {@code p?} in EBNF. {@code Optional.empty()}
-   * is the result when {@code this} fails with no partial match.
+   * {@code p.asOptional()} is equivalent to {@code p?} in EBNF. {@code Optional.empty()}
+   * is the result when {@code this} fails with no partial match. Note that {@link Optional}
+   * prohibits nulls so make sure {@code this} does not result in {@code null}.
    *
    * @since 3.0
    */
@@ -566,7 +567,7 @@ public abstract class Parser<T> {
    * <p> {@code p.prefix(op)} is equivalent to {@code op* p} in EBNF.
    */
   public final Parser<T> prefix(Parser<? extends Function<? super T, ? extends T>> op) {
-    return Parsers.sequence(op.many(), this, Parsers.prefixOperatorBiFunction());
+    return Parsers.sequence(op.many(), this, Parser::applyPrefixOperators);
   }
 
   /**
@@ -604,7 +605,7 @@ public abstract class Parser<T> {
    * <p> {@code p.postfix(op)} is equivalent to {@code p op*} in EBNF.
    */
   public final Parser<T> postfix(Parser<? extends Function<? super T, ? extends T>> op) {
-    return Parsers.sequence(this, op.many(), Parsers::applyPostfixOperators);
+    return Parsers.sequence(this, op.many(), Parser::applyPostfixOperators);
   }
 
   /**
@@ -617,21 +618,29 @@ public abstract class Parser<T> {
    * <p> {@code p.infixn(op)} is equivalent to {@code p (op p)?} in EBNF.
    */
   public final Parser<T> infixn(Parser<? extends BiFunction<? super T, ? super T, ? extends T>> op) {
-    return Parsers.infixn(this, op);
+    return next(a -> {
+      Parser<T> shift = Parsers.sequence(op, this, (m2, b) -> m2.apply(a, b));
+      return shift.or(Parsers.constant(a));
+    });
   }
 
   /**
    * A {@link Parser} for left-associative infix operator. Runs {@code this} for the left operand, and then runs
-   * {@code op} and {@code this} for the operator and the right operand for 0 or more times greedily.
-   * The {@link BiFunction} objects returned from {@code op} are applied from left to right to the
+   * {@code operator} and {@code this} for the operator and the right operand for 0 or more times greedily.
+   * The {@link BiFunction} objects returned from {@code operator} are applied from left to right to the
    * return values of {@code this}, if any. For example:
    * {@code a + b + c + d} is evaluated as {@code (((a + b)+c)+d)}.
    *
    * <p> {@code p.infixl(op)} is equivalent to {@code p (op p)*} in EBNF.
    */
-  public final Parser<T> infixl(Parser<? extends BiFunction<? super T, ? super T, ? extends T>> op) {
-    // somehow generics doesn't work if we inline the code here.
-    return Parsers.infixl(this, op);
+  public final Parser<T> infixl(
+      Parser<? extends BiFunction<? super T, ? super T, ? extends T>> operator) {
+    BiFunction<BiFunction<? super T, ? super T, ? extends T>, T, Function<? super T, ? extends T>>
+    rightToLeft = (op, r) -> l -> op.apply(l, r);
+    return next(first ->
+        Parsers.sequence(operator, this, rightToLeft)
+            .many()
+            .map(maps -> applyInfixOperators(first, maps)));
   }
 
   /**
@@ -645,7 +654,8 @@ public abstract class Parser<T> {
    * <p> {@code p.infixr(op)} is equivalent to {@code p (op p)*} in EBNF.
    */
   public final Parser<T> infixr(Parser<? extends BiFunction<? super T, ? super T, ? extends T>> op) {
-    return Parsers.infixr(this, op);
+    Parser<Rhs<T>> rhs = Parsers.sequence(op, this, Rhs<T>::new);
+    return Parsers.sequence(this, rhs.many(), Parser::applyInfixrOperators);
   }
 
   /**
@@ -912,5 +922,57 @@ public abstract class Parser<T> {
   @SuppressWarnings("unchecked")
   final T getReturn(ParseContext ctxt) {
     return (T) ctxt.result;
+  }
+
+  private static <T> T applyPrefixOperators(
+      List<? extends Function<? super T, ? extends T>> ms, T a) {
+    for (int i = ms.size() - 1; i >= 0; i--) {
+      Function<? super T, ? extends T> m = ms.get(i);
+      a = m.apply(a);
+    }
+    return a;
+  }
+
+  private static <T> T applyPostfixOperators(
+      T a, Iterable<? extends Function<? super T, ? extends T>> ms) {
+    for (Function<? super T, ? extends T> m : ms) {
+      a = m.apply(a);
+    }
+    return a;
+  }
+
+  private static <T> T applyInfixOperators(
+      T initialValue, List<? extends Function<? super T, ? extends T>> functions) {
+    T result = initialValue;
+    for (Function<? super T, ? extends T> function : functions) {
+      result = function.apply(result);
+    }
+    return result;
+  }
+
+  // 1+ 1+ 1+ ..... 1
+  private static final class Rhs<T> {
+    final BiFunction<? super T, ? super T, ? extends T> op;
+    final T rhs;
+
+    Rhs(BiFunction<? super T, ? super T, ? extends T> op, T rhs) {
+      this.op = op;
+      this.rhs = rhs;
+    }
+    
+    @Override public String toString() {
+      return op + " " + rhs;
+    }
+  }
+
+  private static <T> T applyInfixrOperators(T first, List<Rhs<T>> rhss) {
+    if (rhss.isEmpty()) return first;
+    int lastIndex = rhss.size() - 1;
+    T o2 = rhss.get(lastIndex).rhs;
+    for (int i = lastIndex; i > 0; i--) {
+      T o1 = rhss.get(i - 1).rhs;
+      o2 = rhss.get(i).op.apply(o1, o2);
+    }
+    return rhss.get(0).op.apply(first, o2);
   }
 }

@@ -20,6 +20,7 @@ package org.codehaus.jparsec.pattern;
  *
  * @author Ben Yu
  */
+@FunctionalInterface
 public interface CharPredicate {
   
   /** Tests whether {@code c} satisfies the predicate. */
