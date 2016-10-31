@@ -315,7 +315,7 @@ public abstract class Parser<T> {
    * {@code p.optional()} is equivalent to {@code p?} in EBNF. {@code null} is the result when
    * {@code this} fails with no partial match.
    *
-   * @deprecated since 3.0. Use {@link #optional(null)} or {@link #optional_} instead.
+   * @deprecated since 3.0. Use {@link #optional(null)} or {@link #asOptional} instead.
    */
   @Deprecated
   public final Parser<T> optional() {
