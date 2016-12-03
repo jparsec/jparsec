@@ -92,7 +92,7 @@ public class GrammarTest {
     //you can test individual pieces of the grammar
     @Test
     public void test3() {
-        ValueExpression exp = (ValueExpression) assignment().from(TOKENIZER, IGNORED).parse("= 5");
+        ValueExpression exp = assignment().from(TOKENIZER, IGNORED).parse("= 5");
         assertEquals(5, exp.nVal.intValue());
     }
 
