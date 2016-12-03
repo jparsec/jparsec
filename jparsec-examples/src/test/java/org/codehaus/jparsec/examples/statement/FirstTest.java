@@ -48,6 +48,10 @@ public class FirstTest {
     private static Parser<DoubleExpression> doubleExpression02() {
         return Parsers.sequence(readonly(), var(), DoubleExpression::new);
     }
+    //parse two tokens but only take the output of last one in sequence()
+    private static Parser<SingleExpression> singleExpression02() {
+        return Parsers.sequence(readonly(), var()).map(SingleExpression::new);
+    }
     
     // *** Java 6 Syntax ***
     //parse single value into a SingleExpression.
@@ -61,14 +65,6 @@ public class FirstTest {
                         return new SingleExpression(arg0);
                     }
                 });
-    }
-
-    // *** Mixed Syntax ***
-    //parse two tokens but only take the output of last one in sequence()
-    //Use map and Java 8 functional interface. It works but is not as simple
-    //as the Java 8 syntax shown above
-    private static Parser<SingleExpression> singleExpression02() {
-        return Parsers.sequence(readonly(), var()).map(SingleExpression::new);
     }
 
 

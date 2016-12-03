@@ -47,54 +47,28 @@ public class GrammarTest {
     }
 
     //high-level grammar
-
     private static Parser<ReadonlyExpression> readonlyExpression() {
-        return Parsers.or(readonly())
-                .map(new org.codehaus.jparsec.functors.Map<String, ReadonlyExpression>() {
-                    @Override
-                    public ReadonlyExpression map(String arg0) {
-                        return new ReadonlyExpression(arg0);
-                    }
-                });
+        return readonly().map(ReadonlyExpression::new);
     }
     private static Parser<VarExpression> varExpression() {
-        return Parsers.or(var())
-                .map(new org.codehaus.jparsec.functors.Map<String, VarExpression>() {
-                    @Override
-                    public VarExpression map(String arg0) {
-                        return new VarExpression(arg0);
-                    }
-                });
+        return var().map(VarExpression::new);
     }
-
-    public static Parser<IdentExpression> ident() {
-        return Parsers.or(IDENTIFIER_PARSER).
-                map(new org.codehaus.jparsec.functors.Map<String, IdentExpression>() {
-                    @Override
-                    public IdentExpression map(String arg0) {
-                        return new IdentExpression(arg0);
-                    }
-                });
+    private static Parser<IdentExpression> ident() {
+        return IDENTIFIER_PARSER.map(IdentExpression::new);
     }
 
     //'=' followed by an integer value
     private static Parser<ValueExpression> assignment() {
-        return Parsers.sequence(eq(), INTEGER_PARSER).
-                map(new org.codehaus.jparsec.functors.Map<String, ValueExpression>() {
-                    @Override
-                    public ValueExpression map(String arg0) {
-                        return new ValueExpression(arg0);
-                    }
-                });
+        return Parsers.sequence(eq(), INTEGER_PARSER).map(ValueExpression::new);
     }
 
 
     //var x = 5
     private static Parser<FullExpression> full() {
-        return Parsers.sequence(var(), Parsers.sequence(ident(), assignment(), FullExpression::new));
+        return Parsers.sequence(readonly().asOptional(), var(), Parsers.sequence(ident(), assignment(), FullExpression::new));
     }
 
-    static final FullExpression parse(String input) {
+    private static final FullExpression parse(String input) {
         Parser<FullExpression> grammar = full();
         FullExpression exp = grammar.from(TOKENIZER, IGNORED).parse(input);
         return exp;
@@ -102,16 +76,22 @@ public class GrammarTest {
 
 
     @Test
-    public void test4() {
+    public void test1() {
         FullExpression exp = parse("var x = 50");
         assertEquals("x", exp.identExpr.s);
         assertEquals(50, exp.valueExpr.nVal.intValue());
     }
 
+    @Test
+    public void test2() {
+        FullExpression exp = parse("readonly var x = 50");
+        assertEquals("x", exp.identExpr.s);
+        assertEquals(50, exp.valueExpr.nVal.intValue());
+    }
 
     //you can test individual pieces of the grammar
     @Test
-    public void test5() {
+    public void test3() {
         ValueExpression exp = (ValueExpression) assignment().from(TOKENIZER, IGNORED).parse("= 5");
         assertEquals(5, exp.nVal.intValue());
     }
