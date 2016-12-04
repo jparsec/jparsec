@@ -1,4 +1,31 @@
+/*****************************************************************************
+ * Copyright (C) jparsec.org                                                *
+ * ------------------------------------------------------------------------- *
+ * Licensed under the Apache License, Version 2.0 (the "License");           *
+ * you may not use this file except in compliance with the License.          *
+ * You may obtain a copy of the License at                                   *
+ *                                                                           *
+ * http://www.apache.org/licenses/LICENSE-2.0                                *
+ *                                                                           *
+ * Unless required by applicable law or agreed to in writing, software       *
+ * distributed under the License is distributed on an "AS IS" BASIS,         *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+ * See the License for the specific language governing permissions and       *
+ * limitations under the License.                                            *
+ *****************************************************************************/
 package org.codehaus.jparsec;
+
+import org.codehaus.jparsec.Parser.Mode;
+import org.codehaus.jparsec.easymock.BaseMockTest;
+import org.codehaus.jparsec.functors.*;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.BiFunction;
 
 import static org.codehaus.jparsec.Asserts.assertFailure;
 import static org.codehaus.jparsec.Parsers.always;
@@ -7,24 +34,6 @@ import static org.codehaus.jparsec.TestParsers.isChar;
 import static org.easymock.EasyMock.expect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.BiFunction;
-
-import org.codehaus.jparsec.Parser.Mode;
-import org.codehaus.jparsec.easymock.BaseMockTest;
-import org.codehaus.jparsec.functors.Map3;
-import org.codehaus.jparsec.functors.Map4;
-import org.codehaus.jparsec.functors.Map5;
-import org.codehaus.jparsec.functors.Map6;
-import org.codehaus.jparsec.functors.Map7;
-import org.codehaus.jparsec.functors.Map8;
-import org.codehaus.jparsec.functors.Tuples;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 
 /**
  * Unit test for {@link Parsers}.

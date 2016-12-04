@@ -1,34 +1,32 @@
+/*****************************************************************************
+ * Copyright (C) jparsec.org                                                *
+ * ------------------------------------------------------------------------- *
+ * Licensed under the Apache License, Version 2.0 (the "License");           *
+ * you may not use this file except in compliance with the License.          *
+ * You may obtain a copy of the License at                                   *
+ *                                                                           *
+ * http://www.apache.org/licenses/LICENSE-2.0                                *
+ *                                                                           *
+ * Unless required by applicable law or agreed to in writing, software       *
+ * distributed under the License is distributed on an "AS IS" BASIS,         *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+ * See the License for the specific language governing permissions and       *
+ * limitations under the License.                                            *
+ *****************************************************************************/
 package org.codehaus.jparsec.examples.sql.parser;
+
+import org.codehaus.jparsec.Parser;
+import org.codehaus.jparsec.examples.sql.ast.*;
+import org.codehaus.jparsec.functors.Tuples;
+import org.junit.Test;
+
+import java.util.Arrays;
 
 import static org.codehaus.jparsec.examples.sql.parser.ExpressionParser.NUMBER;
 import static org.codehaus.jparsec.examples.sql.parser.ExpressionParser.QUALIFIED_NAME;
 import static org.codehaus.jparsec.examples.sql.parser.RelationParserTest.table;
 import static org.codehaus.jparsec.examples.sql.parser.TerminalParserTest.assertFailure;
 import static org.codehaus.jparsec.examples.sql.parser.TerminalParserTest.assertParser;
-
-import java.util.Arrays;
-
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.examples.sql.ast.BetweenExpression;
-import org.codehaus.jparsec.examples.sql.ast.BinaryExpression;
-import org.codehaus.jparsec.examples.sql.ast.BinaryRelationalExpression;
-import org.codehaus.jparsec.examples.sql.ast.Expression;
-import org.codehaus.jparsec.examples.sql.ast.FullCaseExpression;
-import org.codehaus.jparsec.examples.sql.ast.FunctionExpression;
-import org.codehaus.jparsec.examples.sql.ast.LikeExpression;
-import org.codehaus.jparsec.examples.sql.ast.NullExpression;
-import org.codehaus.jparsec.examples.sql.ast.NumberExpression;
-import org.codehaus.jparsec.examples.sql.ast.Op;
-import org.codehaus.jparsec.examples.sql.ast.QualifiedName;
-import org.codehaus.jparsec.examples.sql.ast.QualifiedNameExpression;
-import org.codehaus.jparsec.examples.sql.ast.SimpleCaseExpression;
-import org.codehaus.jparsec.examples.sql.ast.StringExpression;
-import org.codehaus.jparsec.examples.sql.ast.TupleExpression;
-import org.codehaus.jparsec.examples.sql.ast.UnaryExpression;
-import org.codehaus.jparsec.examples.sql.ast.UnaryRelationalExpression;
-import org.codehaus.jparsec.examples.sql.ast.WildcardExpression;
-import org.codehaus.jparsec.functors.Tuples;
-import org.junit.Test;
 
 /**
  * Unit test for {@link ExpressionParser}.
