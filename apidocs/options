@@ -1,28 +1,26 @@
 -classpath
-'/Users/benyu/jparsec/jparsec/target/classes:/Users/benyu/.m2/repository/org/apache/servicemix/bundles/org.apache.servicemix.bundles.cglib/3.2.4_1/org.apache.servicemix.bundles.cglib-3.2.4_1.jar'
+'/Users/arnaud/projects/jparsec/target/classes:/Users/arnaud/projects/jparsec/jparsec-testutils/target/classes:/Users/arnaud/projects/jparsec/jparsec/target/classes:/Users/arnaud/projects/jparsec/jparsec-examples/target/classes:/Users/arnaud/.m2/repository/org/apache/servicemix/bundles/org.apache.servicemix.bundles.cglib/3.2.4_1/org.apache.servicemix.bundles.cglib-3.2.4_1.jar:/Users/arnaud/.m2/repository/org/jparsec/jparsec/3.0-SNAPSHOT/jparsec-3.0-SNAPSHOT.jar:/Users/arnaud/.m2/repository/junit/junit/4.8.1/junit-4.8.1.jar'
 -encoding
 'UTF-8'
 -protected
 -sourcepath
-'/Users/benyu/jparsec/jparsec/src/main/java'
+'/Users/arnaud/projects/jparsec/jparsec-testutils/src/main/java:/Users/arnaud/projects/jparsec/jparsec/src/main/java:/Users/arnaud/projects/jparsec/jparsec-examples/src/main/java'
 -author
 -bottom
-'Copyright &#169; 2016. All rights reserved.'
+'Copyright &#169; 2013&#x2013;2016 <a href="http://jparsec.org">jparsec</a>. All rights reserved.'
 -charset
 'UTF-8'
 -d
-'/Users/benyu/jparsec/jparsec/target/site/apidocs'
+'/Users/arnaud/projects/jparsec/target/site/apidocs'
 -docencoding
 'UTF-8'
 -doctitle
-'jParsec 3.0-SNAPSHOT API'
+'jParsec Root 3.0-SNAPSHOT API'
 -linkoffline
-'http://docs.oracle.com/javase/7/docs/api' '/Users/benyu/jparsec/jparsec/target/javadoc-bundle-options'
--linkoffline
-'http://github.com/jparsec/jparsec/jparsec-testutils/apidocs' '/Users/benyu/jparsec/jparsec-testutils/target/site/apidocs'
+'http://docs.oracle.com/javase/7/docs/api' '/Users/arnaud/projects/jparsec/target/javadoc-bundle-options'
 -stylesheetfile
-'/Users/benyu/jparsec/javadoc-stylesheet.css'
+'/Users/arnaud/projects/jparsec/javadoc-stylesheet.css'
 -use
 -version
 -windowtitle
-'jParsec 3.0-SNAPSHOT API'
+'jParsec Root 3.0-SNAPSHOT API'
