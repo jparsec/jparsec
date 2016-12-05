@@ -7,11 +7,11 @@ Builds mini parsers in pure Java.
 
 # News
 
-## 2016-10-29
+## 2016-12-05
 
-* Master branch is current development branch for version 3.0 that will target Java 8 ##
+* Removed references to Codehaus in copyright **and** package layout
+* Support for Java 8 now complete
 * Support for OSGi is merged in master, thanks to [Alex Michael Berry](https://github.com/almibe) and [this PR](https://github.com/jparsec/jparsec/pull/47)
-* Java 8 integration. Added Java 8 dependent API (j.u.f.Funciton, @FunctionalInterface, Parser.asOptional() etc.)
 
 ## How to Use?
 
@@ -21,10 +21,20 @@ jparsec is available in maven-central. [Snapshot Javadoc](http://jparsec.github.
 
 Add the following fragment to your `<dependencies>` section:
 
+If using Java 7-:
+
       <dependency>
         <groupId>org.jparsec</groupId>
         <artifactId>jparsec</artifactId>
         <version>2.3</version>
+      </dependency>
+
+If using Java 8+:
+
+      <dependency>
+        <groupId>org.jparsec</groupId>
+        <artifactId>jparsec</artifactId>
+        <version>3.0-rc1</version>
       </dependency>
 
 ## Tell me more
