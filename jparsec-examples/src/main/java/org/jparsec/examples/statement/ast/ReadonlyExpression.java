@@ -1,4 +1,4 @@
-package org.codehaus.jparsec.examples.statement.ast;
+package org.jparsec.examples.statement.ast;
 
 public class ReadonlyExpression implements Expression {
 	public String s;

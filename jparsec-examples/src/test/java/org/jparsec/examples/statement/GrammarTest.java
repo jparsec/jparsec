@@ -1,16 +1,16 @@
-package org.codehaus.jparsec.examples.statement;
+package org.jparsec.examples.statement;
 
 import static org.junit.Assert.assertEquals;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.examples.statement.ast.FullExpression;
-import org.codehaus.jparsec.examples.statement.ast.IdentExpression;
-import org.codehaus.jparsec.examples.statement.ast.ReadonlyExpression;
-import org.codehaus.jparsec.examples.statement.ast.ValueExpression;
-import org.codehaus.jparsec.examples.statement.ast.VarExpression;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.examples.statement.ast.FullExpression;
+import org.jparsec.examples.statement.ast.IdentExpression;
+import org.jparsec.examples.statement.ast.ReadonlyExpression;
+import org.jparsec.examples.statement.ast.ValueExpression;
+import org.jparsec.examples.statement.ast.VarExpression;
 import org.junit.Test;
 
 public class GrammarTest {

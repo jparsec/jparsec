@@ -1,13 +1,13 @@
-package org.codehaus.jparsec.examples.statement;
+package org.jparsec.examples.statement;
 
 import static org.junit.Assert.assertEquals;
 
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.Parsers;
-import org.codehaus.jparsec.Scanners;
-import org.codehaus.jparsec.Terminals;
-import org.codehaus.jparsec.examples.statement.ast.DoubleExpression;
-import org.codehaus.jparsec.examples.statement.ast.SingleExpression;
+import org.jparsec.Parser;
+import org.jparsec.Parsers;
+import org.jparsec.Scanners;
+import org.jparsec.Terminals;
+import org.jparsec.examples.statement.ast.DoubleExpression;
+import org.jparsec.examples.statement.ast.SingleExpression;
 import org.junit.Test;
 
 public class FirstTest {
@@ -59,7 +59,7 @@ public class FirstTest {
     //It is quite verbose (and is not recommended).
     private static Parser<SingleExpression> singleExpression01() {
         return Parsers.or(readonly())
-                .map(new org.codehaus.jparsec.functors.Map<String, SingleExpression>() {
+                .map(new org.jparsec.functors.Map<String, SingleExpression>() {
                     @Override
                     public SingleExpression map(String arg0) {
                         return new SingleExpression(arg0);
