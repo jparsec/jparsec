@@ -3,7 +3,7 @@
   <groupId>org.jparsec</groupId>
   <artifactId>jparsec-root</artifactId>
   <packaging>pom</packaging>
-  <version>3.0-SNAPSHOT</version>
+  <version>3.0-rc1</version>
 
   <name>jParsec Root</name>
 
@@ -44,7 +44,7 @@
     <url>http://github.com/jparsec/jparsec</url>
     <connection>scm:git:git@github.com:jparsec/jparsec.git</connection>
     <developerConnection>scm:git:git@github.com:jparsec/jparsec.git</developerConnection>
-    <tag>jparsec-root-2.2</tag>
+    <tag>jparsec-root-3.0-rc1</tag>
   </scm>
 
   <developers>
@@ -259,7 +259,12 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
         <configuration>
-            <excludePackageNames>org.codehaus.jparsec.internal.*</excludePackageNames>
+            <excludePackageNames>org.jparsec.internal.*</excludePackageNames>
+            <!--
+                We should really fix javadoc but in the meantime...
+                http://stackoverflow.com/questions/15886209/maven-is-not-working-in-java-8-when-javadoc-tags-are-incomplete
+            -->
+            <additionalparam>-Xdoclint:none</additionalparam>
         </configuration>
         <executions>
           <execution>
