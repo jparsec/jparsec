@@ -13,24 +13,22 @@
  * See the License for the specific language governing permissions and       *
  * limitations under the License.                                            *
  *****************************************************************************/
-
 package org.codehaus.jparsec;
 
-import static java.util.Arrays.asList;
-import static org.codehaus.jparsec.Asserts.assertFailure;
-import static org.codehaus.jparsec.Scanners.isChar;
-import static org.codehaus.jparsec.TestParsers.areChars;
+import org.codehaus.jparsec.Parser.Mode;
+import org.codehaus.jparsec.internal.util.Lists;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.codehaus.jparsec.Parser.Mode;
-import org.codehaus.jparsec.functors.Unary;
-import org.codehaus.jparsec.internal.util.Lists;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import static java.util.Arrays.asList;
+import static org.codehaus.jparsec.Asserts.assertFailure;
+import static org.codehaus.jparsec.Scanners.isChar;
+import static org.codehaus.jparsec.TestParsers.areChars;
 
 /**
  * Unit test for error handling of {@link Parser}.

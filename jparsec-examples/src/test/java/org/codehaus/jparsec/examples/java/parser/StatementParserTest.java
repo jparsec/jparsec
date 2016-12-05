@@ -1,39 +1,27 @@
+/*****************************************************************************
+ * Copyright (C) jparsec.org                                                *
+ * ------------------------------------------------------------------------- *
+ * Licensed under the Apache License, Version 2.0 (the "License");           *
+ * you may not use this file except in compliance with the License.          *
+ * You may obtain a copy of the License at                                   *
+ *                                                                           *
+ * http://www.apache.org/licenses/LICENSE-2.0                                *
+ *                                                                           *
+ * Unless required by applicable law or agreed to in writing, software       *
+ * distributed under the License is distributed on an "AS IS" BASIS,         *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+ * See the License for the specific language governing permissions and       *
+ * limitations under the License.                                            *
+ *****************************************************************************/
 package org.codehaus.jparsec.examples.java.parser;
+
+import org.codehaus.jparsec.Parser;
+import org.codehaus.jparsec.examples.java.ast.statement.*;
+import org.junit.Test;
 
 import static org.codehaus.jparsec.examples.java.parser.ExpressionParser.IDENTIFIER;
 import static org.codehaus.jparsec.examples.java.parser.StatementParser.NOP;
-import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.assertFailure;
-import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.assertParser;
-import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.assertResult;
-
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.examples.java.ast.statement.Annotation;
-import org.codehaus.jparsec.examples.java.ast.statement.AssertStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.BlockStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.BreakStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.ContinueStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.DoWhileStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.ExpressionListStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.ExpressionStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.ForStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.ForeachStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.IfStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.LabelStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.Modifier;
-import org.codehaus.jparsec.examples.java.ast.statement.NopStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.ParameterDef;
-import org.codehaus.jparsec.examples.java.ast.statement.ReturnStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.Statement;
-import org.codehaus.jparsec.examples.java.ast.statement.SuperCallStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.SwitchStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.SynchronizedBlockStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.SystemModifier;
-import org.codehaus.jparsec.examples.java.ast.statement.ThisCallStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.ThrowStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.TryStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.VarStatement;
-import org.codehaus.jparsec.examples.java.ast.statement.WhileStatement;
-import org.junit.Test;
+import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.*;
 
 /**
  * Unit test for {@link StatementParser}.

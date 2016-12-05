@@ -1,5 +1,5 @@
 /*****************************************************************************
- * Copyright (C) Codehaus.org                                                *
+ * Copyright (C) jparsec.org                                                *
  * ------------------------------------------------------------------------- *
  * Licensed under the Apache License, Version 2.0 (the "License");           *
  * you may not use this file except in compliance with the License.          *
@@ -16,11 +16,11 @@
 
 package org.codehaus.jparsec.examples.bnf.ast;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.codehaus.jparsec.examples.common.Strings;
 import org.codehaus.jparsec.examples.common.ValueObject;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Represents a rule with a bunch of alternatives.

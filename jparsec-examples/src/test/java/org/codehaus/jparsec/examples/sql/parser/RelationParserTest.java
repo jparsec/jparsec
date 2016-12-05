@@ -1,30 +1,31 @@
+/*****************************************************************************
+ * Copyright (C) jparsec.org                                                *
+ * ------------------------------------------------------------------------- *
+ * Licensed under the Apache License, Version 2.0 (the "License");           *
+ * you may not use this file except in compliance with the License.          *
+ * You may obtain a copy of the License at                                   *
+ *                                                                           *
+ * http://www.apache.org/licenses/LICENSE-2.0                                *
+ *                                                                           *
+ * Unless required by applicable law or agreed to in writing, software       *
+ * distributed under the License is distributed on an "AS IS" BASIS,         *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+ * See the License for the specific language governing permissions and       *
+ * limitations under the License.                                            *
+ *****************************************************************************/
 package org.codehaus.jparsec.examples.sql.parser;
+
+import org.codehaus.jparsec.Parser;
+import org.codehaus.jparsec.examples.sql.ast.*;
+import org.junit.Test;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.codehaus.jparsec.examples.sql.parser.ExpressionParser.NUMBER;
 import static org.codehaus.jparsec.examples.sql.parser.ExpressionParserTest.number;
 import static org.codehaus.jparsec.examples.sql.parser.RelationParser.TABLE;
 import static org.codehaus.jparsec.examples.sql.parser.TerminalParserTest.assertParser;
-
-import java.util.Arrays;
-import java.util.List;
-
-import org.codehaus.jparsec.Parser;
-import org.codehaus.jparsec.examples.sql.ast.AliasedRelation;
-import org.codehaus.jparsec.examples.sql.ast.BinaryExpression;
-import org.codehaus.jparsec.examples.sql.ast.CrossJoinRelation;
-import org.codehaus.jparsec.examples.sql.ast.GroupBy;
-import org.codehaus.jparsec.examples.sql.ast.JoinRelation;
-import org.codehaus.jparsec.examples.sql.ast.JoinType;
-import org.codehaus.jparsec.examples.sql.ast.Op;
-import org.codehaus.jparsec.examples.sql.ast.OrderBy;
-import org.codehaus.jparsec.examples.sql.ast.Projection;
-import org.codehaus.jparsec.examples.sql.ast.QualifiedName;
-import org.codehaus.jparsec.examples.sql.ast.Relation;
-import org.codehaus.jparsec.examples.sql.ast.Select;
-import org.codehaus.jparsec.examples.sql.ast.TableRelation;
-import org.codehaus.jparsec.examples.sql.ast.UnaryRelationalExpression;
-import org.codehaus.jparsec.examples.sql.ast.UnionRelation;
-import org.junit.Test;
 
 /**
  * Unit test for {@link RelationParser}.

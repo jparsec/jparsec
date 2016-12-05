@@ -1,47 +1,33 @@
+/*****************************************************************************
+ * Copyright (C) jparsec.org                                                *
+ * ------------------------------------------------------------------------- *
+ * Licensed under the Apache License, Version 2.0 (the "License");           *
+ * you may not use this file except in compliance with the License.          *
+ * You may obtain a copy of the License at                                   *
+ *                                                                           *
+ * http://www.apache.org/licenses/LICENSE-2.0                                *
+ *                                                                           *
+ * Unless required by applicable law or agreed to in writing, software       *
+ * distributed under the License is distributed on an "AS IS" BASIS,         *
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.  *
+ * See the License for the specific language governing permissions and       *
+ * limitations under the License.                                            *
+ *****************************************************************************/
 package org.codehaus.jparsec.examples.java.parser;
-
-import static org.codehaus.jparsec.examples.java.parser.ExpressionParser.IDENTIFIER;
-import static org.codehaus.jparsec.examples.java.parser.TerminalParser.parse;
-import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.assertFailure;
-import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.assertResult;
-import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.assertToString;
-
-import java.util.function.UnaryOperator;
 
 import org.codehaus.jparsec.Parser;
 import org.codehaus.jparsec.Parsers;
 import org.codehaus.jparsec.examples.java.ast.declaration.DefBody;
 import org.codehaus.jparsec.examples.java.ast.declaration.Member;
-import org.codehaus.jparsec.examples.java.ast.expression.ArrayInitializer;
-import org.codehaus.jparsec.examples.java.ast.expression.ArraySubscriptExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.BinaryExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.BooleanLiteral;
-import org.codehaus.jparsec.examples.java.ast.expression.CastExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.CharLiteral;
-import org.codehaus.jparsec.examples.java.ast.expression.ClassLiteral;
-import org.codehaus.jparsec.examples.java.ast.expression.ConditionalExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.ConstructorReference;
-import org.codehaus.jparsec.examples.java.ast.expression.DecimalPointNumberLiteral;
-import org.codehaus.jparsec.examples.java.ast.expression.Expression;
-import org.codehaus.jparsec.examples.java.ast.expression.Identifier;
-import org.codehaus.jparsec.examples.java.ast.expression.InstanceOfExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral;
+import org.codehaus.jparsec.examples.java.ast.expression.*;
 import org.codehaus.jparsec.examples.java.ast.expression.IntegerLiteral.Radix;
-import org.codehaus.jparsec.examples.java.ast.expression.LambdaExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.MethodCallExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.MethodReference;
-import org.codehaus.jparsec.examples.java.ast.expression.NewArrayExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.NewExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.NullExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.NumberType;
-import org.codehaus.jparsec.examples.java.ast.expression.PostfixUnaryExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.PrefixUnaryExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.QualifiedExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.ScientificNumberLiteral;
-import org.codehaus.jparsec.examples.java.ast.expression.StringLiteral;
-import org.codehaus.jparsec.examples.java.ast.expression.SuperExpression;
-import org.codehaus.jparsec.examples.java.ast.expression.ThisExpression;
 import org.junit.Test;
+
+import java.util.function.UnaryOperator;
+
+import static org.codehaus.jparsec.examples.java.parser.ExpressionParser.IDENTIFIER;
+import static org.codehaus.jparsec.examples.java.parser.TerminalParser.parse;
+import static org.codehaus.jparsec.examples.java.parser.TerminalParserTest.*;
 
 /**
  * Unit test for {@link ExpressionParser}.
