@@ -5,6 +5,8 @@ Builds mini parsers in pure Java.
 
 ![](https://travis-ci.org/jparsec/jparsec.svg?branch=master)
 
+**Latest version**: 3.0 (requires Java 8+)
+
 # News
 
 ## 2016-12-05
@@ -34,7 +36,7 @@ If using Java 8+:
       <dependency>
         <groupId>org.jparsec</groupId>
         <artifactId>jparsec</artifactId>
-        <version>3.0-rc1</version>
+        <version>3.0</version>
       </dependency>
 
 ## Tell me more
