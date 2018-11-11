@@ -326,8 +326,9 @@ public abstract class Parser<T> {
         final Object result = ctxt.result;
         final int at = ctxt.at;
         final int step = ctxt.step;
+        final int errorIndex = ctxt.errorIndex();
         if (Parser.this.apply(ctxt)) return true;
-        if (ctxt.at != at && ctxt.step - step >= 1) return false;
+        if (ctxt.errorIndex() != errorIndex) return false;
         ctxt.set(step, at, result);
         return fallback.apply(ctxt);
       }
