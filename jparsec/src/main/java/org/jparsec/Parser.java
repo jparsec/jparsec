@@ -312,10 +312,35 @@ public abstract class Parser<T> {
   }
 
   /**
+   * {@code a.otherwise(fallback)} runs {@code fallback} when {@code a} matches zero input. This is different
+   * from {@code a.or(alternative)} where {@code alternative} is run whenever {@code a} fails to match.
+   *
+   * <p>One should usually use {@link #or}.
+   *
+   * @param fallback the parser to run if {@code this} matches no input.
+   */
+  public final Parser<T> otherwise(Parser<? extends T> fallback) {
+    return new Parser<T>() {
+      @Override boolean apply(ParseContext ctxt) {
+        final Object result = ctxt.result;
+        final int at = ctxt.at;
+        final int step = ctxt.step;
+        if (Parser.this.apply(ctxt)) return true;
+        if (ctxt.at != at && ctxt.step - step >= 1) return false;
+        ctxt.set(step, at, result);
+        return fallback.apply(ctxt);
+      }
+      @Override public String toString() {
+        return "otherwise";
+      }
+    };
+  }
+
+  /**
    * {@code p.optional()} is equivalent to {@code p?} in EBNF. {@code null} is the result when
    * {@code this} fails with no partial match.
    *
-   * @deprecated since 3.0. Use {@link #optional(null)} or {@link #optional_} instead.
+   * @deprecated since 3.0. Use {@link #optional(null)} or {@link #asOptional} instead.
    */
   @Deprecated
   public final Parser<T> optional() {
