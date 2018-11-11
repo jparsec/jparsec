@@ -318,6 +318,7 @@ public abstract class Parser<T> {
    * <p>One should usually use {@link #or}.
    *
    * @param fallback the parser to run if {@code this} matches no input.
+   * @since 3.1
    */
   public final Parser<T> otherwise(Parser<? extends T> fallback) {
     return new Parser<T>() {
