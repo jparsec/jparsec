@@ -27,7 +27,7 @@ public class SourceLocation {
 
   /**
    * Returns the line number of this location. Because this method takes amortized {@code log(n)} time,
-   * it's typically not a good idea to call it after the entire source has been successfully parsed.
+   * it's typically a good idea to call it after the entire source has been successfully parsed.
    */
   public int getLine() {
     return getLocation().line;
@@ -35,7 +35,7 @@ public class SourceLocation {
 
   /**
    * Returns the column number of this location. Because this method takes amortized {@code log(n)} time,
-   * it's typically not a good idea to call it after the entire source has been successfully parsed.
+   * it's typically a good idea to call it after the entire source has been successfully parsed.
    */
   public int getColumn() {
     return getLocation().column;
