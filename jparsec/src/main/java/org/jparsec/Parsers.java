@@ -53,14 +53,41 @@ public final class Parsers {
       }
     });
   
-  /** A {@link Parser} that retrieves the current index in the source. */
+  /**
+   * A {@link Parser} that retrieves the current index in the source.
+   *
+   * @deprecated Use {@link #SOURCE_LOCATION} instead.
+   */
+  @Deprecated
   public static final Parser<Integer> INDEX = new Parser<Integer>() {
-    @Override boolean apply(final ParseContext ctxt) {
+    @Override boolean apply(ParseContext ctxt) {
       ctxt.result = ctxt.getIndex();
       return true;
     }
     @Override public String toString() {
       return "getIndex";
+    }
+  };
+  
+  /**
+   * A {@link Parser} that returns the current location in the source.
+   *
+   * <p>Because {@link SourceLocation#getLine} and {@link SourceLocation#getColumn} take amortized
+   * {@code log(n)} time, it's more efficient to avoid calling them until the entire source has been
+   * parsed successfully. In other words, avoid {@code SOURCE_LOCATION.map(SourceLocation::getLine)} or
+   * anything similar.
+   *
+   * <p>{@code SourceLocation#getIndex} can be called any time.
+   *
+   * @since 3.1
+   */
+  public static final Parser<SourceLocation> SOURCE_LOCATION = new Parser<SourceLocation>() {
+    @Override boolean apply(ParseContext ctxt) {
+      ctxt.result = new SourceLocation(ctxt.getIndex(), ctxt.locator);
+      return true;
+    }
+    @Override public String toString() {
+      return "SOURCE_LOCATION";
     }
   };
   
