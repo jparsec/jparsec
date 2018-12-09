@@ -667,6 +667,39 @@ public class ParsersTest extends BaseMockTest {
   }
 
   @Test
+  public void testSourceLocation() {
+    assertEquals(1, isChar('a').next(Parsers.SOURCE_LOCATION).parse("a", mode).getIndex());
+    assertEquals(1, isChar('a').next(Parsers.SOURCE_LOCATION).parse("a", mode).getLine());
+    assertEquals(2, isChar('a').next(Parsers.SOURCE_LOCATION).parse("a", mode).getColumn());
+  }
+
+  @Test
+  public void testSourceLocation_multipleLines() {
+    SourceLocation location =
+        Parsers.between(Scanners.string("ab\ncd\ne"), Parsers.SOURCE_LOCATION, Scanners.string("f\ngh"))
+            .parse("ab\ncd\nef\ngh");
+    assertEquals(3, location.getLine());
+    assertEquals(2, location.getColumn());
+
+    // Idempotent
+    assertEquals(3, location.getLine());
+    assertEquals(2, location.getColumn());
+  }
+
+  @Test
+  public void testSourceLocation_nested() {
+    Parser<SourceLocation> parser = Parsers.ANY_TOKEN.many().next(Parsers.SOURCE_LOCATION)
+        .from(Scanners.IDENTIFIER.token().lexer(Scanners.WHITESPACES));
+    SourceLocation location = parser.parse("ab\ncd\nef\ngh");
+    assertEquals(4, location.getLine());
+    assertEquals(3, location.getColumn());
+
+    // Idempotent
+    assertEquals(4, location.getLine());
+    assertEquals(3, location.getColumn());
+  }
+
+  @Test
   public void testToArray() {
     Parser<Integer> p1 = Parsers.constant(1);
     Parser<Integer> p2 = Parsers.constant(2);
@@ -681,7 +714,6 @@ public class ParsersTest extends BaseMockTest {
   public void testToArrayWithIteration() {
     Parser<Integer> p1 = Parsers.constant(1);
     Parser<Integer> p2 = Parsers.constant(2);
-    @SuppressWarnings("unchecked")
     Parser<Integer>[] array = Parsers.toArrayWithIteration(Arrays.asList(p1, p2));
     assertEquals(2, array.length);
     assertSame(p1, array[0]);

@@ -291,6 +291,7 @@ public class ParserTest extends BaseMockTest {
     assertEquals((Object) 123, INTEGER.otherwise(constant(456)).parse("123", mode));
     assertEquals((Object) 'b', isChar('a').otherwise(constant('b')).parse("", mode));
     assertFailure(mode, areChars("ab").otherwise(isChar('a')), "a", 1, 2);
+    assertFailure(mode, areChars("ab").or(isChar('x')).otherwise(isChar('a')), "a", 1, 2);
     assertFailure(mode, areChars("ab").otherwise(isChar('a')), "x", 1, 1);
     assertEquals("otherwise", INTEGER.otherwise(INTEGER).toString());
   }
