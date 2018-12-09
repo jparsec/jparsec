@@ -18,8 +18,10 @@ package org.jparsec.error;
 /**
  * Represents a line and column number of a character or token in the source.
  * 
+ * @deprecated Prefer to use {@link org.jparsec.SourceLocation} instead.
  * @author Ben Yu
  */
+@Deprecated
 public final class Location {
   
   /** 1-based line number. */

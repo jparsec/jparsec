@@ -115,8 +115,32 @@ public class ParserException extends RuntimeException {
     return module;
   }
   
-  /** Returns the location of the error. */
+  /**
+   * Returns the location of the error.
+   *
+   * @deprecated Use {@link #getLine} and {@link #getColumn} instead.
+   */
+  @Deprecated
   public Location getLocation() {
     return location;
+  }
+
+  /**
+   * Returns the line where the error occurred.
+   *
+   * @since 3.1
+   */
+  public final int getLine() {
+    return location.line;
+  }
+
+
+  /**
+   * Returns the column where the error occurred.
+   *
+   * @since 3.1
+   */
+  public final int getColumn() {
+    return location.column;
   }
 }
