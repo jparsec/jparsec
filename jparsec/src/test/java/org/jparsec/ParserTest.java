@@ -74,8 +74,8 @@ public class ParserTest extends BaseMockTest {
       INTEGER.parse(new StringReader("x"), "test module");
       fail();
     } catch (ParserException e) {
-      assertEquals(1, e.getLocation().line);
-      assertEquals(1, e.getLocation().column);
+      assertEquals(1, e.getLine());
+      assertEquals(1, e.getColumn());
       assertTrue(e.getMessage(), e.getMessage().contains("test module"));
       assertTrue(e.getMessage(), e.getMessage().contains("integer expected, x encountered."));
     }

@@ -35,8 +35,8 @@ public final class Asserts {
       parser.parse(source, mode);
       Assert.fail();
     } catch (ParserException e) {
-      assertEquals(line, e.getLocation().line);
-      assertEquals(column, e.getLocation().column);
+      assertEquals(line, e.getLine());
+      assertEquals(column, e.getColumn());
     }
   }
   
@@ -48,8 +48,8 @@ public final class Asserts {
       Assert.fail();
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains(expectedMessage));
-      assertEquals(line, e.getLocation().line);
-      assertEquals(column, e.getLocation().column);
+      assertEquals(line, e.getLine());
+      assertEquals(column, e.getColumn());
     }
   }
   
@@ -63,8 +63,8 @@ public final class Asserts {
     } catch (ParserException e) {
       assertTrue(e.getMessage(), e.getMessage().contains(module));
       assertTrue(e.getMessage(), e.getMessage().contains(expectedMessage));
-      assertEquals(line, e.getLocation().line);
-      assertEquals(column, e.getLocation().column);
+      assertEquals(line, e.getLine());
+      assertEquals(column, e.getColumn());
     }
   }
   
@@ -74,8 +74,8 @@ public final class Asserts {
       parser.parse(source, mode);
       Assert.fail();
     } catch (ParserException e) {
-      assertEquals(line, e.getLocation().line);
-      assertEquals(column, e.getLocation().column);
+      assertEquals(line, e.getLine());
+      assertEquals(column, e.getColumn());
       assertTrue(cause.isInstance(e.getCause()));
     }
   }
