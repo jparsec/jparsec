@@ -511,7 +511,7 @@ public final class Patterns {
   /**
    * Adapts a regular expression pattern to a {@link Pattern}.
    * 
-   * <p><em>WARNING</em>: in addition to regular expression cost, thie returned {@code Pattern} object needs
+   * <p><em>WARNING</em>: in addition to regular expression cost, the returned {@code Pattern} object needs
    * to make a substring copy every time it's evaluated. This can incur excessive copying and memory overhead
    * when parsing large strings. Consider implementing {@code Pattern} manually for large input.
    */
@@ -532,7 +532,7 @@ public final class Patterns {
   /**
    * Adapts a regular expression pattern string to a {@link Pattern}.
    * 
-   * <p><em>WARNING</em>: in addition to regular expression cost, thie returned {@code Pattern} object needs
+   * <p><em>WARNING</em>: in addition to regular expression cost, the returned {@code Pattern} object needs
    * to make a substring copy every time it's evaluated. This can incur excessive copying and memory overhead
    * when parsing large strings. Consider implementing {@code Pattern} manually for large input.
    */
