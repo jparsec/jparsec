@@ -508,7 +508,13 @@ public final class Patterns {
     return atLeast(1, predicate);
   }
 
-  /** Adapts a regular expression pattern to a {@link Pattern}. */
+  /**
+   * Adapts a regular expression pattern to a {@link Pattern}.
+   * 
+   * <p><em>WARNING</em>: in addition to regular expression cost, the returned {@code Pattern} object needs
+   * to make a substring copy every time it's evaluated. This can incur excessive copying and memory overhead
+   * when parsing large strings. Consider implementing {@code Pattern} manually for large input.
+   */
   public static Pattern regex(final java.util.regex.Pattern p) {
     return new Pattern() {
       @Override
@@ -523,7 +529,13 @@ public final class Patterns {
     };
   }
 
-  /** Adapts a regular expression pattern string to a {@link Pattern}. */
+  /**
+   * Adapts a regular expression pattern string to a {@link Pattern}.
+   * 
+   * <p><em>WARNING</em>: in addition to regular expression cost, the returned {@code Pattern} object needs
+   * to make a substring copy every time it's evaluated. This can incur excessive copying and memory overhead
+   * when parsing large strings. Consider implementing {@code Pattern} manually for large input.
+   */
   public static Pattern regex(String s) {
     return regex(java.util.regex.Pattern.compile(s));
   }
