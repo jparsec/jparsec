@@ -94,14 +94,12 @@ public final class Scanners {
    * Scanner with a pattern for double quoted string literal. Backslash '\' is
    * used as escape character. 
    */
-  public static final Parser<String> DOUBLE_QUOTE_STRING = quotedBy(
-      Patterns.regex("(\\\\.|[^\"\\\\])").many().toScanner("quoted string"), Scanners.isChar('"'))
-      .source();
+  public static final Parser<String> DOUBLE_QUOTE_STRING = 
+      quotedBy(escapedChar('\\').or(notChar('"')).skipMany(), isChar('"')).source();
   
   /** Scanner for a c/c++/java style character literal. such as 'a' or '\\'. */
-  public static final Parser<String> SINGLE_QUOTE_CHAR = quotedBy(
-      Patterns.regex("(\\\\.)|[^'\\\\]").toScanner("quoted char"), Scanners.isChar('\''))
-      .source();
+  public static final Parser<String> SINGLE_QUOTE_CHAR =
+      quotedBy(escapedChar('\\').or(notChar('\'')), isChar('\'')).source();
   
   /**
    * Scanner for the c++/java style delimiter of tokens. For example,
@@ -570,5 +568,9 @@ public final class Scanners {
     return parser.between(quote, quote);
   }
   
+  private static Parser<Void> escapedChar(char escape) {
+    return isChar(escape).next(ANY_CHAR);
+  }
+
   private Scanners() {}
 }
