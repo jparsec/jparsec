@@ -155,7 +155,6 @@ public class ParsersTest extends BaseMockTest {
 
   @Test
   public void testSequence_withIterable() {
-    @SuppressWarnings("unchecked")
     Parser<?> parser =
         Parsers.sequence(Arrays.asList(Scanners.isChar('a'), Scanners.isChar('b')));
     assertEquals("sequence", parser.toString());
@@ -236,7 +235,6 @@ public class ParsersTest extends BaseMockTest {
 
   @Test
   public void testList() {
-    @SuppressWarnings("unchecked")
     Parser<List<Character>> parser = Parsers.list(Arrays.asList(isChar('a'), isChar('b')));
     assertEquals("list", parser.toString());
     assertEquals(Arrays.asList('a', 'b'), parser.parse("ab", mode));
@@ -263,7 +261,6 @@ public class ParsersTest extends BaseMockTest {
     assertSame(parser, Parsers.or(parser));
   }
 
-  @SuppressWarnings("unchecked")
   @Test
   public void testOr_withIterable() {
     Parser<Character> parser = Parsers.or(Arrays.asList(isChar('a'), isChar('b')));
@@ -703,7 +700,6 @@ public class ParsersTest extends BaseMockTest {
   public void testToArray() {
     Parser<Integer> p1 = Parsers.constant(1);
     Parser<Integer> p2 = Parsers.constant(2);
-    @SuppressWarnings("unchecked")
     Parser<Integer>[] array = Parsers.toArray(Arrays.asList(p1, p2));
     assertEquals(2, array.length);
     assertSame(p1, array[0]);

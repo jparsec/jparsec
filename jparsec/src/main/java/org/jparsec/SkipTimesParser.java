@@ -43,8 +43,10 @@ final class SkipTimesParser extends Parser<Void> {
     for (int i = 0; i < times; i++) {
       int physical = ctxt.at;
       int logical = ctxt.step;
-      if (!parser.apply(ctxt))
-        return ctxt.stillThere(physical, logical);
+      if (!parser.apply(ctxt)) {
+        ctxt.setAt(logical, physical);
+        return true;
+      }
     }
     return true;
   }

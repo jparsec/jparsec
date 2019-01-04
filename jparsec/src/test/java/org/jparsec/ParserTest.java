@@ -252,6 +252,7 @@ public class ParserTest extends BaseMockTest {
     assertListParser(isChar('a').many1(), "a", 'a');
     assertListParser(isChar('a').many1(), "aaa", 'a', 'a', 'a');
     assertFailure(mode, areChars("ab").many1(), "aba", 1, 4);
+    assertListParser(areChars("ab").many1().followedBy(isChar('a')), "aba", 'b');
     assertListParser(FOO.many1(), "", "foo");
     assertListParser(isChar('a').asDelimiter().next(isChar('b')).many1().followedBy(isChar('a')),
         "aba", 'b');
@@ -264,6 +265,7 @@ public class ParserTest extends BaseMockTest {
     assertListParser(isChar('a').many(), "a", 'a');
     assertListParser(isChar('a').many(), "aaa", 'a', 'a', 'a');
     assertFailure(mode, areChars("ab").many(), "aba", 1, 4);
+    assertListParser(areChars("ab").many().followedBy(isChar('a')), "aba", 'b');
     assertListParser(FOO.many(), "");
     assertListParser(isChar('a').atLeast(0), "");
     assertFailure(mode, isChar('a').atLeast(1), "", 1, 1);
@@ -696,7 +698,6 @@ public class ParserTest extends BaseMockTest {
 
   @Test
   public void testInfixl_fails() {
-    replay();
     assertFailure(mode, INTEGER.infixl(isChar('-').retn(binaryOp)), "4-1-", 1, 5);
   }
 
@@ -718,7 +719,6 @@ public class ParserTest extends BaseMockTest {
 
   @Test
   public void testInfixr_fails() {
-    replay();
     assertFailure(mode, INTEGER.infixr(isChar('-').retn(binaryOp)), "4-1-", 1, 5);
   }
 

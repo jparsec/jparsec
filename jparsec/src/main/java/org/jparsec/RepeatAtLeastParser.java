@@ -52,8 +52,10 @@ final class RepeatAtLeastParser<T> extends Parser<List<T>> {
     int physical = ctxt.at;
     int logical = ctxt.step;
     for (;;logical = ctxt.step) {
-      if (!parser.apply(ctxt))
-        return ctxt.stillThere(physical, logical);
+      if (!parser.apply(ctxt)) {
+        ctxt.setAt(logical, physical);
+        return true;
+      }
       int at2 = ctxt.at;
       if (physical == at2) return true;
       physical = at2;

@@ -41,16 +41,16 @@ final class DelimitedParser<T> extends Parser<List<T>> {
       final int at0 = ctxt.at;
       boolean r = ctxt.applyAsDelimiter(delim);
       if (!r) {
-        if (!ctxt.stillThere(at0, step0)) return false;
         ctxt.result = result;
+        ctxt.setAt(step0, at0);
         return true;
       }
       final int step1 = ctxt.step;
       final int at1 = ctxt.at;
       r = parser.apply(ctxt);
       if (!r) {
-        if (!ctxt.stillThere(at1, step1)) return false;
         ctxt.result = result;
+        ctxt.setAt(step1, at1);
         return true;
       }
       if (at0 == ctxt.at) { // infinite loop
