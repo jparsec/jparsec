@@ -3,7 +3,7 @@
   <groupId>org.jparsec</groupId>
   <artifactId>jparsec-root</artifactId>
   <packaging>pom</packaging>
-  <version>3.1-SNAPSHOT</version>
+  <version>3.1</version>
 
   <name>jParsec Root</name>
 
@@ -44,7 +44,7 @@
     <url>http://github.com/jparsec/jparsec</url>
     <connection>scm:git:git@github.com:jparsec/jparsec.git</connection>
     <developerConnection>scm:git:git@github.com:jparsec/jparsec.git</developerConnection>
-    <tag>jparsec-root-2.2</tag>
+    <tag>jparsec-root-3.1</tag>
   </scm>
 
   <developers>
