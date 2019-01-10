@@ -36,7 +36,7 @@ If using Java 8+:
       <dependency>
         <groupId>org.jparsec</groupId>
         <artifactId>jparsec</artifactId>
-        <version>3.0</version>
+        <version>3.1</version>
       </dependency>
 
 ## Tell me more
