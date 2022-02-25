@@ -151,6 +151,7 @@ public class StatementParserTest {
   public void testVarStatement() {
     Parser<Statement> parser = StatementParser.varStatement(ExpressionParser.IDENTIFIER);
     TerminalParserTest.assertResult(parser, "int i;", VarStatement.class, "int i;");
+    TerminalParserTest.assertResult(parser, "int i=1+1;", VarStatement.class, "int i=1+1;");
     TerminalParserTest.assertResult(parser, "int i=n;", VarStatement.class, "int i = n;");
     TerminalParserTest.assertResult(parser, "final int i=n;", VarStatement.class, "final int i = n;");
     TerminalParserTest.assertResult(parser, "final int[] a1={}, a2, a3={m, n};",
