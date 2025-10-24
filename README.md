@@ -11,7 +11,7 @@ Builds mini parsers in pure Java.
 
 ## 2025-10-23
 * If you are on Java 21+, prefer using Google Mug [Dot Parse](https://github.com/google/mug/blob/master/dot-parse/README.md) — a re-imagined parser combinator library:
-  * The API uses static type to completely eliminate infinite loops or accidental left recursions caused by zero-consumption parser — traditionally very painful to debug in current jparsec or similar combinator or PEG libraries.
+  * The API uses static type to completely eliminate infinite loops or accidental left recursions caused by zero-consumption parser — traditionally painful to debug in current jparsec or similar combinator or PEG libraries.
   * It supports lazy, streaming parsing through the [`parseToStream()`](https://google.github.io/mug/apidocs/com/google/common/labs/parse/Parser.html#parseToStream(java.io.Reader)) and [`probe()`](https://google.github.io/mug/apidocs/com/google/common/labs/parse/Parser.html#probe(java.io.Reader)) methods.
   * Significantly lower ceremony. For example to parse by tokens, just use `.parseSkipping(Character::isWhitespace, input)`.
   * Embraces modern Java (`Stream`, pattern matching).
